@@ -10,12 +10,15 @@
   <link rel="stylesheet" href="explanation.css" />
 </head>
 <body>
-  <div class="page-wrapper">
 
-    <!-- ── En-tête ── -->
+  <!-- ══════════════════════════════════════════════════════════
+       VUE ÉDITEUR
+  ══════════════════════════════════════════════════════════════ -->
+  <div id="editorView" class="page-wrapper">
+
     <header class="ex-header">
       <div class="ex-header-brand">
-        <span class="ex-logo">⚾</span>
+        <span class="ex-logo">🤾</span>
         <span class="ex-brand-name">Handball Board</span>
       </div>
       <div class="ex-header-info">
@@ -26,27 +29,79 @@
         </div>
       </div>
       <div class="ex-header-actions">
+        <button id="btnDocView" class="btn-doc">📄 Vue Document</button>
         <button id="btnSave" class="btn-primary">💾 Enregistrer</button>
         <button id="btnPrint" class="btn-secondary">🖨 Imprimer</button>
       </div>
     </header>
 
-    <!-- ── Corps principal ── -->
     <main class="ex-main" id="exMain">
 
-      <!-- Bloc matériel + description générale -->
+      <!-- Infos générales -->
       <section class="ex-overview">
         <div class="ex-overview-col">
           <label class="field-label">📝 Description générale</label>
-          <textarea id="exNotes" class="field-textarea" rows="4" placeholder="Description générale de l'exercice…"></textarea>
+          <textarea id="exNotes" class="field-textarea" rows="3" placeholder="Description générale de l'exercice…"></textarea>
         </div>
         <div class="ex-overview-col">
           <label class="field-label">🧰 Matériel nécessaire</label>
-          <textarea id="exMaterial" class="field-textarea" rows="4" placeholder="Ex: 6 ballons, 4 cônes, 1 gardien…"></textarea>
+          <textarea id="exMaterial" class="field-textarea" rows="3" placeholder="Ex: 6 ballons, 4 cônes, 1 gardien…"></textarea>
         </div>
       </section>
 
-      <!-- Bloc tactique global -->
+      <!-- Infos document (nouveaux champs) -->
+      <section class="ex-doc-fields">
+        <div class="ex-doc-fields-header" id="docFieldsToggle">
+          <span>📋 Informations pour la fiche document</span>
+          <span class="toggle-arrow">▼</span>
+        </div>
+        <div class="ex-doc-fields-body" id="docFieldsBody">
+          <div class="doc-fields-row">
+            <div class="doc-field-col">
+              <label class="field-label">🎯 Objectif pédagogique</label>
+              <textarea id="exObjectif" class="field-textarea" rows="3" placeholder="Ex: Travailler la relation à 2 sur le secteur central…"></textarea>
+            </div>
+            <div class="doc-field-col">
+              <label class="field-label">⚙️ Mise en place</label>
+              <textarea id="exMiseEnPlace" class="field-textarea" rows="3" placeholder="Ex: 1 gardien, 2 colonnes d'arrières, 1 colonne DC…"></textarea>
+            </div>
+          </div>
+          <div class="doc-fields-row">
+            <div class="doc-field-col">
+              <label class="field-label">🔄 Régulations / Variantes</label>
+              <textarea id="exRegulations" class="field-textarea" rows="3" placeholder="Ex: Changer les formes de tirs, varier les impacts…"></textarea>
+            </div>
+            <div class="doc-field-col">
+              <label class="field-label">💡 Conseils coach</label>
+              <textarea id="exConseils" class="field-textarea" rows="3" placeholder="Ex: Attention aux temps d'engagement, changer de rythme…"></textarea>
+            </div>
+          </div>
+          <div class="doc-fields-row doc-fields-row--meta">
+            <div class="doc-field-meta">
+              <label class="field-label">📊 Niveau</label>
+              <div class="tag-group" id="tagNiveau">
+                <button class="tag" data-val="debutant">Débutant</button>
+                <button class="tag" data-val="moyen">Moyen</button>
+                <button class="tag" data-val="avance">Avancé</button>
+              </div>
+            </div>
+            <div class="doc-field-meta">
+              <label class="field-label">⏱ Durée (min)</label>
+              <input id="exDuree" type="number" class="field-input" placeholder="20" min="1" max="120" />
+            </div>
+            <div class="doc-field-meta">
+              <label class="field-label">👥 Joueurs</label>
+              <input id="exNbJoueurs" type="number" class="field-input" placeholder="8" min="1" max="30" />
+            </div>
+            <div class="doc-field-meta">
+              <label class="field-label">🥅 Gardiens</label>
+              <input id="exNbGardiens" type="number" class="field-input" placeholder="1" min="0" max="4" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Systèmes tactiques -->
       <section class="ex-tactics">
         <div class="ex-tactics-col">
           <label class="field-label">⚔️ Système offensif</label>
@@ -80,10 +135,8 @@
         </div>
       </section>
 
-      <!-- Phases / étapes -->
-      <section class="ex-steps" id="exSteps">
-        <!-- Injecté dynamiquement -->
-      </section>
+      <!-- Phases -->
+      <section class="ex-steps" id="exSteps"></section>
 
     </main>
 
@@ -93,11 +146,110 @@
     </footer>
   </div>
 
-  <!-- Toast notification -->
+  <!-- ══════════════════════════════════════════════════════════
+       VUE DOCUMENT (style HandXPrience)
+  ══════════════════════════════════════════════════════════════ -->
+  <div id="documentView" style="display:none">
+
+    <!-- Barre d'outils doc -->
+    <div class="doc-toolbar no-print">
+      <button id="btnEditorView" class="btn-secondary">← Retour éditeur</button>
+      <span class="doc-toolbar-title" id="docToolbarTitle"></span>
+      <button id="btnPrintDoc" class="btn-primary">🖨 Imprimer / PDF</button>
+    </div>
+
+    <!-- Page A4 -->
+    <div class="doc-page" id="docPage">
+
+      <!-- En-tête coloré -->
+      <div class="doc-header" id="docHeader">
+        <div class="doc-cat-band" id="docCatBand">
+          <span id="docCatLabel">Exercice</span>
+        </div>
+        <div class="doc-title-block">
+          <h1 class="doc-title" id="docTitleText">Titre</h1>
+          <span class="doc-niveau-badge" id="docNiveauBadge"></span>
+        </div>
+      </div>
+
+      <!-- Rangée de snapshots -->
+      <div class="doc-snapshots" id="docSnapshots"></div>
+
+      <!-- Corps 2 colonnes -->
+      <div class="doc-body">
+        <div class="doc-col-left">
+          <div class="doc-section">
+            <h3 class="doc-section-title">Objectif</h3>
+            <p class="doc-section-text" id="docObjectifText"></p>
+          </div>
+          <div class="doc-section">
+            <h3 class="doc-section-title">Mise en place</h3>
+            <p class="doc-section-text" id="docMiseEnPlaceText"></p>
+          </div>
+          <div class="doc-section doc-section--consignes">
+            <h3 class="doc-section-title">Consignes</h3>
+            <p class="doc-section-text" id="docConsignesText"></p>
+          </div>
+        </div>
+        <div class="doc-col-right">
+          <div class="doc-section">
+            <h3 class="doc-section-title">Régulations</h3>
+            <p class="doc-section-text" id="docRegulationsText"></p>
+          </div>
+          <div class="doc-section doc-section--conseils">
+            <h3 class="doc-section-title doc-section-title--conseils">Conseils</h3>
+            <p class="doc-section-text doc-section-text--conseils" id="docConseilsText"></p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pied avec métadonnées -->
+      <div class="doc-meta-footer">
+        <div class="doc-meta-item">
+          <span class="doc-meta-icon">🥅</span>
+          <div class="doc-meta-label">Gardiens</div>
+          <div class="doc-meta-value" id="docMetaGardiens">—</div>
+        </div>
+        <div class="doc-meta-item">
+          <span class="doc-meta-icon">👤</span>
+          <div class="doc-meta-label">Postes</div>
+          <div class="doc-meta-value" id="docMetaPostes">—</div>
+        </div>
+        <div class="doc-meta-item">
+          <span class="doc-meta-icon">🗂️</span>
+          <div class="doc-meta-label">Catégories</div>
+          <div class="doc-meta-value" id="docMetaCat">—</div>
+        </div>
+        <div class="doc-meta-item">
+          <span class="doc-meta-icon">🏀</span>
+          <div class="doc-meta-label">Matériels</div>
+          <div class="doc-meta-value" id="docMetaMateriel">—</div>
+        </div>
+        <div class="doc-meta-item">
+          <span class="doc-meta-icon">👥</span>
+          <div class="doc-meta-label">Participants</div>
+          <div class="doc-meta-value" id="docMetaJoueurs">—</div>
+        </div>
+        <div class="doc-meta-item">
+          <span class="doc-meta-icon">⏱</span>
+          <div class="doc-meta-label">Temps</div>
+          <div class="doc-meta-value" id="docMetaDuree">—</div>
+        </div>
+      </div>
+
+      <div class="doc-brand-footer">
+        Généré avec <strong>Handball Board</strong>
+        <span id="docFooterDate"></span>
+      </div>
+
+    </div><!-- /doc-page -->
+  </div><!-- /documentView -->
+
+  <!-- Toast -->
   <div class="toast" id="toast"></div>
 
   <script>
-  // ── Chargement des données ───────────────────────────────────────────────────
+  'use strict';
 
   const CATEGORY_LABELS = {
     none: 'Sans catégorie', echauffement: 'Échauffement',
@@ -105,7 +257,20 @@
     defensif: 'Travail défensif', montee_balle: 'Montée de balle',
   };
 
+  const CATEGORY_COLORS = {
+    echauffement: '#27ae60',
+    physique:     '#e74c3c',
+    offensif:     '#e91e8c',
+    defensif:     '#1565c0',
+    montee_balle: '#7b1fa2',
+    none:         '#37474f',
+  };
+
+  const NIVEAU_LABELS = { debutant: 'Débutant', moyen: 'Moyen', avance: 'Avancé' };
+
   let data = null;
+
+  // ── Chargement ──────────────────────────────────────────────
 
   function loadData() {
     const raw = localStorage.getItem('handball-explanation-data');
@@ -115,248 +280,347 @@
         '<p style="color:#6a7d9e;padding:40px;text-align:center;">Ouvrez cette page depuis le Handball Board via le bouton « Explication ».</p>';
       return;
     }
-    try {
-      data = JSON.parse(raw);
-    } catch(e) {
-      document.getElementById('exTitle').textContent = 'Erreur de données';
-      return;
-    }
-    try {
-      renderPage();
-    } catch(e) {
-      console.error('renderPage a échoué :', e);
+    try { data = JSON.parse(raw); }
+    catch(e) { document.getElementById('exTitle').textContent = 'Erreur de données'; return; }
+    try { renderPage(); }
+    catch(e) {
+      console.error('renderPage :', e);
       document.getElementById('exTitle').textContent = 'Erreur de rendu';
       document.getElementById('exSteps').innerHTML =
-        `<p style="color:#ef5350;padding:20px;">Erreur lors de l'affichage : ${e.message}</p>`;
+        `<p style="color:#ef5350;padding:20px;">Erreur : ${e.message}</p>`;
     }
   }
 
+  // ── Rendu éditeur ────────────────────────────────────────────
+
   function renderPage() {
-    // Header
     document.title = `${data.name || 'Exercice'} — Handball Board`;
-    document.getElementById('exTitle').textContent = data.name || 'Sans nom';
+    document.getElementById('exTitle').textContent   = data.name || 'Sans nom';
     document.getElementById('footerDate').textContent =
-      new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
+      new Date().toLocaleDateString('fr-FR', { day:'2-digit', month:'long', year:'numeric' });
 
     const catEl = document.getElementById('exCategory');
-    catEl.textContent = CATEGORY_LABELS[data.category] || data.category || '';
-    catEl.dataset.category = data.category || 'none';
+    catEl.textContent       = CATEGORY_LABELS[data.category] || data.category || '';
+    catEl.dataset.category  = data.category || 'none';
 
-    // General fields
+    // Champs généraux
     document.getElementById('exNotes').value    = data.notes || '';
     document.getElementById('exMaterial').value = data.explanation?.material || '';
 
-    // Steps
-    const stepsEl = document.getElementById('exSteps');
+    // Nouveaux champs document
+    const doc = data.explanation?.doc || {};
+    document.getElementById('exObjectif').value    = doc.objectif    || '';
+    document.getElementById('exMiseEnPlace').value = doc.miseEnPlace || '';
+    document.getElementById('exRegulations').value = doc.regulations || '';
+    document.getElementById('exConseils').value    = doc.conseils    || '';
+    if (doc.duree)      document.getElementById('exDuree').value      = doc.duree;
+    if (doc.nbJoueurs)  document.getElementById('exNbJoueurs').value  = doc.nbJoueurs;
+    if (doc.nbGardiens) document.getElementById('exNbGardiens').value = doc.nbGardiens;
+
+    // Phases
+    const stepsEl   = document.getElementById('exSteps');
     stepsEl.innerHTML = '';
     const snapshots = data.snapshots || [];
     const steps     = data.explanation?.steps || [];
     const maxIdx    = snapshots.length > 0 ? snapshots.length - 1 : steps.length - 1;
 
     if (maxIdx < 0) {
-      stepsEl.innerHTML = '<p class="empty-hint">Aucune trajectoire dans cet exercice. Ajoutez des trajectoires depuis le Board puis réouvrez cette page.</p>';
-      return;
+      stepsEl.innerHTML = '<p class="empty-hint">Aucune trajectoire. Ajoutez des trajectoires depuis le Board puis réouvrez cette page.</p>';
+    } else {
+      for (let i = 0; i <= maxIdx; i++) {
+        stepsEl.appendChild(buildStepCard(i, steps, snapshots));
+      }
     }
 
-    for (let i = 0; i <= maxIdx; i++) {
-      const stepData = steps[i] || { step: i, description: '', attention: '', detectedPostes: [], detectedActions: [], playerInfo: [] };
-      const img      = snapshots[i] || null;
-      const selPostes  = stepData.detectedPostes  || [];
-      const selActions = stepData.detectedActions || [];
-      const stepPlayers = stepData.playerInfo || (data.playerInfo ? data.playerInfo[i] || [] : []);
-      const autoDesc = data.autoDesc?.[i] || stepData.autoDescription || '';
-      const descriptionValue = stepData.description?.trim() || autoDesc;
+    // Listeners auto-save
+    document.querySelectorAll(
+      '.step-description,.step-attention,#exNotes,#exMaterial,#exObjectif,#exMiseEnPlace,#exRegulations,#exConseils,#exDuree,#exNbJoueurs,#exNbGardiens'
+    ).forEach(el => el.addEventListener('input', scheduleAutoSave));
 
-      const playerInfoHTML = stepPlayers.length > 0
-        ? stepPlayers.map(p => `<span class="badge badge-player">${p.label} - ${p.poste}</span>`).join('')
-        : '';
-
-      const postesHTML = selPostes.length > 0
-        ? selPostes.map(p => `<span class="badge badge-poste">${p}</span>`).join('')
-        : '';
-      
-      const actionsHTML = selActions.length > 0
-        ? selActions.map(a => `<span class="badge badge-action">${a}</span>`).join('')
-        : '';
-
-      const metaFallback = (!playerInfoHTML && !postesHTML && !actionsHTML)
-        ? `<span class="meta-placeholder">Aucune information automatique disponible</span>`
-        : '';
-
-      const card = document.createElement('div');
-      card.className = 'step-card';
-      card.innerHTML = `
-        <div class="step-header">
-          <div class="step-number">Phase ${i + 1}</div>
-          <div class="step-divider"></div>
-        </div>
-        <div class="step-body">
-          <div class="step-snapshot">
-            ${img
-              ? `<img src="${img}" alt="Phase ${i+1}" class="step-img" />`
-              : `<div class="step-img-placeholder">Aucune image</div>`}
-          </div>
-          <div class="step-fields">
-            <div class="step-field-group step-meta-group">
-              <div class="step-meta">
-                <div class="meta-items">
-                  ${playerInfoHTML}${postesHTML}${actionsHTML}${metaFallback}
-                </div>
-              </div>
-            </div>
-            <div class="step-field-group">
-              <div class="description-header">
-                <label class="field-label" style="margin-bottom: 0;">📋 Description</label>
-                <button type="button" class="btn-regen" data-step="${i}">🔄 Régénérer</button>
-              </div>
-              <textarea class="field-textarea step-description" data-step="${i}" rows="5"
-                placeholder="Décrivez les déplacements et actions de chaque joueur…"
-              >${escHtml(descriptionValue)}</textarea>
-            </div>
-            <div class="step-field-group attention-group">
-              <label class="field-label attention-label">⚠️ Points d'attention</label>
-              <textarea class="field-textarea step-attention" data-step="${i}" rows="3"
-                placeholder="Position, timing, regard, communication…"
-              >${escHtml(stepData.attention || '')}</textarea>
-            </div>
-          </div>
-        </div>
-      `;
-      stepsEl.appendChild(card);
-    }
-
-    // Live-save on input
-    document.querySelectorAll('.step-description, .step-attention').forEach(el => {
-      el.addEventListener('input', () => scheduleAutoSave());
-    });
-    document.getElementById('exNotes').addEventListener('input', () => scheduleAutoSave());
-    document.getElementById('exMaterial').addEventListener('input', () => scheduleAutoSave());
-
-    // Connect Regen buttons
+    // Regen buttons
     document.querySelectorAll('.btn-regen').forEach(btn => {
       btn.addEventListener('click', () => {
-        const idx = Number(btn.dataset.step);
-        const stepData = steps[idx] || {};
-        const autoDesc = stepData.autoDescription || data.autoDesc?.[idx] || '';
+        const idx      = Number(btn.dataset.step);
+        const autoDesc = steps[idx]?.autoDescription || data.autoDesc?.[idx] || '';
         if (autoDesc) {
-          const textarea = document.querySelector(`.step-description[data-step="${idx}"]`);
-          if (textarea) {
-            textarea.value = autoDesc;
-            saveExplanation();
-            showToast('Description régénérée', 'ok');
-          }
+          const ta = document.querySelector(`.step-description[data-step="${idx}"]`);
+          if (ta) { ta.value = autoDesc; saveExplanation(); showToast('Description régénérée', 'ok'); }
         }
       });
     });
 
-    // Global tactic tags (single-select)
-    ['tagOffense','tagDefense','tagSector'].forEach(gid => {
+    // Tag groups
+    const allTagGroups = ['tagOffense','tagDefense','tagSector','tagNiveau'];
+    allTagGroups.forEach(gid => {
       const g = document.getElementById(gid);
       if (!g) return;
-      // Restore saved state
-      const savedVal = data.explanation?.[gid] || null;
+      const savedVal = gid === 'tagNiveau'
+        ? (doc.niveau || null)
+        : (data.explanation?.[gid] || null);
       if (savedVal) g.querySelectorAll('.tag').forEach(b => { if (b.dataset.val === savedVal) b.classList.add('active'); });
-      g.querySelectorAll('.tag').forEach(btn => {
-        btn.addEventListener('click', () => {
-          g.querySelectorAll('.tag').forEach(b => b.classList.remove('active'));
-          btn.classList.toggle('active');
-          scheduleAutoSave();
-        });
-      });
+      g.querySelectorAll('.tag').forEach(btn => btn.addEventListener('click', () => {
+        g.querySelectorAll('.tag').forEach(b => b.classList.remove('active'));
+        btn.classList.toggle('active');
+        scheduleAutoSave();
+      }));
+    });
+
+    // Collapsible doc fields
+    document.getElementById('docFieldsToggle').addEventListener('click', () => {
+      const body  = document.getElementById('docFieldsBody');
+      const arrow = document.querySelector('#docFieldsToggle .toggle-arrow');
+      const open  = body.style.display !== 'none';
+      body.style.display  = open ? 'none' : 'block';
+      arrow.textContent   = open ? '▶' : '▼';
     });
   }
 
-  function escHtml(str) {
-    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  function buildStepCard(i, steps, snapshots) {
+    const stepData    = steps[i] || { step:i, description:'', attention:'', detectedPostes:[], detectedActions:[], playerInfo:[] };
+    const img         = snapshots[i] || null;
+    const selPostes   = stepData.detectedPostes  || [];
+    const selActions  = stepData.detectedActions || [];
+    const stepPlayers = stepData.playerInfo || (data.playerInfo ? data.playerInfo[i] || [] : []);
+    const autoDesc    = data.autoDesc?.[i] || stepData.autoDescription || '';
+    const descVal     = stepData.description?.trim() || autoDesc;
+
+    const playerBadges = stepPlayers.map(p =>
+      `<span class="badge badge-player">${escHtml(p.label)} - ${escHtml(p.poste)}</span>`).join('');
+    const posteBadges  = selPostes.map(p  => `<span class="badge badge-poste">${escHtml(p)}</span>`).join('');
+    const actionBadges = selActions.map(a => `<span class="badge badge-action">${escHtml(a)}</span>`).join('');
+    const metaFallback = (!playerBadges && !posteBadges && !actionBadges)
+      ? `<span class="meta-placeholder">Aucune information automatique disponible</span>` : '';
+
+    const card = document.createElement('div');
+    card.className = 'step-card';
+    card.innerHTML = `
+      <div class="step-header">
+        <div class="step-number">Phase ${i + 1}</div>
+        <div class="step-divider"></div>
+      </div>
+      <div class="step-body">
+        <div class="step-snapshot">
+          ${img
+            ? `<img src="${img}" alt="Phase ${i+1}" class="step-img" />`
+            : `<div class="step-img-placeholder">Aucune image</div>`}
+        </div>
+        <div class="step-fields">
+          <div class="step-field-group step-meta-group">
+            <div class="meta-items">${playerBadges}${posteBadges}${actionBadges}${metaFallback}</div>
+          </div>
+          <div class="step-field-group">
+            <div class="description-header">
+              <label class="field-label" style="margin-bottom:0">📋 Description</label>
+              <button type="button" class="btn-regen" data-step="${i}">🔄 Régénérer</button>
+            </div>
+            <textarea class="field-textarea step-description" data-step="${i}" rows="5"
+              placeholder="Décrivez les déplacements et actions…"
+            >${escHtml(descVal)}</textarea>
+          </div>
+          <div class="step-field-group attention-group">
+            <label class="field-label attention-label">⚠️ Points d'attention</label>
+            <textarea class="field-textarea step-attention" data-step="${i}" rows="3"
+              placeholder="Position, timing, regard, communication…"
+            >${escHtml(stepData.attention || '')}</textarea>
+          </div>
+        </div>
+      </div>
+    `;
+    return card;
   }
 
-  // ── Collecte & sauvegarde ────────────────────────────────────────────────────
+  // ── Rendu document ───────────────────────────────────────────
 
-  let saveTimer = null;
-  function scheduleAutoSave() {
-    clearTimeout(saveTimer);
-    saveTimer = setTimeout(saveExplanation, 1200);
+  function renderDocument() {
+    collectFormData();
+
+    const doc      = data.explanation?.doc || {};
+    const steps    = data.explanation?.steps || [];
+    const snapshots = data.snapshots || [];
+    const cat      = data.category || 'none';
+    const color    = CATEGORY_COLORS[cat] || CATEGORY_COLORS.none;
+
+    document.getElementById('docToolbarTitle').textContent = data.name || 'Sans nom';
+    document.getElementById('docTitleText').textContent    = data.name || 'Sans nom';
+    document.getElementById('docCatLabel').textContent     = CATEGORY_LABELS[cat] || 'Exercice';
+    document.getElementById('docHeader').style.borderLeftColor = color;
+    document.getElementById('docCatBand').style.background  = color;
+    document.getElementById('docFooterDate').textContent   =
+      ' — ' + new Date().toLocaleDateString('fr-FR', { day:'2-digit', month:'long', year:'numeric' });
+
+    const niveauBadge = document.getElementById('docNiveauBadge');
+    niveauBadge.textContent    = NIVEAU_LABELS[doc.niveau] || '';
+    niveauBadge.style.display  = doc.niveau ? 'inline-block' : 'none';
+
+    // Textes
+    setText('docObjectifText',    doc.objectif    || data.notes || '');
+    setText('docMiseEnPlaceText', doc.miseEnPlace || '');
+    setText('docRegulationsText', doc.regulations || '');
+    setText('docConseilsText',    doc.conseils    || '');
+
+    // Consignes : auto-générées depuis les phases si vide
+    const consignesAuto = steps
+      .map((s, i) => {
+        const desc = s.description?.trim() || s.autoDescription?.trim() || '';
+        return desc ? `(${i + 1}) ${desc}` : '';
+      })
+      .filter(Boolean)
+      .join('\n');
+    setText('docConsignesText', consignesAuto);
+
+    // Snapshots
+    const snapEl = document.getElementById('docSnapshots');
+    snapEl.innerHTML = '';
+    snapshots.slice(0, 3).forEach((src, i) => {
+      if (!src) return;
+      const wrap = document.createElement('div');
+      wrap.className = 'doc-snap-wrap';
+      const lbl = document.createElement('div');
+      lbl.className   = 'doc-snap-label';
+      lbl.textContent = i === 0 ? 'Mise en place' : `Consignes ${i}`;
+      const img = document.createElement('img');
+      img.src       = src;
+      img.alt       = `Phase ${i + 1}`;
+      img.className = 'doc-snap-img';
+      wrap.appendChild(lbl);
+      wrap.appendChild(img);
+      snapEl.appendChild(wrap);
+    });
+    if (snapshots.length === 0) {
+      snapEl.innerHTML = '<p style="color:#aaa;font-size:0.8rem;padding:8px 0">Aucune image disponible</p>';
+    }
+
+    // Métadonnées footer
+    const allPostes = [...new Set(steps.flatMap(s => s.detectedPostes || []))].join(', ') || '—';
+    const gardiens  = doc.nbGardiens != null ? doc.nbGardiens : '—';
+    const joueurs   = doc.nbJoueurs  != null ? doc.nbJoueurs  : '—';
+    const duree     = doc.duree      != null ? `${doc.duree} min` : '—';
+    const catLabel  = CATEGORY_LABELS[cat] || '—';
+    const materiel  = (data.explanation?.material || '').slice(0, 60) || '—';
+
+    document.getElementById('docMetaGardiens').textContent = gardiens;
+    document.getElementById('docMetaPostes').textContent   = allPostes;
+    document.getElementById('docMetaCat').textContent      = catLabel;
+    document.getElementById('docMetaMateriel').textContent = materiel;
+    document.getElementById('docMetaJoueurs').textContent  = joueurs;
+    document.getElementById('docMetaDuree').textContent    = duree;
   }
 
-  async function saveExplanation() {
+  function setText(id, val) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    // Preserve newlines as <br>
+    el.innerHTML = escHtml(val || '—').replace(/\n/g, '<br>');
+  }
+
+  // ── Collecte & sauvegarde ────────────────────────────────────
+
+  function collectFormData() {
     if (!data) return;
-
-    // Collect current values
     data.notes = document.getElementById('exNotes').value;
-    if (!data.explanation) data.explanation = { material: '', steps: [] };
+    if (!data.explanation) data.explanation = {};
     data.explanation.material = document.getElementById('exMaterial').value;
 
+    // Champs doc
+    if (!data.explanation.doc) data.explanation.doc = {};
+    data.explanation.doc.objectif    = document.getElementById('exObjectif').value;
+    data.explanation.doc.miseEnPlace = document.getElementById('exMiseEnPlace').value;
+    data.explanation.doc.regulations = document.getElementById('exRegulations').value;
+    data.explanation.doc.conseils    = document.getElementById('exConseils').value;
+    data.explanation.doc.duree       = document.getElementById('exDuree').value || null;
+    data.explanation.doc.nbJoueurs   = document.getElementById('exNbJoueurs').value || null;
+    data.explanation.doc.nbGardiens  = document.getElementById('exNbGardiens').value || null;
+
+    const niveauActive = document.querySelector('#tagNiveau .tag.active');
+    data.explanation.doc.niveau = niveauActive ? niveauActive.dataset.val : null;
+
+    // Phases
+    if (!data.explanation.steps) data.explanation.steps = [];
     document.querySelectorAll('.step-description').forEach(el => {
       const i = Number(el.dataset.step);
-      if (!data.explanation.steps[i]) data.explanation.steps[i] = { step: i, description: '', attention: '' };
+      if (!data.explanation.steps[i]) data.explanation.steps[i] = { step:i, description:'', attention:'' };
       data.explanation.steps[i].description = el.value;
     });
     document.querySelectorAll('.step-attention').forEach(el => {
       const i = Number(el.dataset.step);
-      if (!data.explanation.steps[i]) data.explanation.steps[i] = { step: i, description: '', attention: '' };
+      if (!data.explanation.steps[i]) data.explanation.steps[i] = { step:i, description:'', attention:'' };
       data.explanation.steps[i].attention = el.value;
     });
-    
-    // Global tactics
+
+    // Tags tactiques
     ['tagOffense','tagDefense','tagSector'].forEach(gid => {
-      const g = document.getElementById(gid);
-      if (!g) return;
-      const active = g.querySelector('.tag.active');
+      const active = document.querySelector(`#${gid} .tag.active`);
       data.explanation[gid] = active ? active.dataset.val : null;
     });
+  }
 
-    // Update localStorage so the main board can pick up changes
+  let saveTimer = null;
+  function scheduleAutoSave() { clearTimeout(saveTimer); saveTimer = setTimeout(saveExplanation, 1200); }
+
+  async function saveExplanation() {
+    if (!data) return;
+    collectFormData();
     localStorage.setItem('handball-explanation-data', JSON.stringify(data));
-
-    // Persist to backend API
     if (!data.exerciseId) { showToast('⚠ Pas d\'ID d\'exercice', 'warn'); return; }
     try {
       const res = await fetch('/api/exercises');
       const lib = await res.json();
       const existing = lib.find(ex => ex.id === data.exerciseId);
       if (!existing) { showToast('⚠ Exercice introuvable', 'warn'); return; }
-
-      const updated = {
-        ...existing,
-        notes:       data.notes,
-        explanation: data.explanation,
-        updatedAt:   new Date().toISOString(),
-      };
       await fetch('/api/exercises', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updated),
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...existing, notes: data.notes, explanation: data.explanation, updatedAt: new Date().toISOString() }),
       });
       showToast('✓ Sauvegardé', 'ok');
-    } catch(e) {
-      console.error(e);
-      showToast('Erreur réseau', 'error');
-    }
+    } catch(e) { console.error(e); showToast('Erreur réseau', 'error'); }
   }
 
-  // ── Toast ────────────────────────────────────────────────────────────────────
+  // ── Toast ────────────────────────────────────────────────────
 
   let toastTimer = null;
   function showToast(msg, type = 'ok') {
     const t = document.getElementById('toast');
     t.textContent = msg;
-    t.className = 'toast toast-' + type + ' toast-show';
+    t.className   = `toast toast-${type} toast-show`;
     clearTimeout(toastTimer);
     toastTimer = setTimeout(() => t.classList.remove('toast-show'), 2500);
   }
 
-  // ── Boutons ──────────────────────────────────────────────────────────────────
+  // ── Helpers ──────────────────────────────────────────────────
 
-  document.getElementById('btnSave').addEventListener('click', async () => {
-    await saveExplanation();
-  });
+  function escHtml(str) {
+    return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // ── Boutons ──────────────────────────────────────────────────
+
+  document.getElementById('btnSave').addEventListener('click', saveExplanation);
 
   document.getElementById('btnPrint').addEventListener('click', () => {
+    switchToDocument();
+    setTimeout(() => window.print(), 300);
+  });
+
+  document.getElementById('btnDocView').addEventListener('click', () => {
+    switchToDocument();
+  });
+
+  document.getElementById('btnEditorView').addEventListener('click', () => {
+    document.getElementById('documentView').style.display = 'none';
+    document.getElementById('editorView').style.display   = 'block';
+  });
+
+  document.getElementById('btnPrintDoc').addEventListener('click', () => {
     window.print();
   });
 
-  // ── Init ─────────────────────────────────────────────────────────────────────
+  function switchToDocument() {
+    renderDocument();
+    document.getElementById('editorView').style.display   = 'none';
+    document.getElementById('documentView').style.display = 'block';
+  }
 
+  // ── Init ─────────────────────────────────────────────────────
   loadData();
   </script>
 </body>
