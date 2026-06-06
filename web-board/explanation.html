@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fiche d'exercice — Handball Board</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="explanation.css" />
+</head>
+<body>
+  <div class="page-wrapper">
+
+    <!-- ── En-tête ── -->
+    <header class="ex-header">
+      <div class="ex-header-brand">
+        <span class="ex-logo">⚾</span>
+        <span class="ex-brand-name">Handball Board</span>
+      </div>
+      <div class="ex-header-info">
+        <h1 id="exTitle">Chargement…</h1>
+        <div class="ex-meta">
+          <span class="ex-badge" id="exCategory"></span>
+          <span class="ex-date" id="exDate"></span>
+        </div>
+      </div>
+      <div class="ex-header-actions">
+        <button id="btnSave" class="btn-primary">💾 Enregistrer</button>
+        <button id="btnPrint" class="btn-secondary">🖨 Imprimer</button>
+      </div>
+    </header>
+
+    <!-- ── Corps principal ── -->
+    <main class="ex-main" id="exMain">
+
+      <!-- Bloc matériel + description générale -->
+      <section class="ex-overview">
+        <div class="ex-overview-col">
+          <label class="field-label">📝 Description générale</label>
+          <textarea id="exNotes" class="field-textarea" rows="4" placeholder="Description générale de l'exercice…"></textarea>
+        </div>
+        <div class="ex-overview-col">
+          <label class="field-label">🧰 Matériel nécessaire</label>
+          <textarea id="exMaterial" class="field-textarea" rows="4" placeholder="Ex: 6 ballons, 4 cônes, 1 gardien…"></textarea>
+        </div>
+      </section>
+
+      <!-- Bloc tactique global -->
+      <section class="ex-tactics">
+        <div class="ex-tactics-col">
+          <label class="field-label">⚔️ Système offensif</label>
+          <div class="tag-group" id="tagOffense">
+            <button class="tag" data-val="3-3">3-3</button>
+            <button class="tag" data-val="3-2-1">3-2-1</button>
+            <button class="tag" data-val="2-4">2-4</button>
+            <button class="tag" data-val="5-1">5-1 off</button>
+            <button class="tag" data-val="libre">Libre</button>
+          </div>
+        </div>
+        <div class="ex-tactics-col">
+          <label class="field-label">🛡️ Système défensif</label>
+          <div class="tag-group" id="tagDefense">
+            <button class="tag" data-val="6-0">6-0</button>
+            <button class="tag" data-val="5-1">5-1</button>
+            <button class="tag" data-val="4-2">4-2</button>
+            <button class="tag" data-val="3-3">3-3 def</button>
+            <button class="tag" data-val="1-5">1-5</button>
+          </div>
+        </div>
+        <div class="ex-tactics-col">
+          <label class="field-label">📍 Secteur de jeu</label>
+          <div class="tag-group" id="tagSector">
+            <button class="tag" data-val="1-2">1-2 (ailes)</button>
+            <button class="tag" data-val="2-3">2-3 (centre)</button>
+            <button class="tag" data-val="3-3">3-3 (plein)</button>
+            <button class="tag" data-val="mi-distance">Mi-distance</button>
+            <button class="tag" data-val="transition">Transition</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Phases / étapes -->
+      <section class="ex-steps" id="exSteps">
+        <!-- Injecté dynamiquement -->
+      </section>
+
+    </main>
+
+    <footer class="ex-footer">
+      <span>Généré avec <strong>Handball Board</strong></span>
+      <span id="footerDate"></span>
+    </footer>
+  </div>
+
+  <!-- Toast notification -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+  // ── Chargement des données ───────────────────────────────────────────────────
+
+  const CATEGORY_LABELS = {
+    none: 'Sans catégorie', echauffement: 'Échauffement',
+    physique: 'Travail physique', offensif: 'Travail offensif',
+    defensif: 'Travail défensif', montee_balle: 'Montée de balle',
+  };
+
+  let data = null;
+
+  function loadData() {
+    const raw = localStorage.getItem('handball-explanation-data');
+    if (!raw) {
+      document.getElementById('exTitle').textContent = 'Aucune donnée';
+      document.querySelector('.ex-main').innerHTML =
+        '<p style="color:#6a7d9e;padding:40px;text-align:center;">Ouvrez cette page depuis le Handball Board via le bouton « Explication ».</p>';
+      return;
+    }
+    try {
+      data = JSON.parse(raw);
+    } catch(e) {
+      document.getElementById('exTitle').textContent = 'Erreur de données';
+      return;
+    }
+    try {
+      renderPage();
+    } catch(e) {
+      console.error('renderPage a échoué :', e);
+      document.getElementById('exTitle').textContent = 'Erreur de rendu';
+      document.getElementById('exSteps').innerHTML =
+        `<p style="color:#ef5350;padding:20px;">Erreur lors de l'affichage : ${e.message}</p>`;
+    }
+  }
+
+  function renderPage() {
+    // Header
+    document.title = `${data.name || 'Exercice'} — Handball Board`;
+    document.getElementById('exTitle').textContent = data.name || 'Sans nom';
+    document.getElementById('footerDate').textContent =
+      new Date().toLocaleDateString('fr-FR', { day: '2-digit', month: 'long', year: 'numeric' });
+
+    const catEl = document.getElementById('exCategory');
+    catEl.textContent = CATEGORY_LABELS[data.category] || data.category || '';
+    catEl.dataset.category = data.category || 'none';
+
+    // General fields
+    document.getElementById('exNotes').value    = data.notes || '';
+    document.getElementById('exMaterial').value = data.explanation?.material || '';
+
+    // Steps
+    const stepsEl = document.getElementById('exSteps');
+    stepsEl.innerHTML = '';
+    const snapshots = data.snapshots || [];
+    const steps     = data.explanation?.steps || [];
+    const maxIdx    = snapshots.length > 0 ? snapshots.length - 1 : steps.length - 1;
+
+    if (maxIdx < 0) {
+      stepsEl.innerHTML = '<p class="empty-hint">Aucune trajectoire dans cet exercice. Ajoutez des trajectoires depuis le Board puis réouvrez cette page.</p>';
+      return;
+    }
+
+    for (let i = 0; i <= maxIdx; i++) {
+      const stepData = steps[i] || { step: i, description: '', attention: '', detectedPostes: [], detectedActions: [], playerInfo: [] };
+      const img      = snapshots[i] || null;
+      const selPostes  = stepData.detectedPostes  || [];
+      const selActions = stepData.detectedActions || [];
+      const stepPlayers = stepData.playerInfo || (data.playerInfo ? data.playerInfo[i] || [] : []);
+      const autoDesc = data.autoDesc?.[i] || stepData.autoDescription || '';
+      const descriptionValue = stepData.description?.trim() || autoDesc;
+
+      const playerInfoHTML = stepPlayers.length > 0
+        ? stepPlayers.map(p => `<span class="badge badge-player">${p.label} - ${p.poste}</span>`).join('')
+        : '';
+
+      const postesHTML = selPostes.length > 0
+        ? selPostes.map(p => `<span class="badge badge-poste">${p}</span>`).join('')
+        : '';
+      
+      const actionsHTML = selActions.length > 0
+        ? selActions.map(a => `<span class="badge badge-action">${a}</span>`).join('')
+        : '';
+
+      const metaFallback = (!playerInfoHTML && !postesHTML && !actionsHTML)
+        ? `<span class="meta-placeholder">Aucune information automatique disponible</span>`
+        : '';
+
+      const card = document.createElement('div');
+      card.className = 'step-card';
+      card.innerHTML = `
+        <div class="step-header">
+          <div class="step-number">Phase ${i + 1}</div>
+          <div class="step-divider"></div>
+        </div>
+        <div class="step-body">
+          <div class="step-snapshot">
+            ${img
+              ? `<img src="${img}" alt="Phase ${i+1}" class="step-img" />`
+              : `<div class="step-img-placeholder">Aucune image</div>`}
+          </div>
+          <div class="step-fields">
+            <div class="step-field-group step-meta-group">
+              <div class="step-meta">
+                <div class="meta-items">
+                  ${playerInfoHTML}${postesHTML}${actionsHTML}${metaFallback}
+                </div>
+              </div>
+            </div>
+            <div class="step-field-group">
+              <div class="description-header">
+                <label class="field-label" style="margin-bottom: 0;">📋 Description</label>
+                <button type="button" class="btn-regen" data-step="${i}">🔄 Régénérer</button>
+              </div>
+              <textarea class="field-textarea step-description" data-step="${i}" rows="5"
+                placeholder="Décrivez les déplacements et actions de chaque joueur…"
+              >${escHtml(descriptionValue)}</textarea>
+            </div>
+            <div class="step-field-group attention-group">
+              <label class="field-label attention-label">⚠️ Points d'attention</label>
+              <textarea class="field-textarea step-attention" data-step="${i}" rows="3"
+                placeholder="Position, timing, regard, communication…"
+              >${escHtml(stepData.attention || '')}</textarea>
+            </div>
+          </div>
+        </div>
+      `;
+      stepsEl.appendChild(card);
+    }
+
+    // Live-save on input
+    document.querySelectorAll('.step-description, .step-attention').forEach(el => {
+      el.addEventListener('input', () => scheduleAutoSave());
+    });
+    document.getElementById('exNotes').addEventListener('input', () => scheduleAutoSave());
+    document.getElementById('exMaterial').addEventListener('input', () => scheduleAutoSave());
+
+    // Connect Regen buttons
+    document.querySelectorAll('.btn-regen').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = Number(btn.dataset.step);
+        const stepData = steps[idx] || {};
+        const autoDesc = stepData.autoDescription || data.autoDesc?.[idx] || '';
+        if (autoDesc) {
+          const textarea = document.querySelector(`.step-description[data-step="${idx}"]`);
+          if (textarea) {
+            textarea.value = autoDesc;
+            saveExplanation();
+            showToast('Description régénérée', 'ok');
+          }
+        }
+      });
+    });
+
+    // Global tactic tags (single-select)
+    ['tagOffense','tagDefense','tagSector'].forEach(gid => {
+      const g = document.getElementById(gid);
+      if (!g) return;
+      // Restore saved state
+      const savedVal = data.explanation?.[gid] || null;
+      if (savedVal) g.querySelectorAll('.tag').forEach(b => { if (b.dataset.val === savedVal) b.classList.add('active'); });
+      g.querySelectorAll('.tag').forEach(btn => {
+        btn.addEventListener('click', () => {
+          g.querySelectorAll('.tag').forEach(b => b.classList.remove('active'));
+          btn.classList.toggle('active');
+          scheduleAutoSave();
+        });
+      });
+    });
+  }
+
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // ── Collecte & sauvegarde ────────────────────────────────────────────────────
+
+  let saveTimer = null;
+  function scheduleAutoSave() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(saveExplanation, 1200);
+  }
+
+  async function saveExplanation() {
+    if (!data) return;
+
+    // Collect current values
+    data.notes = document.getElementById('exNotes').value;
+    if (!data.explanation) data.explanation = { material: '', steps: [] };
+    data.explanation.material = document.getElementById('exMaterial').value;
+
+    document.querySelectorAll('.step-description').forEach(el => {
+      const i = Number(el.dataset.step);
+      if (!data.explanation.steps[i]) data.explanation.steps[i] = { step: i, description: '', attention: '' };
+      data.explanation.steps[i].description = el.value;
+    });
+    document.querySelectorAll('.step-attention').forEach(el => {
+      const i = Number(el.dataset.step);
+      if (!data.explanation.steps[i]) data.explanation.steps[i] = { step: i, description: '', attention: '' };
+      data.explanation.steps[i].attention = el.value;
+    });
+    
+    // Global tactics
+    ['tagOffense','tagDefense','tagSector'].forEach(gid => {
+      const g = document.getElementById(gid);
+      if (!g) return;
+      const active = g.querySelector('.tag.active');
+      data.explanation[gid] = active ? active.dataset.val : null;
+    });
+
+    // Update localStorage so the main board can pick up changes
+    localStorage.setItem('handball-explanation-data', JSON.stringify(data));
+
+    // Persist to backend API
+    if (!data.exerciseId) { showToast('⚠ Pas d\'ID d\'exercice', 'warn'); return; }
+    try {
+      const res = await fetch('/api/exercises');
+      const lib = await res.json();
+      const existing = lib.find(ex => ex.id === data.exerciseId);
+      if (!existing) { showToast('⚠ Exercice introuvable', 'warn'); return; }
+
+      const updated = {
+        ...existing,
+        notes:       data.notes,
+        explanation: data.explanation,
+        updatedAt:   new Date().toISOString(),
+      };
+      await fetch('/api/exercises', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updated),
+      });
+      showToast('✓ Sauvegardé', 'ok');
+    } catch(e) {
+      console.error(e);
+      showToast('Erreur réseau', 'error');
+    }
+  }
+
+  // ── Toast ────────────────────────────────────────────────────────────────────
+
+  let toastTimer = null;
+  function showToast(msg, type = 'ok') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast toast-' + type + ' toast-show';
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('toast-show'), 2500);
+  }
+
+  // ── Boutons ──────────────────────────────────────────────────────────────────
+
+  document.getElementById('btnSave').addEventListener('click', async () => {
+    await saveExplanation();
+  });
+
+  document.getElementById('btnPrint').addEventListener('click', () => {
+    window.print();
+  });
+
+  // ── Init ─────────────────────────────────────────────────────────────────────
+
+  loadData();
+  </script>
+</body>
+</html>

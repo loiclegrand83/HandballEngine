@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Handball Tactical Board</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#07111f" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Handball Board" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <h1>Board</h1>
+      <div class="button-group small" style="margin-bottom: 6px;">
+        <button id="newExercise" title="Nouvel exercice">Nouveau</button>
+        <button id="saveLocal" title="Enregistrer l'exercice">Enregistrer</button>
+        <button id="openLibrary" title="Ouvrir la bibliothèque">Bibliothèque</button>
+        <button id="exportJson" title="Exporter JSON">Export JSON</button>
+      </div>
+      <button id="openExplanation" title="Ouvrir la page explication" style="width:100%;margin-bottom:6px;padding:9px 13px;background:linear-gradient(135deg,rgba(123,92,240,0.18),rgba(79,156,249,0.12));border:1px solid rgba(123,92,240,0.4);border-radius:10px;color:#b39dfd;font:600 0.83rem Inter,system-ui;cursor:pointer;transition:all .2s;">📋 Explication &amp; Points d'attention</button>
+      <input id="importJson" type="file" accept="application/json" title="Importer JSON" />
+      <hr />
+      <section>
+        <h2>Vue</h2>
+        <div class="button-group" id="viewModeButtons">
+          <button type="button" data-mode="full">Terrain complet</button>
+          <button type="button" data-mode="half">Demi-terrain</button>
+          <button type="button" data-mode="perspective">Perspective</button>
+        </div>
+      </section>
+      <section>
+        <h2>Mode</h2>
+        <div class="button-group" id="drawModeButtons">
+          <button type="button" data-mode="asset">Asset</button>
+          <button type="button" data-mode="select">Sélect</button>
+          <button type="button" data-mode="course">Course</button>
+          <button type="button" data-mode="shot">Tir</button>
+          <button type="button" data-mode="pass">Passe</button>
+          <button type="button" data-mode="croise">Croisé</button>
+          <button type="button" data-mode="fixation" style="grid-column: span 2;">Fixation</button>
+        </div>
+        
+        <label class="toggle-btn" style="margin-bottom: 6px;">
+          <input type="checkbox" id="syncCheckbox" />
+          <span class="toggle-label">Lié à la trajectoire précédente</span>
+        </label>
+        
+        <div class="button-group small">
+          <button id="finishPath">Terminer traj.</button>
+          <button id="playAnimation">▶ Animation</button>
+        </div>
+      </section>
+      <section>
+        <h2>Exercice</h2>
+        <label>
+          Nom
+          <input id="exerciseName" type="text" value="Exercice 1" />
+        </label>
+        <label>
+          Catégorie
+          <select id="exerciseCategory">
+            <option value="none">Aucune catégorie</option>
+            <option value="echauffement">Échauffement</option>
+            <option value="physique">Travail physique</option>
+            <option value="offensif">Travail offensif</option>
+            <option value="defensif">Travail défensif</option>
+            <option value="montee_balle">Montée de balle</option>
+          </select>
+        </label>
+        <label>
+          Notes
+          <textarea id="exerciseNotes" rows="2"></textarea>
+        </label>
+      </section>
+      <section>
+        <h2>Postes</h2>
+        <div class="button-group small" id="postButtons">
+          <button type="button" data-post="AG">AG</button>
+          <button type="button" data-post="ARG">ARG</button>
+          <button type="button" data-post="DC">DC</button>
+          <button type="button" data-post="PIV">PIV</button>
+          <button type="button" data-post="ARD">ARD</button>
+          <button type="button" data-post="AD">AD</button>
+        </div>
+        <p style="font-size:0.72rem;opacity:0.55;margin-top:4px;">Sélectionner un poste avant de placer un joueur</p>
+      </section>
+      <section>
+        <h2>Aide</h2>
+        <p>Cliquer sur un asset, puis sur le terrain pour l’ajouter.</p>
+        <p>Drag pour déplacer.</p>
+      </section>
+    </aside>
+
+    <main class="main-panel">
+      <div class="canvas-container">
+        <canvas id="boardCanvas" width="1000" height="600"></canvas>
+      </div>
+      <div class="bottom-controls">
+        <section class="control-block">
+          <h2>Équipe</h2>
+          <div class="button-group small" id="teamButtons">
+            <button type="button" data-team="A">Équipe A</button>
+            <button type="button" data-team="B">Équipe B</button>
+          </div>
+        </section>
+        <section class="control-block">
+          <h2>Haies</h2>
+          <div id="assetPalette" class="palette"></div>
+        </section>
+      </div>
+      <div class="footer">
+        <span id="status">Prêt</span>
+      </div>
+    </main>
+  </div>
+
+  <div class="modal-overlay" id="libraryModal" style="display: none;">
+    <div class="modal-content library-modal">
+      <div class="modal-header">
+        <h2>Bibliothèque d'exercices</h2>
+        <button class="close-btn" id="closeLibrary">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="library-filters">
+          <label>Filtrer :</label>
+          <select id="libraryFilter">
+            <option value="all">Toutes les catégories</option>
+            <option value="echauffement">Échauffement</option>
+            <option value="physique">Travail physique</option>
+            <option value="offensif">Travail offensif</option>
+            <option value="defensif">Travail défensif</option>
+            <option value="montee_balle">Montée de balle</option>
+            <option value="none">Sans catégorie</option>
+          </select>
+        </div>
+        <div class="library-grid" id="libraryGrid">
+          <!-- Les exercices seront injectés ici -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
