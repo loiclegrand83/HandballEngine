@@ -144,14 +144,19 @@ haweb/
 #### Ajouts
 - Écran d'accueil (`index.html`) : choix entre Board Tactique et Temps mort
 - Module Temps mort (`timeout.html`) : tableau tactique plein écran
-  - Terrain vue du dessus avec lignes réglementaires (6m, 9m, 7m, médiane, buts)
+  - Terrain vue du dessus aux proportions réglementaires (40m × 20m)
+  - Lignes réglementaires : zones 6m et 9m (arcs clippés dans le terrain), ligne des 7m, ligne médiane, buts
   - 8 formations prédéfinies : attaque (3-3, 2-4, 2-5, 1-6) / défense (6-0, 5-1, 4-2, 3-3)
   - Formations offensives sans gardien : 2-5 et 1-6
-  - Drag & drop des joueurs (Pointer Events — PC + tablette)
-  - Mode Stylo : tracé libre → flèches colorées par équipe
+  - Positions calibrées sur la grille 40m×20m (équipe A x∈[0.22;0.42], équipe B x∈[0.62;0.76])
+  - Drag & drop des joueurs (Pointer Events — PC + tablette Android)
+  - Mode Stylo : tracé libre → flèches colorées par équipe (rouge/bleu)
   - Suppression de flèche au tap, effacement global, réinitialisation complète
   - Canvas responsive (recalcul au resize et à la rotation tablette)
-  - Barre de contrôle flottante semi-transparente
+  - Barre de contrôle flottante semi-transparente (`backdrop-filter: blur`)
+
+#### Corrections
+- `Lancer-Board.sh` : gestion de plusieurs PIDs simultanés sur le port 3000 (via `xargs kill`)
 
 #### Sécurité
 - Google Fonts remplacé par `system-ui` (suppression dépendance réseau externe)
