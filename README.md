@@ -138,6 +138,30 @@ haweb/
 
 ## Versioning
 
+### v1.1.0 — 2026-06-07
+**Menu d'accueil + Tableau tactique Temps mort**
+
+#### Ajouts
+- Écran d'accueil (`index.html`) : choix entre Board Tactique et Temps mort
+- Module Temps mort (`timeout.html`) : tableau tactique plein écran
+  - Terrain vue du dessus avec lignes réglementaires (6m, 9m, 7m, médiane, buts)
+  - 8 formations prédéfinies : attaque (3-3, 2-4, 2-5, 1-6) / défense (6-0, 5-1, 4-2, 3-3)
+  - Formations offensives sans gardien : 2-5 et 1-6
+  - Drag & drop des joueurs (Pointer Events — PC + tablette)
+  - Mode Stylo : tracé libre → flèches colorées par équipe
+  - Suppression de flèche au tap, effacement global, réinitialisation complète
+  - Canvas responsive (recalcul au resize et à la rotation tablette)
+  - Barre de contrôle flottante semi-transparente
+
+#### Sécurité
+- Google Fonts remplacé par `system-ui` (suppression dépendance réseau externe)
+- CSP durcie : suppression des sources `fonts.googleapis.com` et `fonts.gstatic.com`
+- `setPointerCapture` protégé par `try/catch` (compatibilité navigateurs anciens)
+- Ajout `rel="noopener noreferrer"` sur les liens de navigation
+- Guard `idx >= 0` sur `splice` pour éviter la suppression accidentelle du dernier élément
+
+---
+
 ### v1.0.0 — 2026-06-06
 **Version initiale complète**
 
