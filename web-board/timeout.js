@@ -75,26 +75,46 @@ function drawCourt() {
 }
 
 function _drawGoalZone(side) {
-  const cx = side === 'left' ? OX : OX + TW;
-  const cy = OY + TH / 2;
-  const lw = ctx.lineWidth;
+  // Terrain 40m × 20m
+  // Rayon 6m = 6/40 de TW = 15% TW
+  // Rayon 9m = 9/40 de TW = 22.5% TW
+  // Ligne 7m = 7/40 de TW depuis le but = 17.5% TW
+  // But : 3m large = 3/20 de TH = 15% TH
 
-  // Arc 6m
+  const cy  = OY + TH / 2;
+  const lw  = ctx.lineWidth;
+  const r6  = TW * 0.15;
+  const r9  = TW * 0.225;
+  const arcX = side === 'left' ? OX : OX + TW;
+
+  // Clipper pour que les arcs restent dans le terrain
+  ctx.save();
   ctx.beginPath();
-  ctx.arc(cx, cy, TH * 0.3, -Math.PI / 2, Math.PI / 2, side === 'left');
+  ctx.rect(OX, OY, TW, TH);
+  ctx.clip();
+
+  ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+  ctx.lineWidth   = lw;
+
+  // Arc 6m — sens horaire pour gauche, anti-horaire pour droite
+  ctx.beginPath();
+  ctx.arc(arcX, cy, r6, -Math.PI / 2, Math.PI / 2, side === 'right');
   ctx.stroke();
 
-  // Arc 9m (pointillés)
-  ctx.save();
+  // Arc 9m — pointillés
   ctx.setLineDash([TW * 0.012, TW * 0.008]);
   ctx.beginPath();
-  ctx.arc(cx, cy, TH * 0.45, -Math.PI / 2, Math.PI / 2, side === 'left');
+  ctx.arc(arcX, cy, r9, -Math.PI / 2, Math.PI / 2, side === 'right');
   ctx.stroke();
+  ctx.setLineDash([]);
+
   ctx.restore();
 
   // Ligne des 7m
   const x7  = side === 'left' ? OX + TW * 0.175 : OX + TW * 0.825;
-  const hw7 = TH * 0.04;
+  const hw7 = TH * 0.035;
+  ctx.strokeStyle = 'rgba(255,255,255,0.85)';
+  ctx.lineWidth   = lw;
   ctx.beginPath();
   ctx.moveTo(x7, cy - hw7);
   ctx.lineTo(x7, cy + hw7);
@@ -102,10 +122,10 @@ function _drawGoalZone(side) {
 
   // But
   const gw = TH * 0.15;
-  const gd = TW * 0.01;
-  ctx.fillStyle   = 'rgba(255,255,255,0.08)';
-  ctx.strokeStyle = 'rgba(255,255,255,0.9)';
-  ctx.lineWidth   = lw * 1.5;
+  const gd = TW * 0.018;
+  ctx.fillStyle   = 'rgba(255,255,255,0.1)';
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth   = lw * 2;
   if (side === 'left') {
     ctx.strokeRect(OX - gd, cy - gw / 2, gd, gw);
     ctx.fillRect  (OX - gd, cy - gw / 2, gd, gw);
@@ -120,81 +140,103 @@ function _drawGoalZone(side) {
 // ── Formations ────────────────────────────────────────────────────────────
 // x=0 = but gauche (équipe A attaque vers la droite)
 // x=1 = but droit  (équipe B défend à droite)
+// Repères terrain (terrain 40m × 20m, x normalisé sur largeur 40m) :
+//   Ligne de but gauche  : x = 0.00
+//   Zone 6m gauche       : x ≈ 0.15  (6/40)
+//   Zone 9m gauche       : x ≈ 0.225 (9/40)
+//   Ligne 7m gauche      : x ≈ 0.175 (7/40)
+//   Ligne médiane        : x = 0.50
+//   Zone 9m droite       : x ≈ 0.775
+//   Zone 6m droite       : x ≈ 0.85
+//   Ligne de but droite  : x = 1.00
+//
+// Équipe A (rouge) attaque vers la droite : joueurs dans x ∈ [0.18 ; 0.48]
+// Équipe B (bleu)  défend à droite        : joueurs dans x ∈ [0.52 ; 0.82]
 const FORMATIONS = {
   A: {
     '3-3': [
-      { label:'AG',  x:0.22, y:0.18 },
-      { label:'DC',  x:0.22, y:0.50 },
-      { label:'AD',  x:0.22, y:0.82 },
-      { label:'AIL', x:0.32, y:0.12 },
-      { label:'PIV', x:0.36, y:0.50 },
-      { label:'AIL', x:0.32, y:0.88 },
-      { label:'G',   x:0.03, y:0.50, goalkeeper:true },
+      // 3 arrières sur la ligne des 9m (x≈0.28), espacés en hauteur
+      { label:'ARG', x:0.28, y:0.22 },
+      { label:'DC',  x:0.28, y:0.50 },
+      { label:'ARD', x:0.28, y:0.78 },
+      // 2 ailiers + 1 pivot devant (x≈0.38)
+      { label:'AG',  x:0.38, y:0.08 },
+      { label:'PIV', x:0.40, y:0.50 },
+      { label:'AD',  x:0.38, y:0.92 },
+      { label:'G',   x:0.02, y:0.50, goalkeeper:true },
     ],
     '2-4': [
-      { label:'ARG', x:0.20, y:0.30 },
-      { label:'ARD', x:0.20, y:0.70 },
-      { label:'AG',  x:0.32, y:0.12 },
-      { label:'DC',  x:0.34, y:0.38 },
-      { label:'DC',  x:0.34, y:0.62 },
-      { label:'AD',  x:0.32, y:0.88 },
-      { label:'G',   x:0.03, y:0.50, goalkeeper:true },
+      // 2 arrières en retrait
+      { label:'ARG', x:0.26, y:0.30 },
+      { label:'ARD', x:0.26, y:0.70 },
+      // 4 avants répartis
+      { label:'AG',  x:0.38, y:0.08 },
+      { label:'DC1', x:0.38, y:0.36 },
+      { label:'DC2', x:0.38, y:0.64 },
+      { label:'AD',  x:0.38, y:0.92 },
+      { label:'G',   x:0.02, y:0.50, goalkeeper:true },
     ],
     '2-5': [
-      { label:'ARG', x:0.18, y:0.28 },
-      { label:'ARD', x:0.18, y:0.72 },
-      { label:'AG',  x:0.30, y:0.10 },
-      { label:'DC1', x:0.32, y:0.35 },
-      { label:'PIV', x:0.38, y:0.50 },
-      { label:'DC2', x:0.32, y:0.65 },
-      { label:'AD',  x:0.30, y:0.90 },
+      // Sans gardien — 2 arrières + 5 avants
+      { label:'ARG', x:0.24, y:0.28 },
+      { label:'ARD', x:0.24, y:0.72 },
+      { label:'AG',  x:0.36, y:0.08 },
+      { label:'DC1', x:0.36, y:0.33 },
+      { label:'PIV', x:0.42, y:0.50 },
+      { label:'DC2', x:0.36, y:0.67 },
+      { label:'AD',  x:0.36, y:0.92 },
     ],
     '1-6': [
-      { label:'DC',  x:0.16, y:0.50 },
-      { label:'AG',  x:0.28, y:0.10 },
-      { label:'ARG', x:0.30, y:0.28 },
-      { label:'PIV', x:0.38, y:0.50 },
-      { label:'ARD', x:0.30, y:0.72 },
-      { label:'AD',  x:0.28, y:0.90 },
-      { label:'AIL', x:0.35, y:0.38 },
+      // Sans gardien — 1 meneur + 6 avants
+      { label:'DC',  x:0.22, y:0.50 },
+      { label:'AG',  x:0.34, y:0.08 },
+      { label:'ARG', x:0.36, y:0.28 },
+      { label:'DC1', x:0.40, y:0.40 },
+      { label:'PIV', x:0.42, y:0.58 },
+      { label:'ARD', x:0.36, y:0.72 },
+      { label:'AD',  x:0.34, y:0.92 },
     ],
   },
   B: {
     '6-0': [
-      { label:'1', x:0.56, y:0.16 },
-      { label:'2', x:0.54, y:0.32 },
-      { label:'3', x:0.54, y:0.50 },
-      { label:'4', x:0.54, y:0.68 },
-      { label:'5', x:0.56, y:0.84 },
-      { label:'6', x:0.58, y:0.50 },
-      { label:'G', x:0.97, y:0.50, goalkeeper:true },
+      // 6 défenseurs alignés sur la ligne des 9m adverse (x≈0.72)
+      { label:'1', x:0.72, y:0.10 },
+      { label:'2', x:0.72, y:0.28 },
+      { label:'3', x:0.72, y:0.46 },
+      { label:'4', x:0.72, y:0.54 },
+      { label:'5', x:0.72, y:0.72 },
+      { label:'6', x:0.72, y:0.90 },
+      { label:'G', x:0.98, y:0.50, goalkeeper:true },
     ],
     '5-1': [
-      { label:'1', x:0.56, y:0.16 },
-      { label:'2', x:0.56, y:0.36 },
-      { label:'3', x:0.56, y:0.64 },
-      { label:'4', x:0.56, y:0.84 },
-      { label:'5', x:0.59, y:0.50 },
-      { label:'6', x:0.48, y:0.50 },
-      { label:'G', x:0.97, y:0.50, goalkeeper:true },
+      // 5 défenseurs + 1 avancé (x≈0.62)
+      { label:'1', x:0.72, y:0.12 },
+      { label:'2', x:0.72, y:0.32 },
+      { label:'3', x:0.72, y:0.50 },
+      { label:'4', x:0.72, y:0.68 },
+      { label:'5', x:0.72, y:0.88 },
+      { label:'6', x:0.62, y:0.50 },
+      { label:'G', x:0.98, y:0.50, goalkeeper:true },
     ],
     '4-2': [
-      { label:'1', x:0.56, y:0.18 },
-      { label:'2', x:0.56, y:0.40 },
-      { label:'3', x:0.56, y:0.60 },
-      { label:'4', x:0.56, y:0.82 },
-      { label:'5', x:0.47, y:0.35 },
-      { label:'6', x:0.47, y:0.65 },
-      { label:'G', x:0.97, y:0.50, goalkeeper:true },
+      // 4 défenseurs + 2 avancés
+      { label:'1', x:0.74, y:0.16 },
+      { label:'2', x:0.74, y:0.40 },
+      { label:'3', x:0.74, y:0.60 },
+      { label:'4', x:0.74, y:0.84 },
+      { label:'5', x:0.62, y:0.33 },
+      { label:'6', x:0.62, y:0.67 },
+      { label:'G', x:0.98, y:0.50, goalkeeper:true },
     ],
     '3-3': [
-      { label:'1', x:0.56, y:0.22 },
-      { label:'2', x:0.56, y:0.50 },
-      { label:'3', x:0.56, y:0.78 },
-      { label:'4', x:0.47, y:0.32 },
-      { label:'5', x:0.47, y:0.50 },
-      { label:'6', x:0.47, y:0.68 },
-      { label:'G', x:0.97, y:0.50, goalkeeper:true },
+      // 3 défenseurs profonds + 3 avancés
+      { label:'1', x:0.76, y:0.20 },
+      { label:'2', x:0.76, y:0.50 },
+      { label:'3', x:0.76, y:0.80 },
+      { label:'4', x:0.64, y:0.30 },
+      { label:'5', x:0.64, y:0.50 },
+      { label:'6', x:0.64, y:0.70 },
+      { label:'G', x:0.98, y:0.50, goalkeeper:true },
     ],
   },
 };
