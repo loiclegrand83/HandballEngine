@@ -53,6 +53,7 @@ body {
   padding: 18px 14px;
   border-right: 1px solid var(--border);
   background: var(--panel);
+  -webkit-backdrop-filter: blur(24px);
   backdrop-filter: blur(24px);
   box-shadow: 4px 0 48px rgba(0, 0, 0, 0.45);
   display: flex;
@@ -276,7 +277,8 @@ body {
   display: none;
 }
 
-.toggle-btn:has(input[type="checkbox"]:checked) {
+.toggle-btn:has(input[type="checkbox"]:checked),
+.toggle-btn.checked {
   background: linear-gradient(135deg, rgba(79, 156, 249, 0.18), rgba(123, 92, 240, 0.14));
   border-color: rgba(79, 156, 249, 0.5);
   color: var(--accent);
@@ -284,7 +286,8 @@ body {
               inset 0 1px 0 rgba(255, 255, 255, 0.07);
 }
 
-.toggle-btn:has(input[type="checkbox"]:checked)::before {
+.toggle-btn:has(input[type="checkbox"]:checked)::before,
+.toggle-btn.checked::before {
   content: "✓";
   margin-right: 6px;
   font-weight: bold;
@@ -385,6 +388,57 @@ body {
   border-radius: 999px;
   background: var(--asset-color);
 }
+
+.asset-icon.hurdle {
+  position: relative;
+  width: 20px;
+  height: 18px;
+  /* Arceau jaune courbé via border-top arrondi */
+  border-top: 4px solid var(--asset-color);
+  border-left: 4px solid var(--asset-color);
+  border-right: 4px solid var(--asset-color);
+  border-bottom: none;
+  border-radius: 12px 12px 0 0;
+  background: transparent;
+  box-sizing: border-box;
+}
+
+.asset-icon.hurdle::before,
+.asset-icon.hurdle::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  width: 4px;
+  height: 6px;
+  background: #111;
+  border-radius: 0 0 2px 2px;
+}
+.asset-icon.hurdle::before { left: -4px; }
+.asset-icon.hurdle::after  { right: -4px; }
+
+.asset-icon.dumbbell {
+  position: relative;
+  width: 22px;
+  height: 12px;
+  /* Barre centrale argentée */
+  background: linear-gradient(to bottom, #e0e0e0, #ffffff 40%, #9e9e9e);
+  border-radius: 2px;
+}
+
+.asset-icon.dumbbell::before,
+.asset-icon.dumbbell::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 6px;
+  height: 14px;
+  background: #212121;
+  border-radius: 2px;
+  border: 1px solid #111;
+}
+.asset-icon.dumbbell::before { left:  -5px; }
+.asset-icon.dumbbell::after  { right: -5px; }
 
 .asset-icon.rect {
   width: 15px;
@@ -499,6 +553,7 @@ canvas {
   border: 1px solid var(--border);
   border-radius: var(--r-md);
   padding: 12px 14px;
+  -webkit-backdrop-filter: blur(16px);
   backdrop-filter: blur(16px);
 }
 
@@ -569,6 +624,7 @@ canvas {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.7);
+  -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
   z-index: 999;
   display: flex;

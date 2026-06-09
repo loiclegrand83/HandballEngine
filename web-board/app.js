@@ -1,5 +1,23 @@
 const canvas = document.getElementById('boardCanvas');
 const ctx = canvas.getContext('2d');
+
+// Polyfill ctx.roundRect for Chrome < 99 / older Android
+if (!CanvasRenderingContext2D.prototype.roundRect) {
+  CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+    const rad = Math.min(typeof r === 'number' ? r : (Array.isArray(r) ? r[0] : 0), Math.abs(w) / 2, Math.abs(h) / 2);
+    this.beginPath();
+    this.moveTo(x + rad, y);
+    this.lineTo(x + w - rad, y);
+    this.quadraticCurveTo(x + w, y, x + w, y + rad);
+    this.lineTo(x + w, y + h - rad);
+    this.quadraticCurveTo(x + w, y + h, x + w - rad, y + h);
+    this.lineTo(x + rad, y + h);
+    this.quadraticCurveTo(x, y + h, x, y + h - rad);
+    this.lineTo(x, y + rad);
+    this.quadraticCurveTo(x, y, x + rad, y);
+    this.closePath();
+  };
+}
 const assetPalette = document.getElementById('assetPalette');
 const exerciseName = document.getElementById('exerciseName');
 const exerciseNotes = document.getElementById('exerciseNotes');
@@ -38,11 +56,11 @@ const board = {
 
 const assets = [
   { id: 'player', label: 'Joueur', color: '#4682b4', radius: 18, shape: 'circle', hidden: true },
-  { id: 'ball', label: 'Ballon', color: '#f0f0f0', radius: 13, shape: 'ball' },
-  { id: 'H', label: 'Haie', color: '#8bc34a', radius: 16, shape: 'bar' },
+  { id: 'ball', label: 'Ballon', color: '#ffffff', radius: 13, shape: 'ball' },
+  { id: 'H', label: 'Haie', color: '#fdd835', radius: 22, shape: 'hurdle' },
   { id: 'G', label: 'Gardien', color: '#fdd835', radius: 18, shape: 'circle' },
   { id: 'C', label: 'Cible', color: '#66bb6a', radius: 12, shape: 'ring' },
-  { id: 'dumbbell', label: 'Haltère', color: '#ffca28', radius: 18, shape: 'bar' },
+  { id: 'dumbbell', label: 'Haltère', color: '#ffca28', radius: 24, shape: 'dumbbell' },
   { id: 'swiss', label: 'Swiss ball', color: '#26c6da', radius: 18, shape: 'circle' },
   { id: 'cup', label: 'Coupelle', color: '#f48fb1', radius: 16, shape: 'cup' },
   { id: 'hoop', label: 'Cerceau', color: '#ab47bc', radius: 20, shape: 'ring' },
@@ -927,51 +945,220 @@ function drawShape(item, pos) {
       ctx.beginPath(); ctx.roundRect(-w / 2, -h / 2, w, h, 3); ctx.fill(); ctx.stroke(); 
       break;
     }
-    case 'bar': {
-      const w = item.radius * 1.5;
-      ctx.beginPath(); ctx.roundRect(-w / 2, -3.5, w, 7, 3); ctx.fill(); ctx.stroke(); 
-      break;
-    }
-    case 'ladder': {
-      const w = item.radius * 2.0;
-      const h = item.radius * 1.8;
-      ctx.strokeStyle = item.color;
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.moveTo(-w / 2, -h / 2); ctx.lineTo(-w / 2, h / 2);
-      ctx.moveTo(w / 2, -h / 2); ctx.lineTo(w / 2, h / 2);
-      for (let i = 0; i < 6; i++) {
-        const y = -h / 2 + (h / 5) * i;
-        ctx.moveTo(-w / 2, y); ctx.lineTo(w / 2, y);
-      }
-      ctx.stroke();
-      break;
-    }
-    case 'cup': {
-      const outer = item.radius * 0.85;
-      const inner = outer * 0.4;
+    case 'ball': {
+      const r = item.radius;
+      // Ombre
+      ctx.fillStyle = 'rgba(0,0,0,0.2)';
+      ctx.beginPath(); ctx.ellipse(2, r * 0.75, r * 0.82, r * 0.22, 0, 0, Math.PI * 2); ctx.fill();
+      // Corps — couleur de l'asset (modifiable via la palette)
       ctx.fillStyle = item.color;
+      ctx.strokeStyle = 'rgba(0,0,0,0.25)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      // Coutures ballon de handball : 3 lignes courbes noires
+      // (pas d'ellipse aplatie — ce serait un ballon de basket)
+      ctx.strokeStyle = 'rgba(0,0,0,0.40)';
+      ctx.lineWidth = 1.1;
+      // Courbe gauche (verticale, légèrement bombée)
       ctx.beginPath();
-      ctx.arc(0, 0, outer, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = '#07111f';
-      ctx.beginPath();
-      ctx.arc(0, 0, inner, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
-      ctx.lineWidth = 1.2;
-      ctx.beginPath();
-      ctx.arc(0, 0, outer, 0, Math.PI * 2);
+      ctx.moveTo(-r * 0.15, -r * 0.92);
+      ctx.bezierCurveTo(-r * 0.55, -r * 0.45, -r * 0.55, r * 0.45, -r * 0.15, r * 0.92);
       ctx.stroke();
+      // Courbe droite (symétrique)
+      ctx.beginPath();
+      ctx.moveTo( r * 0.15, -r * 0.92);
+      ctx.bezierCurveTo( r * 0.55, -r * 0.45,  r * 0.55, r * 0.45,  r * 0.15, r * 0.92);
+      ctx.stroke();
+      // Bande horizontale centrale (légèrement courbée)
+      ctx.beginPath();
+      ctx.moveTo(-r * 0.92, r * 0.10);
+      ctx.bezierCurveTo(-r * 0.40, -r * 0.18, r * 0.40, -r * 0.18, r * 0.92, r * 0.10);
+      ctx.stroke();
+      // Reflet
+      ctx.fillStyle = 'rgba(255,255,255,0.32)';
+      ctx.beginPath(); ctx.arc(-r * 0.28, -r * 0.30, r * 0.20, 0, Math.PI * 2); ctx.fill();
       break;
     }
-    case 'cone':
+
+    case 'hurdle': {
+      // Haie d'athlétisme : arceau jaune courbé sur deux pieds noirs
+      const r = item.radius;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      // Pieds noirs
+      ctx.fillStyle = '#111';
+      ctx.strokeStyle = '#333';
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.roundRect(-r * 0.62, r * 0.28, r * 0.22, r * 0.50, 3); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.roundRect( r * 0.40, r * 0.28, r * 0.22, r * 0.50, 3); ctx.fill(); ctx.stroke();
+      // Arceau jaune vif — large tube courbé
+      ctx.strokeStyle = '#fdd835';
+      ctx.lineWidth = r * 0.26;
       ctx.beginPath();
-      ctx.moveTo(0, -item.radius);
-      ctx.lineTo(-item.radius, item.radius);
-      ctx.lineTo(item.radius, item.radius);
-      ctx.closePath(); ctx.fill(); ctx.stroke(); 
+      ctx.moveTo(-r * 0.51, r * 0.38);
+      ctx.lineTo(-r * 0.51, -r * 0.05);
+      ctx.bezierCurveTo(-r * 0.51, -r * 0.88, r * 0.51, -r * 0.88, r * 0.51, -r * 0.05);
+      ctx.lineTo( r * 0.51,  r * 0.38);
+      ctx.stroke();
+      // Embouts noirs aux jonctions pied/arceau
+      ctx.fillStyle = '#111';
+      ctx.beginPath(); ctx.arc(-r * 0.51, r * 0.38, r * 0.13, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc( r * 0.51, r * 0.38, r * 0.13, 0, Math.PI * 2); ctx.fill();
       break;
+    }
+
+    case 'dumbbell': {
+      // Haltère : deux grands disques noirs + barre argentée
+      const r = item.radius;
+      const drawDisk = (cx) => {
+        // Disque principal noir
+        ctx.fillStyle = '#212121'; ctx.strokeStyle = '#111'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.arc(cx, 0, r * 0.40, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        // Anneaux de relief
+        ctx.strokeStyle = '#383838'; ctx.lineWidth = r * 0.055;
+        ctx.beginPath(); ctx.arc(cx, 0, r * 0.30, 0, Math.PI * 2); ctx.stroke();
+        ctx.strokeStyle = '#2e2e2e'; ctx.lineWidth = r * 0.045;
+        ctx.beginPath(); ctx.arc(cx, 0, r * 0.19, 0, Math.PI * 2); ctx.stroke();
+        // Centre bordeaux
+        ctx.fillStyle = '#7b1a1a';
+        ctx.beginPath(); ctx.arc(cx, 0, r * 0.09, 0, Math.PI * 2); ctx.fill();
+        // Reflet
+        ctx.fillStyle = 'rgba(255,255,255,0.13)';
+        ctx.beginPath(); ctx.arc(cx - r * 0.13, -r * 0.15, r * 0.09, 0, Math.PI * 2); ctx.fill();
+      };
+      drawDisk(-r * 0.56);
+      drawDisk( r * 0.56);
+      // Barre argentée dégradée
+      const grad = ctx.createLinearGradient(0, -r * 0.10, 0, r * 0.10);
+      grad.addColorStop(0,   '#eeeeee');
+      grad.addColorStop(0.4, '#ffffff');
+      grad.addColorStop(1,   '#9e9e9e');
+      ctx.fillStyle = grad; ctx.strokeStyle = '#757575'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.roundRect(-r * 0.56, -r * 0.09, r * 1.12, r * 0.18, 2); ctx.fill(); ctx.stroke();
+      break;
+    }
+
+    case 'bar': {
+      // Fallback — barre simple (ne devrait plus être utilisée)
+      const r = item.radius;
+      ctx.beginPath(); ctx.roundRect(-r * 0.75, -r * 0.15, r * 1.5, r * 0.3, 3); ctx.fill(); ctx.stroke();
+      break;
+    }
+
+    case 'cup': {
+      // Coupelle vue du dessus : disque aplati coloré avec anneau intérieur creux
+      const r = item.radius;
+      // Ombre portée
+      ctx.fillStyle = 'rgba(0,0,0,0.22)';
+      ctx.beginPath(); ctx.ellipse(2, 2, r * 0.82, r * 0.82, 0, 0, Math.PI * 2); ctx.fill();
+      // Corps extérieur (bord de la coupelle)
+      ctx.fillStyle = item.color;
+      ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(0, 0, r * 0.82, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      // Cavité intérieure (vue du dessus = creux foncé au centre)
+      ctx.fillStyle = 'rgba(0,0,0,0.35)';
+      ctx.beginPath(); ctx.arc(0, 0, r * 0.46, 0, Math.PI * 2); ctx.fill();
+      // Anneau intermédiaire (épaisseur de la paroi)
+      ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+      ctx.lineWidth = r * 0.08;
+      ctx.beginPath(); ctx.arc(0, 0, r * 0.64, 0, Math.PI * 2); ctx.stroke();
+      // Reflet sur le bord haut-gauche
+      ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+      ctx.lineWidth = r * 0.1;
+      ctx.beginPath(); ctx.arc(0, 0, r * 0.82, Math.PI * 1.05, Math.PI * 1.45); ctx.stroke();
+      break;
+    }
+
+    case 'ring': {
+      const r = item.radius;
+      if (item.id === 'hoop') {
+        // Cerceau : anneau épais avec reflet
+        ctx.strokeStyle = item.color;
+        ctx.lineWidth = r * 0.26;
+        ctx.beginPath(); ctx.arc(0, 0, r * 0.74, 0, Math.PI * 2); ctx.stroke();
+        ctx.strokeStyle = 'rgba(255,255,255,0.28)';
+        ctx.lineWidth = r * 0.07;
+        ctx.beginPath(); ctx.arc(0, 0, r * 0.74, Math.PI * 1.1, Math.PI * 1.55); ctx.stroke();
+      } else {
+        // Cible : 3 anneaux concentriques rouge/blanc
+        const cols = ['#f44336', '#ffffff', '#f44336'];
+        for (let i = 0; i < 3; i++) {
+          ctx.fillStyle = cols[i];
+          ctx.beginPath(); ctx.arc(0, 0, r * (1 - i * 0.3), 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.strokeStyle = '#f44336'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(-r * 0.12, 0); ctx.lineTo(r * 0.12, 0); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0, -r * 0.12); ctx.lineTo(0, r * 0.12); ctx.stroke();
+      }
+      break;
+    }
+
+    case 'ladder': {
+      const r = item.radius;
+      const rw = r * 0.52, rh = r * 0.92;
+      ctx.strokeStyle = item.color;
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'square';
+      // Deux rails
+      ctx.beginPath(); ctx.moveTo(-rw, -rh); ctx.lineTo(-rw, rh); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo( rw, -rh); ctx.lineTo( rw, rh); ctx.stroke();
+      // 6 barreaux
+      for (let i = 0; i <= 5; i++) {
+        const y = -rh + (2 * rh / 5) * i;
+        ctx.beginPath(); ctx.moveTo(-rw, y); ctx.lineTo(rw, y); ctx.stroke();
+      }
+      break;
+    }
+
+    case 'rect': {
+      // Mannequin : tête + corps
+      const r = item.radius;
+      ctx.fillStyle = item.color; ctx.strokeStyle = 'rgba(0,0,0,0.4)'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.roundRect(-r * 0.33, -r * 0.28, r * 0.66, r * 0.95, r * 0.1); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#ffcc80'; ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+      ctx.beginPath(); ctx.arc(0, -r * 0.52, r * 0.27, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      break;
+    }
+
+    case 'wall': {
+      // Mur : rectangle large avec motif de briques
+      const r = item.radius;
+      ctx.fillStyle = item.color; ctx.strokeStyle = 'rgba(255,255,255,0.25)'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.roundRect(-r, -r * 0.36, r * 2, r * 0.72, r * 0.06); ctx.fill(); ctx.stroke();
+      ctx.strokeStyle = 'rgba(0,0,0,0.22)'; ctx.lineWidth = 1;
+      // Ligne médiane horizontale
+      ctx.beginPath(); ctx.moveTo(-r, 0); ctx.lineTo(r, 0); ctx.stroke();
+      const bw = r * 0.62;
+      // Rangée haute
+      for (let x = -r + bw * 0.25; x < r; x += bw) {
+        ctx.beginPath(); ctx.moveTo(x, -r * 0.36); ctx.lineTo(x, 0); ctx.stroke();
+      }
+      // Rangée basse (décalée)
+      for (let x = -r + bw * 0.55; x < r; x += bw) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, r * 0.36); ctx.stroke();
+      }
+      break;
+    }
+
+    case 'cone': {
+      const r = item.radius;
+      // Ombre
+      ctx.fillStyle = 'rgba(0,0,0,0.18)';
+      ctx.beginPath(); ctx.ellipse(0, r * 0.42, r * 0.8, r * 0.18, 0, 0, Math.PI * 2); ctx.fill();
+      // Corps
+      ctx.fillStyle = item.color; ctx.strokeStyle = 'rgba(0,0,0,0.35)'; ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, -r * 0.72);
+      ctx.lineTo(-r * 0.72, r * 0.38);
+      ctx.lineTo( r * 0.72, r * 0.38);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      // Bande blanche
+      ctx.strokeStyle = 'rgba(255,255,255,0.65)'; ctx.lineWidth = r * 0.16;
+      ctx.beginPath(); ctx.moveTo(-r * 0.32, r * 0.06); ctx.lineTo(r * 0.32, r * 0.06); ctx.stroke();
+      break;
+    }
+
     case 'arrow': {
       const w = item.radius * 1.5, h = item.radius * 0.7;
       ctx.beginPath();
@@ -984,48 +1171,15 @@ function drawShape(item, pos) {
 
     case 'zone-fix': {
       const r = item.radius;
-      // Remplissage semi-transparent
       ctx.fillStyle = 'rgba(206, 147, 216, 0.15)';
       ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill();
-      // Bordure en pointillés
-      ctx.strokeStyle = item.color;
-      ctx.lineWidth = 2;
+      ctx.strokeStyle = item.color; ctx.lineWidth = 2;
       ctx.setLineDash([6, 4]);
       ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.stroke();
       ctx.setLineDash([]);
-      // Croix centrale
       const cs = r * 0.28;
-      ctx.strokeStyle = item.color;
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.moveTo(-cs, 0); ctx.lineTo(cs, 0);
-      ctx.moveTo(0, -cs); ctx.lineTo(0, cs);
-      ctx.stroke();
-      break;
-    }
-
-    case 'ball': {
-      const r = item.radius;
-      // Corps
-      ctx.fillStyle = item.color;
-      ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.fill();
-      // Reflet
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.42)';
-      ctx.beginPath(); ctx.arc(-r * 0.26, -r * 0.26, r * 0.28, 0, Math.PI * 2); ctx.fill();
-      // Coutures
-      ctx.strokeStyle = 'rgba(0, 0, 0, 0.28)';
-      ctx.lineWidth = 1;
-      ctx.setLineDash([]);
-      ctx.beginPath();
-      ctx.arc(0, 0, r * 0.68, -Math.PI * 0.1, Math.PI * 0.9);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.arc(r * 0.08, r * 0.28, r * 0.7, Math.PI * 0.72, Math.PI * 1.62);
-      ctx.stroke();
-      // Contour
-      ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
-      ctx.lineWidth = 1.5;
-      ctx.beginPath(); ctx.arc(0, 0, r, 0, Math.PI * 2); ctx.stroke();
+      ctx.strokeStyle = item.color; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(-cs, 0); ctx.lineTo(cs, 0); ctx.moveTo(0, -cs); ctx.lineTo(0, cs); ctx.stroke();
       break;
     }
 
@@ -1127,7 +1281,7 @@ const teamColors = {
 
 // ─── Sanitisation des données importées ───────────────────────────────────────
 
-const VALID_SHAPES = ['circle', 'ring', 'rect', 'wall', 'bar', 'ladder', 'cup', 'cone', 'arrow', 'ball', 'zone-fix'];
+const VALID_SHAPES = ['circle', 'ring', 'rect', 'wall', 'bar', 'hurdle', 'dumbbell', 'ladder', 'cup', 'cone', 'arrow', 'ball', 'zone-fix'];
 const VALID_TEAMS  = ['A', 'B', null];
 const VALID_PATH_KINDS = ['course', 'shot', 'pass', 'croise', 'fixation'];
 const HANDBALL_POSTS = ['AG', 'ARG', 'DC', 'PIV', 'ARD', 'AD'];
@@ -1672,6 +1826,15 @@ closeLibraryBtn.addEventListener('click', () => {
 
 libraryFilter.addEventListener('change', () => {
   renderLibrary();
+});
+
+// Fallback for browsers without :has() support (Chrome < 105)
+document.querySelectorAll('.toggle-btn input[type="checkbox"]').forEach(cb => {
+  const label = cb.closest('.toggle-btn');
+  if (!label) return;
+  const sync = () => label.classList.toggle('checked', cb.checked);
+  cb.addEventListener('change', sync);
+  sync();
 });
 
 document.getElementById('exportJson').addEventListener('click', exportJson);

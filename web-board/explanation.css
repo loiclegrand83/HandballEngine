@@ -124,7 +124,7 @@ body {
 @media (max-width: 700px) { .ex-overview { grid-template-columns: 1fr; } }
 .ex-overview-col {
   background: var(--panel); border: 1px solid var(--border);
-  border-radius: var(--r-md); padding: 16px; backdrop-filter: blur(16px);
+  border-radius: var(--r-md); padding: 16px; -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
 }
 
 /* ── Doc fields section ────────────────────────────────────── */
@@ -183,7 +183,7 @@ body {
 
 .step-card {
   background: var(--panel); border: 1px solid var(--border);
-  border-radius: var(--r-lg); overflow: hidden; backdrop-filter: blur(16px);
+  border-radius: var(--r-lg); overflow: hidden; -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
   transition: box-shadow 0.2s var(--ease);
 }
 .step-card:hover { box-shadow: 0 6px 32px rgba(79,156,249,0.1); }

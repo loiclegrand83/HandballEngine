@@ -138,6 +138,42 @@ haweb/
 
 ## Versioning
 
+### v1.3.0 — 2026-06-09
+**Compatibilité tablette/Chromebook + premier exercice bibliothèque**
+
+#### Compatibilité
+- Polyfill `ctx.roundRect()` pour Chrome < 99 (anciens Android)
+- Sélecteur `:has()` remplacé par classe `.checked` JS pour Chrome < 105
+- Préfixe `-webkit-backdrop-filter` ajouté dans tous les fichiers CSS (styles.css, timeout.css, explanation.css)
+
+#### Bibliothèque
+- Exercice "Feinte de croisé 1" ajouté : modélisation complète avec 4 phases animées (passe, feinte, croisé, tir)
+
+---
+
+### v1.2.0 — 2026-06-09
+**Assets redessinés + corrections formations temps mort**
+
+#### Assets
+- Haie (`hurdle`) : shape dédiée — arceau jaune courbé sur deux pieds noirs
+- Haltère (`dumbbell`) : shape dédiée — deux grands disques noirs + barre argentée dégradée
+- Ballon : orange avec coutures caractéristiques et reflet
+- Coupelle : disque vue du dessus avec cavité centrale et anneau de paroi
+- Cerceau : anneau épais avec reflet
+- Plot : triangle avec bande blanche et ombre
+- Mannequin : silhouette tête ronde + corps
+- Mur : rectangle avec motif briques décalées
+- Icônes palette sidebar mises à jour (hurdle et dumbbell)
+
+#### Tableau temps mort
+- Formations équipe A : arrières sur ligne 9m gauche (x=0.225), ailiers/pivot entre 6m et 9m
+- Formations équipe B : défenseurs sur ligne 9m droite (x=0.775), avancés entre 6m et 9m
+
+#### Documentation
+- `Documentation-et-Guide.md` entièrement réécrite (v1.1.0) : tous les modules, assets, formations, raccourcis
+
+---
+
 ### v1.1.0 — 2026-06-07
 **Menu d'accueil + Tableau tactique Temps mort**
 

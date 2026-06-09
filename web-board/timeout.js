@@ -152,91 +152,90 @@ function _drawGoalZone(side) {
 //
 // Équipe A (rouge) attaque vers la droite : joueurs dans x ∈ [0.18 ; 0.48]
 // Équipe B (bleu)  défend à droite        : joueurs dans x ∈ [0.52 ; 0.82]
+// Repères terrain normalisés (40m × 20m) :
+//   But gauche        x=0.00  |  Zone 6m gauche  x=0.15  |  Zone 9m gauche  x=0.225
+//   Ligne 7m gauche   x=0.175 |  Ligne médiane   x=0.50
+//   Zone 9m droite    x=0.775 |  Zone 6m droite  x=0.85  |  But droit       x=1.00
+//
+//   Équipe A (attaque, rouge) : G à x=0.02, arrières sur 9m gauche (x=0.225),
+//                               ailiers/pivot entre 6m et 9m (x=0.35–0.43)
+//   Équipe B (défense, bleu)  : défenseurs sur 9m droite (x=0.775),
+//                               avancés entre 6m et 9m (x=0.66), G à x=0.98
 const FORMATIONS = {
   A: {
     '3-3': [
-      // 3 arrières sur la ligne des 9m (x≈0.28), espacés en hauteur
-      { label:'ARG', x:0.28, y:0.22 },
-      { label:'DC',  x:0.28, y:0.50 },
-      { label:'ARD', x:0.28, y:0.78 },
-      // 2 ailiers + 1 pivot devant (x≈0.38)
-      { label:'AG',  x:0.38, y:0.08 },
-      { label:'PIV', x:0.40, y:0.50 },
-      { label:'AD',  x:0.38, y:0.92 },
-      { label:'G',   x:0.02, y:0.50, goalkeeper:true },
+      { label:'ARG', x:0.225, y:0.22 },
+      { label:'DC',  x:0.225, y:0.50 },
+      { label:'ARD', x:0.225, y:0.78 },
+      { label:'AG',  x:0.380, y:0.08 },
+      { label:'PIV', x:0.420, y:0.50 },
+      { label:'AD',  x:0.380, y:0.92 },
+      { label:'G',   x:0.020, y:0.50, goalkeeper:true },
     ],
     '2-4': [
-      // 2 arrières en retrait
-      { label:'ARG', x:0.26, y:0.30 },
-      { label:'ARD', x:0.26, y:0.70 },
-      // 4 avants répartis
-      { label:'AG',  x:0.38, y:0.08 },
-      { label:'DC1', x:0.38, y:0.36 },
-      { label:'DC2', x:0.38, y:0.64 },
-      { label:'AD',  x:0.38, y:0.92 },
-      { label:'G',   x:0.02, y:0.50, goalkeeper:true },
+      { label:'ARG', x:0.225, y:0.30 },
+      { label:'ARD', x:0.225, y:0.70 },
+      { label:'AG',  x:0.380, y:0.08 },
+      { label:'DC1', x:0.380, y:0.36 },
+      { label:'DC2', x:0.380, y:0.64 },
+      { label:'AD',  x:0.380, y:0.92 },
+      { label:'G',   x:0.020, y:0.50, goalkeeper:true },
     ],
     '2-5': [
-      // Sans gardien — 2 arrières + 5 avants
-      { label:'ARG', x:0.24, y:0.28 },
-      { label:'ARD', x:0.24, y:0.72 },
-      { label:'AG',  x:0.36, y:0.08 },
-      { label:'DC1', x:0.36, y:0.33 },
-      { label:'PIV', x:0.42, y:0.50 },
-      { label:'DC2', x:0.36, y:0.67 },
-      { label:'AD',  x:0.36, y:0.92 },
+      { label:'ARG', x:0.225, y:0.28 },
+      { label:'ARD', x:0.225, y:0.72 },
+      { label:'AG',  x:0.370, y:0.08 },
+      { label:'DC1', x:0.370, y:0.33 },
+      { label:'PIV', x:0.430, y:0.50 },
+      { label:'DC2', x:0.370, y:0.67 },
+      { label:'AD',  x:0.370, y:0.92 },
     ],
     '1-6': [
-      // Sans gardien — 1 meneur + 6 avants
-      { label:'DC',  x:0.22, y:0.50 },
-      { label:'AG',  x:0.34, y:0.08 },
-      { label:'ARG', x:0.36, y:0.28 },
-      { label:'DC1', x:0.40, y:0.40 },
-      { label:'PIV', x:0.42, y:0.58 },
-      { label:'ARD', x:0.36, y:0.72 },
-      { label:'AD',  x:0.34, y:0.92 },
+      { label:'DC',  x:0.225, y:0.50 },
+      { label:'AG',  x:0.360, y:0.08 },
+      { label:'ARG', x:0.360, y:0.28 },
+      { label:'DC1', x:0.420, y:0.40 },
+      { label:'PIV', x:0.430, y:0.58 },
+      { label:'ARD', x:0.360, y:0.72 },
+      { label:'AD',  x:0.360, y:0.92 },
     ],
   },
   B: {
     '6-0': [
-      // 6 défenseurs alignés sur la ligne des 9m adverse (x≈0.72)
-      { label:'1', x:0.72, y:0.10 },
-      { label:'2', x:0.72, y:0.28 },
-      { label:'3', x:0.72, y:0.46 },
-      { label:'4', x:0.72, y:0.54 },
-      { label:'5', x:0.72, y:0.72 },
-      { label:'6', x:0.72, y:0.90 },
-      { label:'G', x:0.98, y:0.50, goalkeeper:true },
+      { label:'1', x:0.775, y:0.08 },
+      { label:'2', x:0.775, y:0.24 },
+      { label:'3', x:0.775, y:0.40 },
+      { label:'4', x:0.775, y:0.60 },
+      { label:'5', x:0.775, y:0.76 },
+      { label:'6', x:0.775, y:0.92 },
+      { label:'G', x:0.980, y:0.50, goalkeeper:true },
     ],
     '5-1': [
-      // 5 défenseurs + 1 avancé (x≈0.62)
-      { label:'1', x:0.72, y:0.12 },
-      { label:'2', x:0.72, y:0.32 },
-      { label:'3', x:0.72, y:0.50 },
-      { label:'4', x:0.72, y:0.68 },
-      { label:'5', x:0.72, y:0.88 },
-      { label:'6', x:0.62, y:0.50 },
-      { label:'G', x:0.98, y:0.50, goalkeeper:true },
+      { label:'1', x:0.775, y:0.10 },
+      { label:'2', x:0.775, y:0.28 },
+      { label:'3', x:0.775, y:0.50 },
+      { label:'4', x:0.775, y:0.72 },
+      { label:'5', x:0.775, y:0.90 },
+      { label:'6', x:0.660, y:0.50 },
+      { label:'G', x:0.980, y:0.50, goalkeeper:true },
     ],
     '4-2': [
-      // 4 défenseurs + 2 avancés
-      { label:'1', x:0.74, y:0.16 },
-      { label:'2', x:0.74, y:0.40 },
-      { label:'3', x:0.74, y:0.60 },
-      { label:'4', x:0.74, y:0.84 },
-      { label:'5', x:0.62, y:0.33 },
-      { label:'6', x:0.62, y:0.67 },
-      { label:'G', x:0.98, y:0.50, goalkeeper:true },
+      { label:'1', x:0.775, y:0.16 },
+      { label:'2', x:0.775, y:0.40 },
+      { label:'3', x:0.775, y:0.60 },
+      { label:'4', x:0.775, y:0.84 },
+      { label:'5', x:0.665, y:0.33 },
+      { label:'6', x:0.665, y:0.67 },
+      { label:'G', x:0.980, y:0.50, goalkeeper:true },
     ],
     '3-3': [
-      // 3 défenseurs profonds + 3 avancés
-      { label:'1', x:0.76, y:0.20 },
-      { label:'2', x:0.76, y:0.50 },
-      { label:'3', x:0.76, y:0.80 },
-      { label:'4', x:0.64, y:0.30 },
-      { label:'5', x:0.64, y:0.50 },
-      { label:'6', x:0.64, y:0.70 },
-      { label:'G', x:0.98, y:0.50, goalkeeper:true },
+      { label:'1', x:0.775, y:0.20 },
+      { label:'2', x:0.775, y:0.50 },
+      { label:'3', x:0.775, y:0.80 },
+      { label:'4', x:0.665, y:0.30 },
+      { label:'5', x:0.665, y:0.50 },
+      { label:'6', x:0.665, y:0.70 },
+      { label:'G', x:0.980, y:0.50, goalkeeper:true },
     ],
   },
 };

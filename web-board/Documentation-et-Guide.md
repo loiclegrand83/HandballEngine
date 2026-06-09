@@ -1,73 +1,300 @@
-# 🤾‍♂️ Handball Tactical Board - Documentation & Guide
+# Handball Engine — Documentation & Guide utilisateur
 
-Bienvenue dans la documentation officielle du **Handball Tactical Board**, votre outil ultime pour concevoir, animer et partager vos exercices de handball comme un pro !
-
----
-
-## 🏗️ Architecture & Structure du Projet
-
-L'application est construite autour d'une architecture moderne, légère et autonome. Elle ne nécessite pas de base de données lourde ni de connexion internet pour fonctionner. Tout est pensé pour être rapide et pérenne.
-
-### Le Modèle Technologique
-- **Frontend (L'interface)** : Conçu en pur **HTML5, CSS3 et JavaScript (Vanilla)**. Aucun framework lourd (comme React ou Angular) n'est utilisé, ce qui garantit une vitesse d'exécution fulgurante et un contrôle absolu sur le dessin (via l'élément `<canvas>`).
-- **Backend (Le serveur local)** : Un mini-serveur natif en **Node.js** gère la distribution des fichiers et fait le pont avec votre disque dur.
-- **Stockage (La base de données)** : Les exercices sont sauvegardés sous forme de fichiers **JSON** physiques. Cela permet un archivage durable, l'envoi par email, et une compatibilité infinie.
-
-### Le Rôle des Fichiers
-
-Voici ce que contient le dossier `web-board` :
-
-* 📄 **`index.html`** : Le squelette de la page. C'est ici que sont définis les menus, les boutons, et l'espace de dessin (le *canvas*).
-* 🎨 **`styles.css`** : Le designer de l'application. Il gère l'esthétique sombre, les effets de verre (glassmorphism), les couleurs néon, et l'ergonomie globale pour un rendu professionnel.
-* 🧠 **`app.js`** : Le cerveau de l'application. Ce fichier contient toute la logique mathématique (tracés de courbes de Bézier, calculs des trajectoires), la gestion des clics, le moteur d'animation temporelle, et la communication avec le serveur.
-* ⚙️ **`server.js`** : Le chef d'orchestre local. Il lance un serveur web sur votre machine, ouvre le navigateur, et s'occupe de lire/écrire les fichiers JSON quand vous enregistrez vos exercices.
-* 📁 **`bibli/`** (Dossier) : Votre coffre-fort. C'est ici que le serveur range soigneusement chaque exercice sous forme de fichier `.json`.
-* 🚀 **`Lancer-Board.sh` / `Handball-Board.desktop`** : Vos clés de contact. Ces fichiers permettent de lancer l'application en un simple double-clic sans jamais ouvrir un terminal de commande.
+**Version 1.1.0** — Application locale de tableau tactique handball
 
 ---
 
-## 🎮 Guide d'Utilisation Ludique (Le "Comment qu'on joue ?")
+## Sommaire
 
-Prêt à dessiner la tactique du siècle ? Suivez le guide !
-
-### 1. Démarrer la machine 🚀
-Double-cliquez sur `Handball-Board.desktop` ou `Lancer-Board.sh`. Boom ! Le serveur démarre, votre navigateur s'ouvre, et le terrain vous attend.
-
-### 2. Peupler le terrain 🏃‍♂️
-1. Regardez en bas de l'écran, dans le panneau **Haies & Assets**.
-2. Cliquez sur l'élément de votre choix (un joueur, un ballon, un plot, etc.).
-3. Cliquez n'importe où sur le terrain pour le poser. Magique !
-4. **Astuce de pro :** Choisissez l'Équipe A (Bleu) ou l'Équipe B (Rouge) avant de poser un joueur pour qu'il prenne la bonne couleur et qu'un numéro automatique lui soit attribué !
-5. **Tourner ou Supprimer :** Un *double-clic* sur un objet le fait pivoter de 90°. Un *clic-droit* le supprime du terrain.
-
-### 3. Mode "Sélect" (Le doigt magique) 👆
-Dans le menu de gauche, choisissez le mode **Sélect**.
-- Cliquez et glissez un joueur pour le déplacer.
-- Cliquez sur une trajectoire pour faire apparaître ses "points de contrôle" (les petits ronds blancs). Vous pouvez alors tirer sur ces points pour courber votre passe ou votre course avec une précision millimétrique !
-
-### 4. Dessiner comme Picasso 🎨
-Le menu de gauche vous offre trois pinceaux :
-- **Course (Bleu pointillé)** : Tracez le déplacement d'un joueur.
-- **Passe (Jaune pointillé)** : Tracez la trajectoire du ballon entre deux joueurs.
-- **Tir (Rouge vif)** : BOUM. La frappe vers le but.
-
-*Comment faire ?* Cliquez sur un point de départ, puis cliquez pour ajouter des points de passage. Une courbe élégante se dessine automatiquement !
-Quand vous avez fini votre tracé, cliquez sur **Terminer traj.** (ou changez de mode).
-
-### 5. L'Animation... Action ! 🎬
-Vous avez tracé une course et une passe ?
-1. Cliquez sur le bouton "toggle" **[ Lié à la trajectoire précédente ]** avant de dessiner un nouveau trait si vous voulez que les actions s'enchaînent de manière synchronisée (le joueur court EN MÊME TEMPS que la passe part).
-2. Laissez-le décoché pour que l'action se passe *après* la précédente.
-3. Cliquez sur **▶ Animation** et admirez vos petits joueurs bouger tout seuls sur le terrain comme de vrais pros. Appuyez sur **⏹ Arrêter** pour les remettre à leur place initiale.
-
-### 6. Gérer sa Bibliothèque 📚
-* "C'est beau, mais je veux le garder pour demain !"
-* Donnez un **Nom** à votre chef-d'œuvre, choisissez une **Catégorie** (Ex: Montée de balle), écrivez quelques notes de coaching, et cliquez sur **Enregistrer**.
-* Cliquez sur **Bibliothèque**. Vos exercices sont là, bien rangés, triables par couleur et catégorie. Un clic sur "Charger" et le terrain se remplit de nouveau.
-
-### 7. Le Partage (L'export JSON) 🤝
-Vous voulez envoyer votre exercice à l'entraîneur adjoint ? Cliquez sur **Export JSON**. Un petit fichier se télécharge. Envoyez-le par mail. L'adjoint n'aura qu'à cliquer sur "Choisir un fichier" sous "Importer JSON" sur son propre logiciel, et votre exercice apparaîtra sur son écran !
+1. [Vue d'ensemble](#1-vue-densemble)
+2. [Lancement](#2-lancement)
+3. [Menu d'accueil](#3-menu-daccueil)
+4. [Board Tactique](#4-board-tactique)
+5. [Tableau Temps mort](#5-tableau-temps-mort)
+6. [Page d'explication & Fiche document](#6-page-dexplication--fiche-document)
+7. [Bibliothèque d'exercices](#7-bibliothèque-dexercices)
+8. [Accès tablette (Android)](#8-accès-tablette-android)
+9. [Architecture technique](#9-architecture-technique)
 
 ---
 
-Amusez-vous bien, et que la tactique soit avec vous ! 🤾‍♀️🔥
+## 1. Vue d'ensemble
+
+Handball Engine est un outil local (aucune connexion internet requise) conçu pour les entraîneurs de handball. Il regroupe trois modules :
+
+| Module | Usage |
+|---|---|
+| **Board Tactique** | Créer et animer des exercices d'entraînement |
+| **Temps mort** | Donner des instructions tactiques rapides pendant un match |
+| **Page d'explication** | Générer une fiche pédagogique imprimable par exercice |
+
+---
+
+## 2. Lancement
+
+### Linux — raccourci bureau
+Double-cliquer sur `Handball-Board.desktop` dans le dossier `web-board/`.
+
+### Ligne de commande
+```bash
+cd web-board
+bash Lancer-Board.sh
+```
+
+Le serveur démarre sur `http://localhost:3000` et ouvre le navigateur automatiquement.
+
+> **Arrêt :** `Ctrl+C` dans le terminal ou fermeture de la fenêtre du bureau.
+
+---
+
+## 3. Menu d'accueil
+
+Au démarrage, `http://localhost:3000` affiche deux cartes :
+
+- **Board Tactique** → ouvre `board.html`
+- **Temps mort** → ouvre `timeout.html`
+
+---
+
+## 4. Board Tactique
+
+### 4.1 Vues du terrain
+
+Trois vues disponibles (barre latérale gauche, section **Vue**) :
+
+| Vue | Description |
+|---|---|
+| Terrain complet | Vue du dessus, terrain entier 40m × 20m |
+| Demi-terrain | Vue du dessus, zone offensive uniquement |
+| Perspective | Vue inclinée 3D de la zone de but |
+
+### 4.2 Placer des joueurs
+
+1. Choisir l'**Équipe A** ou **Équipe B** (panneau bas)
+2. Optionnel : sélectionner un **poste** dans la section "Postes" (AG, ARG, DC, PIV, ARD, AD) — le joueur sera marqué avec ce poste
+3. Cliquer sur le terrain — le joueur apparaît avec un numéro automatique ou son poste
+
+> **Déplacer :** cliquer-glisser un joueur  
+> **Supprimer :** clic droit sur un joueur
+
+### 4.3 Postes disponibles
+
+| Abréviation | Poste |
+|---|---|
+| AG | Ailier Gauche |
+| ARG | Arrière Gauche |
+| DC | Demi-Centre |
+| PIV | Pivot |
+| ARD | Arrière Droit |
+| AD | Ailier Droit |
+
+### 4.4 Assets disponibles
+
+Sélectionner un asset dans la palette **Haies & Assets** puis cliquer sur le terrain.
+
+| Asset | Description |
+|---|---|
+| Ballon | Ballon de handball (orange, avec coutures) |
+| Haie | Structure verticale — poteaux + barre colorée |
+| Haltère | Deux disques dorés + barre centrale noire |
+| Cible | Anneaux concentriques rouge/blanc |
+| Swiss ball | Cercle coloré |
+| Coupelle | Disque vue du dessus avec cavité centrale |
+| Cerceau | Anneau épais coloré |
+| Échelle de rythme | Grille de barreaux vue du dessus |
+| Mannequin | Silhouette tête + corps |
+| Mur | Rectangle large avec motif briques |
+| Plot | Triangle orange avec bande blanche |
+| Zone de fixation | Cercle pointillé violet semi-transparent |
+
+> **Double-clic** sur un asset posé : rotation 90°  
+> **Clic droit** : suppression
+
+### 4.5 Trajectoires
+
+Choisir un mode dans la section **Mode**, cliquer successivement les points sur le terrain, puis cliquer **Terminer traj.**.
+
+| Mode | Couleur | Usage |
+|---|---|---|
+| Course | Bleu clair (tirets) | Déplacement d'un joueur |
+| Tir | Rouge (plein + flèche) | Tir au but |
+| Passe | Jaune (tirets + flèche) | Transmission de balle |
+| Croisé | Orange (plein + ✕) | Croisement entre deux joueurs |
+| Fixation | Violet (tirets + FIX) | Action de fixation défensive |
+
+**Option "Lié à la trajectoire précédente" :** si coché, la trajectoire s'anime en simultané avec la précédente (même phase). Si décoché, elle crée une nouvelle phase séquentielle.
+
+> **Clic droit** sur une trajectoire : suppression  
+> La numérotation des phases se recalcule automatiquement après chaque suppression.
+
+### 4.6 Animation
+
+Cliquer sur **▶ Animation** pour lancer la lecture séquentielle des phases.
+
+- Les joueurs se déplacent le long des trajectoires **Course**, **Croisé** et **Fixation**
+- Le ballon se déplace le long des trajectoires **Passe** et **Tir**
+- Un halo coloré indique le type de mouvement en cours
+- **⏹ Arrêter** remet tous les éléments à leur position initiale
+
+### 4.7 Sauvegarder un exercice
+
+1. Renseigner le **Nom** et la **Catégorie** de l'exercice (section "Exercice")
+2. Cliquer sur **Enregistrer** — l'exercice est enregistré dans la bibliothèque locale
+
+> Les exercices ne sont jamais sauvegardés automatiquement — seul le bouton "Enregistrer" déclenche la sauvegarde.
+
+### 4.8 Importer / Exporter
+
+- **Export JSON** : télécharge l'exercice courant sous forme de fichier `.json`
+- **Choisir un fichier** (import) : charge un fichier `.json` exporté précédemment
+
+---
+
+## 5. Tableau Temps mort
+
+Conçu pour une utilisation rapide pendant les 60 secondes d'un temps mort.
+
+### 5.1 Interface
+
+Le terrain occupe **tout l'écran** (vue du dessus, proportions 40m × 20m).  
+Une barre de contrôle flottante est fixée en bas de l'écran.
+
+### 5.2 Formations automatiques
+
+Sélectionner une formation dans les deux menus déroulants puis cliquer **⟳ Formation auto**.
+
+**Équipe A (attaque, rouge) :**
+
+| Formation | Description |
+|---|---|
+| 3-3 | 3 arrières + 2 ailiers + 1 pivot + gardien |
+| 2-4 | 2 arrières + 4 avants + gardien |
+| 2-5 | 2 arrières + 5 avants (sans gardien) |
+| 1-6 | 1 meneur + 6 avants (sans gardien) |
+
+**Équipe B (défense, bleu) :**
+
+| Formation | Description |
+|---|---|
+| 6-0 | 6 défenseurs alignés sur la ligne des 9m |
+| 5-1 | 5 défenseurs + 1 avancé |
+| 4-2 | 4 défenseurs + 2 avancés |
+| 3-3 | 3 défenseurs profonds + 3 avancés |
+
+> Les joueurs sont positionnés aux emplacements réglementaires de chaque système.  
+> Changer le menu déroulant repositionne immédiatement l'équipe concernée sans toucher à l'autre.
+
+### 5.3 Déplacer les joueurs
+
+**Appuyer-glisser** directement sur un joueur — aucun mode à activer.  
+Les joueurs sont larges pour un confort tactile sur tablette.
+
+### 5.4 Dessiner des flèches
+
+1. Cliquer **✏️ Stylo** pour activer le mode dessin (le bouton s'illumine)
+2. Tracer librement sur le terrain — une flèche colorée se forme
+   - Rouge pour l'équipe A, Bleu pour l'équipe B
+3. Cliquer à nouveau sur **✏️ Stylo** pour revenir au mode déplacement
+
+> **Tap sur une flèche** (hors mode stylo) : supprime cette flèche  
+> **✕ Effacer flèches** : supprime toutes les flèches  
+> **↺ Réinitialiser** : remet joueurs et flèches à zéro  
+> **← Accueil** : retour au menu principal
+
+---
+
+## 6. Page d'explication & Fiche document
+
+### 6.1 Ouvrir
+
+Depuis le Board Tactique, cliquer sur **📋 Explication & Points d'attention**.  
+La page s'ouvre dans un nouvel onglet avec les snapshots de chaque phase et les descriptions générées automatiquement.
+
+### 6.2 Vue Éditeur
+
+Chaque phase dispose de :
+- Un snapshot du terrain à cet instant
+- Une description auto-générée (postes détectés, actions identifiées)
+- Un champ **Points d'attention** éditable librement
+
+La section **Informations pour la fiche document** (repliable) permet de renseigner :
+
+| Champ | Description |
+|---|---|
+| Objectif | But pédagogique de l'exercice |
+| Mise en place | Organisation du terrain, nombre de groupes |
+| Consignes réglementaires | Règles spécifiques à respecter |
+| Conseils coach | Points d'attention pour l'entraîneur |
+| Durée | En minutes |
+| Nombre de joueurs | Total |
+| Nombre de gardiens | Optionnel |
+| Niveau | Tag de niveau (Débutant / Intermédiaire / Avancé / Elite) |
+
+### 6.3 Vue Document (fiche imprimable)
+
+Cliquer sur **Vue Document** pour basculer vers la fiche au format A4, structurée comme une fiche HandXPrience :
+
+- Bandeau coloré par catégorie avec titre et badge niveau
+- Rangée de snapshots par phase
+- Colonne gauche : objectif, mise en place, consignes (auto-générées)
+- Colonne droite : réglementations, conseils
+- Pied de page sombre : durée, joueurs, gardiens
+
+**Imprimer / Exporter PDF :** `Ctrl+P` ou bouton **🖨 Imprimer** → "Enregistrer en PDF" dans la boîte de dialogue du navigateur.
+
+> **Sauvegarder** depuis la page d'explication : enregistre les annotations dans la bibliothèque associées à l'exercice.
+
+---
+
+## 7. Bibliothèque d'exercices
+
+Cliquer sur **Bibliothèque** dans le Board Tactique.
+
+- **Filtrer** par catégorie via le menu déroulant
+- **Charger** : recharge l'exercice complet sur le terrain
+- **Supprimer** : efface définitivement l'exercice
+- Les exercices sont stockés sous forme de fichiers JSON dans `web-board/bibli/`
+
+---
+
+## 8. Accès tablette (Android)
+
+1. Le PC et la tablette doivent être sur le même réseau Wi-Fi
+2. Lancer le serveur sur le PC — l'URL réseau s'affiche dans le terminal (ex: `http://192.168.1.125:3000`)
+3. Sur la tablette : ouvrir Chrome et naviguer vers cette URL
+4. Menu Chrome (⋮) → **"Ajouter à l'écran d'accueil"** pour installer comme application PWA
+
+> Le module **Temps mort** est particulièrement adapté à la tablette : plein écran, grandes zones tactiles, aucune navigation nécessaire pendant le match.
+
+---
+
+## 9. Architecture technique
+
+| Composant | Technologie | Rôle |
+|---|---|---|
+| Interface | HTML5 + CSS3 + JS Vanilla | Rendu, interactions |
+| Dessin | Canvas API (2D) | Terrain, joueurs, trajectoires, animation |
+| Interactions tactiles | Pointer Events API | Souris + tactile unifiés |
+| Serveur local | Node.js (sans framework) | Fichiers statiques + API REST exercices |
+| Stockage | Fichiers JSON dans `bibli/` | Persistance des exercices |
+| PWA | `manifest.json` | Installation sur tablette, mode paysage forcé |
+| Sécurité | CSP, X-Frame-Options, path traversal, body limit | Protection du serveur local |
+
+### Fichiers principaux
+
+| Fichier | Rôle |
+|---|---|
+| `index.html` | Menu d'accueil |
+| `board.html` | Interface du board tactique |
+| `app.js` | Logique complète du board (dessin, animation, save) |
+| `styles.css` | Styles du board |
+| `timeout.html` | Tableau tactique temps mort |
+| `timeout.js` | Logique du temps mort (terrain, formations, drag, flèches) |
+| `timeout.css` | Styles du temps mort |
+| `explanation.html` | Page d'explication et fiche document |
+| `explanation.css` | Styles de la fiche (A4 + print) |
+| `server.js` | Serveur Node.js local sécurisé |
+| `manifest.json` | PWA (installation tablette, orientation paysage) |
+| `Lancer-Board.sh` | Script de lancement Linux |
+| `Handball-Board.desktop` | Raccourci bureau Linux |
+| `bibli/` | Dossier des exercices sauvegardés (non versionné) |
