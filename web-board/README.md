@@ -1,47 +1,73 @@
-# Handball Tactical Board
+# Handball Engine
 
-Application HTML5 locale pour créer des exercices sur un terrain de handball.
+Plateforme d'entraînement et d'analyse tactique pour le handball, conçue pour fonctionner sur tablette ou Chromebook en condition terrain.
 
-## Utilisation
+## Démarrage
 
-1. Ouvre `web-board/index.html` directement dans ton navigateur.
-2. Choisis un asset dans la palette.
-3. Clique sur le terrain pour ajouter un joueur, un équipement ou un point.
-4. Déplace un élément en le glissant.
-5. Sauvegarde localement avec le bouton "Sauvegarder local".
-6. Exporter en JSON pour partager ou archiver.
-7. Importer un fichier JSON existant avec le champ de fichier.
+```bash
+node server.js
+```
 
-## Équipements disponibles
+Le serveur démarre sur `http://localhost:3000` et ouvre automatiquement le navigateur.
 
-- Joueur
-- Gardien
-- Passe
-- Cible
-- Haltère
-- Swiss ball
-- Cerceau
-- Échelle
-- Mannequin
-- Mur
-- Plot
+## Pages
+
+| Page | URL | Description |
+|---|---|---|
+| Accueil | `/` | Menu principal |
+| Board Tactique | `/pages/board.html` | Création et animation d'exercices |
+| Temps Mort | `/pages/timeout.html` | Instructions tactiques rapides pendant le match |
+| Explication | `/pages/explanation.html` | Fiche pédagogique d'un exercice (vue éditeur + vue document imprimable) |
+
+## Board Tactique
+
+- Palette d'assets : joueurs, gardien, équipements (cônes, plots, mannequins, haies, haltères, cerceaux, échelles…)
+- Vues : terrain complet, demi-terrain, perspective
+- Modes de tracé : course, tir, passe, croisé, fixation
+- Animation des trajectoires
+- Liaison de trajectoires (option "Lié à la trajectoire précédente")
+- Sauvegarde locale (bibliothèque JSON via le serveur)
+- Export / import JSON
+- Fiche d'exercice avec vue document imprimable (A4)
+
+## Temps Mort
+
+- Terrain plein écran
+- Formations attaque et défense configurables (3-3, 5-1, 6-0…)
+- Positionnement automatique des joueurs
+- Mode stylo pour annoter en direct
+- Effacement des flèches en un clic
+
+## Architecture
+
+```
+web-board/
+├── index.html          # Page d'accueil
+├── server.js           # Serveur HTTP local (port 3000)
+├── pages/
+│   ├── board.html
+│   ├── timeout.html
+│   └── explanation.html
+├── src/
+│   ├── css/
+│   │   ├── styles.css       # Board tactique
+│   │   ├── timeout.css      # Temps mort
+│   │   └── explanation.css  # Fiche exercice
+│   └── js/
+│       ├── app.js           # Logique du board
+│       └── timeout.js       # Logique du temps mort
+├── assets/             # SVG joueurs et icônes
+└── data/bibli/         # Exercices sauvegardés (JSON)
+```
+
+## Design
+
+**Data Sport × Terrain Brut** — noir charbon, jaune terrain (`#f5c400`), vert data (`#00e676`).  
+Typographies : **Bebas Neue** (titres), **Barlow Condensed** (boutons/labels), **DM Mono** (données/code).  
+Zéro glassmorphism — surfaces opaques, bordures fines solides, rail coloré vertical comme signature visuelle.
 
 ## Sécurité
 
-- Tout fonctionne localement dans le navigateur.
-- Aucune donnée n’est envoyée à un serveur.
-- Les fichiers JSON peuvent être importés/exportés sans connexion.
-
-## Extensions possibles
-
-- ajouter des trajectoires de passe et de déplacement
-- ajouter un mode vidéo ou chronomètre
-- intégrer l’analyse de vidéos via un second écran
-- transformer en application desktop sécurisée avec Tauri
-
-## Nouvelles fonctionnalités
-
-- vue terrain complet, demi-terrain, perspective
-- tracés 6m / 9m / 7m / 4m / ligne remplaçants
-- mode course et mode tir
-- lecture d’animation simple sur la dernière trajectoire
+- Tout fonctionne localement, aucune donnée envoyée à l'extérieur.
+- Content Security Policy configurée dans `server.js`.
+- Accès réseau local uniquement (LAN).

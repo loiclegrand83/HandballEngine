@@ -5,11 +5,11 @@ const os = require('os');
 const { exec } = require('child_process');
 
 const PORT = 3000;
-const BIBLI_DIR = path.join(__dirname, 'bibli');
+const BIBLI_DIR = path.join(__dirname, 'data', 'bibli');
 const MAX_BODY_BYTES = 1 * 1024 * 1024; // 1 Mo
 
 if (!fs.existsSync(BIBLI_DIR)) {
-  fs.mkdirSync(BIBLI_DIR);
+  fs.mkdirSync(BIBLI_DIR, { recursive: true });
 }
 
 const MIME_TYPES = {
@@ -26,7 +26,7 @@ const SECURITY_HEADERS = {
   'X-Content-Type-Options': 'nosniff',
   'X-Frame-Options':        'DENY',
   'Referrer-Policy':        'no-referrer',
-  'Content-Security-Policy': "default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; script-src 'self' 'unsafe-inline'",
+  'Content-Security-Policy': "default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; script-src 'self' 'unsafe-inline'",
 };
 
 function setSecurityHeaders(res) {

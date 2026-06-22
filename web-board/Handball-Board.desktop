@@ -1,8 +1,0 @@
-[Desktop Entry]
-Version=1.0
-Name=Handball Tactical Board
-Comment=Lancer le tableau tactique de Handball
-Exec=bash -c 'cd "$(dirname "%k")" && bash Lancer-Board.sh'
-Terminal=false
-Type=Application
-Categories=Sports;Utility;

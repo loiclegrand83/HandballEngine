@@ -494,7 +494,7 @@ document.getElementById('btnReset').addEventListener('click', () => {
 });
 
 document.getElementById('btnHome').addEventListener('click', () => {
-  window.location.href = 'index.html';
+  window.location.href = '../index.html';
 });
 
 document.getElementById('formationA').addEventListener('change', e => {

@@ -4,14 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Handball Tactical Board</title>
-  <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#07111f" />
+  <link rel="manifest" href="../manifest.json" />
+  <meta name="theme-color" content="#080b0f" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="Handball Board" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="../src/css/styles.css" />
 </head>
 <body>
   <div class="app-shell">
@@ -23,7 +23,7 @@
         <button id="openLibrary" title="Ouvrir la bibliothèque">Bibliothèque</button>
         <button id="exportJson" title="Exporter JSON">Export JSON</button>
       </div>
-      <button id="openExplanation" title="Ouvrir la page explication" style="width:100%;margin-bottom:6px;padding:9px 13px;background:linear-gradient(135deg,rgba(123,92,240,0.18),rgba(79,156,249,0.12));border:1px solid rgba(123,92,240,0.4);border-radius:10px;color:#b39dfd;font:600 0.83rem Inter,system-ui;cursor:pointer;transition:all .2s;">📋 Explication &amp; Points d'attention</button>
+      <button id="openExplanation" title="Ouvrir la page explication" style="width:100%;margin-bottom:5px;padding:9px 12px;background:rgba(245,196,0,0.08);border:1px solid rgba(245,196,0,0.3);border-radius:4px;color:#f5c400;font:700 0.82rem 'Barlow Condensed',system-ui;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;text-align:left;">📋 Explication &amp; Points d'attention</button>
       <input id="importJson" type="file" accept="application/json" title="Importer JSON" />
       <hr />
       <section>
@@ -146,6 +146,6 @@
     </div>
   </div>
 
-  <script src="app.js"></script>
+  <script src="../src/js/app.js"></script>
 </body>
 </html>

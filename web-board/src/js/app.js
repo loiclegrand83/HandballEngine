@@ -36,7 +36,7 @@ const libraryGrid = document.getElementById('libraryGrid');
 const libraryFilter = document.getElementById('libraryFilter');
 
 const playerImage = new Image();
-playerImage.src = 'assets/player.png';
+playerImage.src = '../../assets/player.png';
 playerImage.onload = () => {
   if (typeof render === 'function') render();
 };
@@ -2487,7 +2487,7 @@ function openExplanationPage() {
     console.error(e);
     return;
   }
-  window.open('explanation.html', '_blank');
+  window.open('../pages/explanation.html', '_blank');
 }
 
 // ─── Init ─────────────────────────────────────────────────────────────────────

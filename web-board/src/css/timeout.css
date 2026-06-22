@@ -1,0 +1,114 @@
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  width: 100%; height: 100%;
+  overflow: hidden;
+  background: #080b0f;
+  font-family: 'Barlow', system-ui, sans-serif;
+  color: #f0ece0;
+  touch-action: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+#courtCanvas {
+  display: block;
+  position: absolute;
+  top: 0; left: 0;
+}
+
+/* ── Barre flottante ─────────────────────────────── */
+#controlBar {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 16px;
+  background: #0d1015;
+  border-top: 1px solid #1e2228;
+  /* Rail jaune en haut de la barre */
+  box-shadow: 0 -3px 0 0 rgba(245,196,0,0.6), 0 -1px 0 0 #1e2228;
+  z-index: 100;
+  overflow-x: auto;
+}
+
+.bar-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.62rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #5a6070;
+  white-space: nowrap;
+}
+
+.bar-select {
+  background: #111419;
+  border: 1px solid #1e2228;
+  border-radius: 4px;
+  color: #f0ece0;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  padding: 6px 10px;
+  cursor: pointer;
+  min-width: 90px;
+  transition: border-color 0.15s;
+}
+.bar-select:focus {
+  outline: none;
+  border-color: rgba(245,196,0,0.4);
+}
+
+.bar-sep {
+  width: 1px; height: 36px;
+  background: #1e2228;
+  flex-shrink: 0;
+}
+
+.bar-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 16px;
+  height: 44px;
+  border: 1px solid #1e2228;
+  border-radius: 4px;
+  background: #111419;
+  color: #f0ece0;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+.bar-btn:hover { background: #181c22; }
+
+.bar-btn--auto        { border-color: rgba(245,196,0,0.3); color: #f5c400; }
+.bar-btn--auto:hover  { background: rgba(245,196,0,0.08); border-color: rgba(245,196,0,0.6); }
+
+.bar-btn--pen         { border-color: rgba(0,230,118,0.3); color: #00e676; }
+.bar-btn--pen.active  {
+  background: rgba(0,230,118,0.1);
+  border-color: rgba(0,230,118,0.7);
+}
+
+.bar-btn--clear       { border-color: rgba(255,59,48,0.3); color: #ff6b6b; }
+.bar-btn--clear:hover { background: rgba(255,59,48,0.08); }
+
+.bar-btn--reset       { border-color: #1e2228; }
+
+.bar-btn--home {
+  margin-left: auto;
+  border-color: #1e2228;
+  color: #5a6070;
+}
+.bar-btn--home:hover { color: #f0ece0; border-color: rgba(240,236,224,0.2); }
