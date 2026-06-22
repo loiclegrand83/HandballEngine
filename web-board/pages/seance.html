@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Séance — Handball Engine</title>
+  <link rel="manifest" href="../manifest.json" />
+  <meta name="theme-color" content="#080b0f" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="../src/css/seance.css" />
+</head>
+<body>
+
+  <!-- ══════════════════════════════════════════════════════════
+       TOOLBAR
+  ══════════════════════════════════════════════════════════════ -->
+  <header class="toolbar">
+    <span class="toolbar-brand">Handball Engine</span>
+    <div class="toolbar-sep"></div>
+
+    <button class="btn btn--home" id="btnHome">← Accueil</button>
+    <button class="btn" id="btnLibrary">Bibliothèque</button>
+    <button class="btn" id="btnNewSeance">Nouvelle séance</button>
+
+    <div class="toolbar-spacer"></div>
+
+    <button class="btn btn--doc"     id="btnDocView">📄 Vue document</button>
+    <button class="btn btn--primary" id="btnSave">💾 Enregistrer</button>
+    <button class="btn btn--doc"     id="btnPrint" style="display:none;">🖨 Imprimer / PDF</button>
+    <button class="btn"              id="btnBackEdit" style="display:none;">← Retour édition</button>
+  </header>
+
+  <!-- ══════════════════════════════════════════════════════════
+       VUE ÉDITEUR
+  ══════════════════════════════════════════════════════════════ -->
+  <div id="editorView">
+
+    <!-- Méta séance -->
+    <div class="seance-meta">
+      <div class="meta-grid">
+        <div class="meta-group">
+          <label class="field-label" for="fTitre">Titre de la séance</label>
+          <input class="field-input" id="fTitre" type="text" placeholder="Ex : Défense zone — bloc 2" />
+        </div>
+        <div class="meta-group">
+          <label class="field-label" for="fTheme">Thématique</label>
+          <input class="field-input" id="fTheme" type="text" placeholder="Ex : Repli défensif, Montée de balle…" />
+        </div>
+        <div class="meta-group">
+          <label class="field-label" for="fDate">Date</label>
+          <input class="field-input" id="fDate" type="date" />
+        </div>
+        <div class="meta-group">
+          <label class="field-label" for="fDuree">Durée totale (min)</label>
+          <input class="field-input" id="fDuree" type="number" min="10" max="180" placeholder="75" />
+        </div>
+      </div>
+      <div class="meta-group" style="margin-bottom:14px;">
+        <label class="field-label" for="fCoach">Coach</label>
+        <input class="field-input" id="fCoach" type="text" placeholder="Nom du coach" style="max-width:280px;" />
+      </div>
+      <div class="meta-group" style="margin-bottom:14px;">
+        <label class="field-label" for="fObjectif">Objectif de séance</label>
+        <textarea class="field-textarea" id="fObjectif" rows="2"
+          placeholder="Améliorer le repli défensif en transition, travailler la communication…"></textarea>
+      </div>
+      <div class="material-summary">
+        <span class="material-summary-label">⬡ Matériel</span>
+        <span class="material-summary-text" id="materialSummary">
+          <span class="material-summary-empty">Ajoutez des exercices pour voir le matériel consolidé</span>
+        </span>
+      </div>
+    </div>
+
+    <!-- Liste des blocs -->
+    <div class="section-header">
+      <span class="section-title">Déroulé<span class="section-subtitle" id="blocCount"></span></span>
+    </div>
+
+    <div class="bloc-list" id="blocList"></div>
+
+    <!-- Ajouter un bloc -->
+    <div class="add-bloc-bar">
+      <button class="btn" onclick="addBloc('echauffement')">+ Échauffement</button>
+      <button class="btn" onclick="addBloc('exercice')">+ Exercice</button>
+      <button class="btn" onclick="addBloc('opposition')">+ Opposition libre</button>
+      <button class="btn" onclick="addBloc('retour_calme')">+ Retour au calme</button>
+    </div>
+
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       VUE BIBLIOTHÈQUE
+  ══════════════════════════════════════════════════════════════ -->
+  <div id="libraryView" style="display:none;">
+    <div class="section-header" style="margin-bottom:0;">
+      <span class="section-title">Séances sauvegardées</span>
+    </div>
+    <div class="lib-grid" id="libGrid">
+      <div class="lib-empty">Chargement…</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       VUE DOCUMENT
+  ══════════════════════════════════════════════════════════════ -->
+  <div id="documentView" style="display:none;">
+    <div class="doc-toolbar">
+      <div class="toolbar-spacer"></div>
+      <span class="doc-toolbar-title">Feuille de route — Séance</span>
+      <div class="toolbar-spacer"></div>
+    </div>
+    <div class="doc-page" id="docPage"></div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       MODALE SÉLECTION EXERCICE
+  ══════════════════════════════════════════════════════════════ -->
+  <div class="modal-overlay hidden" id="modalOverlay">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h2>Choisir un exercice</h2>
+        <button class="modal-close" id="modalClose">✕</button>
+      </div>
+      <div class="modal-filters">
+        <input class="field-input" id="modalSearch" type="text" placeholder="Rechercher…" />
+        <select class="field-select" id="modalCat">
+          <option value="">Toutes catégories</option>
+          <option value="echauffement">Échauffement</option>
+          <option value="offensif">Offensif</option>
+          <option value="defensif">Défensif</option>
+          <option value="montee_balle">Montée de balle</option>
+          <option value="physique">Physique</option>
+        </select>
+      </div>
+      <div class="modal-body">
+        <div class="ex-grid" id="exGrid">
+          <div class="ex-empty">Chargement…</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script src="../src/js/seance.js"></script>
+</body>
+</html>

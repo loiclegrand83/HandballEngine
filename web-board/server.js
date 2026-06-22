@@ -5,12 +5,12 @@ const os = require('os');
 const { exec } = require('child_process');
 
 const PORT = 3000;
-const BIBLI_DIR = path.join(__dirname, 'data', 'bibli');
+const BIBLI_DIR   = path.join(__dirname, 'data', 'bibli');
+const SEANCES_DIR = path.join(__dirname, 'data', 'seances');
 const MAX_BODY_BYTES = 1 * 1024 * 1024; // 1 Mo
 
-if (!fs.existsSync(BIBLI_DIR)) {
-  fs.mkdirSync(BIBLI_DIR, { recursive: true });
-}
+if (!fs.existsSync(BIBLI_DIR))   fs.mkdirSync(BIBLI_DIR,   { recursive: true });
+if (!fs.existsSync(SEANCES_DIR)) fs.mkdirSync(SEANCES_DIR, { recursive: true });
 
 const MIME_TYPES = {
   '.html': 'text/html',
@@ -64,6 +64,85 @@ const server = http.createServer((req, res) => {
     console.log('Arrêt du serveur demandé par le navigateur.');
     setTimeout(() => process.exit(0), 200);
     return;
+  }
+
+  // --- API séances ---
+  if (req.url.startsWith('/api/seances')) {
+
+    if (req.method === 'GET') {
+      fs.readdir(SEANCES_DIR, (err, files) => {
+        if (err) {
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          return res.end(JSON.stringify({ error: 'Erreur lecture dossier' }));
+        }
+        const seances = [];
+        for (const file of files.filter(f => f.endsWith('.json'))) {
+          try {
+            const content = fs.readFileSync(path.join(SEANCES_DIR, file), 'utf-8');
+            seances.push(JSON.parse(content));
+          } catch(e) {
+            console.error(`Erreur lecture ${file}`, e);
+          }
+        }
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(seances));
+      });
+      return;
+    }
+
+    if (req.method === 'POST') {
+      let body = '';
+      let bodySize = 0;
+      req.on('data', chunk => {
+        bodySize += chunk.length;
+        if (bodySize > MAX_BODY_BYTES) {
+          res.writeHead(413, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Payload trop volumineux' }));
+          req.destroy();
+          return;
+        }
+        body += chunk.toString();
+      });
+      req.on('end', () => {
+        if (res.writableEnded) return;
+        try {
+          const data = JSON.parse(body);
+          if (!isValidId(data.id)) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            return res.end(JSON.stringify({ error: 'ID invalide ou manquant' }));
+          }
+          const filePath = path.join(SEANCES_DIR, `${data.id}.json`);
+          if (!filePath.startsWith(SEANCES_DIR + path.sep)) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            return res.end(JSON.stringify({ error: 'Chemin interdit' }));
+          }
+          fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ success: true }));
+        } catch(e) {
+          res.writeHead(500, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ error: 'Erreur serveur' }));
+        }
+      });
+      return;
+    }
+
+    if (req.method === 'DELETE') {
+      const id = req.url.split('/').pop();
+      if (!isValidId(id)) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ error: 'ID invalide ou manquant' }));
+      }
+      const filePath = path.join(SEANCES_DIR, `${id}.json`);
+      if (!filePath.startsWith(SEANCES_DIR + path.sep)) {
+        res.writeHead(400, { 'Content-Type': 'application/json' });
+        return res.end(JSON.stringify({ error: 'Chemin interdit' }));
+      }
+      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ success: true }));
+      return;
+    }
   }
 
   // --- API exercices ---
