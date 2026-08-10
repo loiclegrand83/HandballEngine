@@ -407,10 +407,13 @@ function _distToSegment(px, py, a, b) {
 }
 
 canvas.addEventListener('pointerdown', e => {
+  // Ignore les contacts tactiles parasites (paume) pendant un tracé au stylet
+  if (state.drawing && state.drawing.pointerId !== undefined && e.pointerId !== state.drawing.pointerId) return;
+
   const cx = e.offsetX, cy = e.offsetY;
 
   if (state.penMode) {
-    state.drawing = { points: [toNorm(cx, cy)], team: state.penTeam };
+    state.drawing = { points: [toNorm(cx, cy)], team: state.penTeam, pointerId: e.pointerId };
     // 🔒 F01 : try/catch — DOMException sur certains navigateurs mobiles
     try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
     return;
@@ -441,6 +444,7 @@ canvas.addEventListener('pointermove', e => {
     return;
   }
   if (state.drawing) {
+    if (state.drawing.pointerId !== undefined && e.pointerId !== state.drawing.pointerId) return;
     const norm = toNorm(e.offsetX, e.offsetY);
     const last = state.drawing.points[state.drawing.points.length - 1];
     if (Math.hypot(norm.x - last.x, norm.y - last.y) > 0.01) {
@@ -450,18 +454,26 @@ canvas.addEventListener('pointermove', e => {
   }
 });
 
-canvas.addEventListener('pointerup', () => {
-  if (state.drag) { state.drag = null; return; }
-  if (state.drawing) {
-    if (state.drawing.points.length > 2) {
-      state.arrows.push({
-        points : simplifyArrow(state.drawing.points),
-        team   : state.drawing.team,
-      });
-    }
-    state.drawing = null;
-    draw();
+function _finishDrawing(e) {
+  if (state.drawing.pointerId !== undefined && e.pointerId !== state.drawing.pointerId) return;
+  if (state.drawing.points.length > 2) {
+    state.arrows.push({
+      points : simplifyArrow(state.drawing.points),
+      team   : state.drawing.team,
+    });
   }
+  state.drawing = null;
+  draw();
+}
+
+canvas.addEventListener('pointerup', e => {
+  if (state.drag) { state.drag = null; return; }
+  if (state.drawing) _finishDrawing(e);
+});
+
+canvas.addEventListener('pointercancel', e => {
+  if (state.drag) { state.drag = null; return; }
+  if (state.drawing) _finishDrawing(e);
 });
 
 function simplifyArrow(points) {
@@ -495,6 +507,19 @@ document.getElementById('btnReset').addEventListener('click', () => {
 
 document.getElementById('btnHome').addEventListener('click', () => {
   window.location.href = '../index.html';
+});
+
+document.getElementById('btnFullscreen').addEventListener('click', () => {
+  if (document.fullscreenElement) {
+    document.exitFullscreen();
+  } else {
+    document.documentElement.requestFullscreen().catch(() => {});
+  }
+});
+
+document.addEventListener('fullscreenchange', () => {
+  document.getElementById('btnFullscreen').classList.toggle('active', !!document.fullscreenElement);
+  resize();
 });
 
 document.getElementById('formationA').addEventListener('change', e => {

@@ -159,6 +159,8 @@ Conçu pour une utilisation rapide pendant les 60 secondes d'un temps mort.
 Le terrain occupe **tout l'écran** (vue du dessus, proportions 40m × 20m).  
 Une barre de contrôle flottante est fixée en bas de l'écran.
 
+Sur un appareil tactile avec navigateur (ex. Chromebook), le bouton **⛶ Plein écran** masque l'interface du navigateur (barre d'adresse, onglets) pour un usage terrain sans distraction. Cliquer à nouveau (ou `Échap`) pour revenir en mode fenêtré.
+
 ### 5.2 Formations automatiques
 
 Sélectionner une formation dans les deux menus déroulants puis cliquer **⟳ Formation auto**.
@@ -200,6 +202,14 @@ Les joueurs sont larges pour un confort tactile sur tablette.
 > **✕ Effacer flèches** : supprime toutes les flèches  
 > **↺ Réinitialiser** : remet joueurs et flèches à zéro  
 > **← Accueil** : retour au menu principal
+
+### 5.5 Utilisation au stylet (tablette/Chromebook tactile)
+
+Le mode Stylo fonctionne aussi bien au doigt qu'au stylet — le stylet apporte simplement plus de précision pour le tracé.
+
+- Pendant un tracé en mode Stylo, tout contact tactile secondaire (ex. paume posée sur l'écran) est **ignoré automatiquement** : seul le pointeur qui a commencé le tracé est pris en compte jusqu'à son relâchement.
+- Si le tracé est interrompu par le système (perte de contact, ex. sortie de la zone tactile), la flèche en cours est proprement finalisée plutôt que perdue ou fantôme.
+- Le déplacement des joueurs (glisser sans mode Stylo actif) reste utilisable au doigt à tout moment, y compris pendant que l'autre main tient le stylet.
 
 ---
 

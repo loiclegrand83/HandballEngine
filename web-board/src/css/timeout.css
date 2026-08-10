@@ -106,6 +106,10 @@ html, body {
 
 .bar-btn--reset       { border-color: #1e2228; }
 
+.bar-btn--fullscreen        { border-color: rgba(64,196,255,0.3); color: #40c4ff; }
+.bar-btn--fullscreen:hover  { background: rgba(64,196,255,0.08); border-color: rgba(64,196,255,0.6); }
+.bar-btn--fullscreen.active { background: rgba(64,196,255,0.1); border-color: rgba(64,196,255,0.7); }
+
 .bar-btn--home {
   margin-left: auto;
   border-color: #1e2228;
