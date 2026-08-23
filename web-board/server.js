@@ -157,7 +157,8 @@ const server = http.createServer((req, res) => {
   if (handleCrudRoute(req, res, '/api/planning', PLANNING_DIR)) return;
 
   // --- Serveur statique ---
-  const safePath = path.normalize(decodeURIComponent(req.url)).replace(/^(\.\.[/\\])+/, '');
+  const urlPath = req.url.split('?')[0];
+  const safePath = path.normalize(decodeURIComponent(urlPath)).replace(/^(\.\.[/\\])+/, '');
   let filePath = path.join(__dirname, safePath === '/' ? 'index.html' : safePath);
 
   // Bloquer toute sortie hors du répertoire du projet
