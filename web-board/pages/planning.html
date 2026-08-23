@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Planning — Handball Engine</title>
+  <link rel="manifest" href="../manifest.json" />
+  <meta name="theme-color" content="#080b0f" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="../src/css/planning.css" />
+</head>
+<body>
+
+  <!-- ══════════════════════════════════════════════════════════
+       TOOLBAR
+  ══════════════════════════════════════════════════════════════ -->
+  <header class="toolbar">
+    <span class="toolbar-brand">Handball Engine</span>
+    <div class="toolbar-sep"></div>
+
+    <button class="btn btn--home" id="btnHome">← Accueil</button>
+
+    <div class="toolbar-spacer"></div>
+
+    <button class="btn" id="btnPrevMonth">‹</button>
+    <span class="month-label" id="monthLabel"></span>
+    <button class="btn" id="btnNextMonth">›</button>
+    <button class="btn" id="btnToday">Aujourd'hui</button>
+
+    <div class="toolbar-spacer"></div>
+
+    <button class="btn btn--primary" id="btnAddEntrainement">+ Entraînement</button>
+    <button class="btn btn--primary" id="btnAddMatch">+ Match</button>
+  </header>
+
+  <!-- ══════════════════════════════════════════════════════════
+       CALENDRIER
+  ══════════════════════════════════════════════════════════════ -->
+  <div class="calendar-wrap">
+    <div class="weekday-row">
+      <span>Lun</span><span>Mar</span><span>Mer</span><span>Jeu</span><span>Ven</span><span>Sam</span><span>Dim</span>
+    </div>
+    <div class="calendar-grid" id="calendarGrid"></div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════
+       MODALE ÉVÉNEMENT (entraînement ou match)
+  ══════════════════════════════════════════════════════════════ -->
+  <div class="modal-overlay hidden" id="modalOverlay">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h2 id="modalTitle">Nouvel événement</h2>
+        <button class="modal-close" id="modalClose">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="field-group">
+          <label class="field-label" for="fDate">Date</label>
+          <input class="field-input" id="fDate" type="date" />
+        </div>
+
+        <!-- Champs Entraînement -->
+        <div id="fieldsEntrainement">
+          <div class="field-group">
+            <label class="field-label" for="fTitre">Titre</label>
+            <input class="field-input" id="fTitre" type="text" placeholder="Ex : Défense zone — bloc 2" />
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="fHeure">Heure</label>
+            <input class="field-input" id="fHeure" type="time" />
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="fSeanceLink">Séance liée (optionnel)</label>
+            <select class="field-select" id="fSeanceLink">
+              <option value="">— Aucune —</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="fNotesEnt">Notes</label>
+            <textarea class="field-textarea" id="fNotesEnt" rows="2" placeholder="Remarques, présence, absents…"></textarea>
+          </div>
+        </div>
+
+        <!-- Champs Match -->
+        <div id="fieldsMatch">
+          <div class="field-group">
+            <label class="field-label" for="fAdversaire">Adversaire</label>
+            <input class="field-input" id="fAdversaire" type="text" placeholder="Nom de l'équipe adverse" />
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="fHeureMatch">Heure</label>
+            <input class="field-input" id="fHeureMatch" type="time" />
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="fLieu">Lieu</label>
+            <select class="field-select" id="fLieu">
+              <option value="domicile">Domicile</option>
+              <option value="exterieur">Extérieur</option>
+            </select>
+          </div>
+          <div class="field-group score-row">
+            <div>
+              <label class="field-label" for="fScoreNous">Score — Nous</label>
+              <input class="field-input field-input--score" id="fScoreNous" type="number" min="0" />
+            </div>
+            <div>
+              <label class="field-label" for="fScoreEux">Score — Eux</label>
+              <input class="field-input field-input--score" id="fScoreEux" type="number" min="0" />
+            </div>
+          </div>
+          <div class="field-group">
+            <label class="field-label" for="fNotesMatch">Notes</label>
+            <textarea class="field-textarea" id="fNotesMatch" rows="2" placeholder="Résumé, points marquants…"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-foot">
+        <button class="btn btn--danger" id="btnDeleteEvent" style="display:none;">Supprimer</button>
+        <div class="toolbar-spacer"></div>
+        <button class="btn" id="btnCancelEvent">Annuler</button>
+        <button class="btn btn--primary" id="btnSaveEvent">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script src="../src/js/planning.js"></script>
+</body>
+</html>

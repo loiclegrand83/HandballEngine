@@ -2,3 +2,4 @@ node_modules/
 *.zip
 *.pdf
 web-board/bibli/
+web-board/data/

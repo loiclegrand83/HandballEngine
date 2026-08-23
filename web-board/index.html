@@ -159,9 +159,10 @@
       opacity: 1;
     }
 
-    .card--board   { --card-color: var(--yellow); }
-    .card--seance  { --card-color: #b97fff; }
-    .card--timeout { --card-color: var(--green); }
+    .card--board    { --card-color: var(--yellow); }
+    .card--seance   { --card-color: #b97fff; }
+    .card--planning { --card-color: #64b5f6; }
+    .card--timeout  { --card-color: var(--green); }
 
     .card-tag {
       font-family: 'DM Mono', monospace;
@@ -261,15 +262,22 @@
         <span class="card-cta">Ouvrir</span>
       </a>
 
+      <a class="card card--planning" href="pages/planning.html" rel="noopener noreferrer">
+        <span class="card-tag">03 — Calendrier</span>
+        <span class="card-title">Planning</span>
+        <span class="card-desc">Entraînements, matchs<br>et résultats de la saison.</span>
+        <span class="card-cta">Ouvrir</span>
+      </a>
+
       <a class="card card--timeout" href="pages/timeout.html" rel="noopener noreferrer">
-        <span class="card-tag">03 — Match</span>
+        <span class="card-tag">04 — Match</span>
         <span class="card-title">Temps Mort</span>
         <span class="card-desc">Instructions tactiques rapides<br>pendant le match.</span>
         <span class="card-cta">Ouvrir</span>
       </a>
     </div>
 
-    <p class="home-stamp">Handball Engine · v1.3.0</p>
+    <p class="home-stamp">Handball Engine · v1.5.0</p>
   </div>
 </body>
 </html>

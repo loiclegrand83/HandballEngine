@@ -11,21 +11,25 @@
 3. [Menu d'accueil](#3-menu-daccueil)
 4. [Board Tactique](#4-board-tactique)
 5. [Tableau Temps mort](#5-tableau-temps-mort)
-6. [Page d'explication & Fiche document](#6-page-dexplication--fiche-document)
-7. [Bibliothèque d'exercices](#7-bibliothèque-dexercices)
-8. [Accès tablette (Android)](#8-accès-tablette-android)
-9. [Architecture technique](#9-architecture-technique)
+6. [Séances](#6-séances)
+7. [Planning](#7-planning)
+8. [Page d'explication & Fiche document](#8-page-dexplication--fiche-document)
+9. [Bibliothèque d'exercices](#9-bibliothèque-dexercices)
+10. [Accès tablette (Android)](#10-accès-tablette-android)
+11. [Architecture technique](#11-architecture-technique)
 
 ---
 
 ## 1. Vue d'ensemble
 
-Handball Engine est un outil local (aucune connexion internet requise) conçu pour les entraîneurs de handball. Il regroupe trois modules :
+Handball Engine est un outil local (aucune connexion internet requise) conçu pour les entraîneurs de handball. Il regroupe cinq modules :
 
 | Module | Usage |
 |---|---|
 | **Board Tactique** | Créer et animer des exercices d'entraînement |
 | **Temps mort** | Donner des instructions tactiques rapides pendant un match |
+| **Séances** | Construire une feuille de route d'entraînement (blocs d'exercices) |
+| **Planning** | Calendrier des entraînements et des matchs, avec résultats |
 | **Page d'explication** | Générer une fiche pédagogique imprimable par exercice |
 
 ---
@@ -49,10 +53,12 @@ Le serveur démarre sur `http://localhost:3000` et ouvre le navigateur automatiq
 
 ## 3. Menu d'accueil
 
-Au démarrage, `http://localhost:3000` affiche deux cartes :
+Au démarrage, `http://localhost:3000` affiche les cartes des modules disponibles :
 
-- **Board Tactique** → ouvre `board.html`
-- **Temps mort** → ouvre `timeout.html`
+- **Board Tactique** → ouvre `pages/board.html`
+- **Séances** → ouvre `pages/seance.html`
+- **Planning** → ouvre `pages/planning.html`
+- **Temps mort** → ouvre `pages/timeout.html`
 
 ---
 
@@ -213,7 +219,55 @@ Le mode Stylo fonctionne aussi bien au doigt qu'au stylet — le stylet apporte 
 
 ---
 
-## 6. Page d'explication & Fiche document
+## 6. Séances
+
+Cliquer sur **Séances** depuis le menu d'accueil, ou **Bibliothèque** puis **Nouvelle séance** depuis le module lui-même.
+
+### 6.1 Informations générales
+
+En haut de l'éditeur : titre, thématique, date, durée totale, coach, objectif de séance. Le champ **Matériel** se remplit automatiquement à partir du matériel utilisé dans les exercices ajoutés.
+
+### 6.2 Construire le déroulé
+
+Utiliser les boutons **+ Échauffement**, **+ Exercice**, **+ Opposition libre**, **+ Retour au calme** pour ajouter des blocs, dans l'ordre voulu.
+
+Chaque bloc **Exercice** permet de choisir un exercice existant dans la bibliothèque du Board Tactique (recherche + filtre par catégorie) ; un aperçu du schéma s'affiche automatiquement. Chaque bloc affiche sa durée, qui contribue à la durée totale de la séance.
+
+### 6.3 Enregistrer et consulter
+
+- **💾 Enregistrer** : sauvegarde la séance dans la bibliothèque des séances
+- **Bibliothèque** : liste des séances sauvegardées, chargement ou suppression
+- **📄 Vue document** : bascule vers une feuille de route imprimable au format A4, avec **🖨 Imprimer / PDF**
+
+> Les séances sont stockées sous forme de fichiers JSON dans `web-board/data/seances/` (non versionné).
+
+---
+
+## 7. Planning
+
+Cliquer sur **Planning** depuis le menu d'accueil. Le module affiche un calendrier mensuel regroupant les entraînements et les matchs de la saison.
+
+### 7.1 Navigation
+
+Les flèches **‹** / **›** changent de mois, **Aujourd'hui** revient au mois courant. Cliquer sur une case du calendrier ouvre directement le formulaire de création d'un événement à cette date.
+
+### 7.2 Ajouter un entraînement
+
+Bouton **+ Entraînement** : titre, heure, notes libres, et un lien optionnel vers une **séance** créée dans le module Séances — pratique pour retrouver rapidement la feuille de route du jour depuis le planning.
+
+### 7.3 Ajouter un match
+
+Bouton **+ Match** : adversaire, heure, domicile ou extérieur, score (une fois joué) et notes. Le calendrier affiche directement le score sur la case du jour, avec un liseré vert (victoire), rouge (défaite) ou neutre (match à venir / nul).
+
+### 7.4 Modifier ou supprimer
+
+Cliquer sur un événement existant (dans une case du calendrier) rouvre le formulaire pré-rempli, avec un bouton **Supprimer**.
+
+> Les événements sont stockés sous forme de fichiers JSON dans `web-board/data/planning/` (non versionné).
+
+---
+
+## 8. Page d'explication & Fiche document
 
 ### 6.1 Ouvrir
 
@@ -256,7 +310,7 @@ Cliquer sur **Vue Document** pour basculer vers la fiche au format A4, structur�
 
 ---
 
-## 7. Bibliothèque d'exercices
+## 9. Bibliothèque d'exercices
 
 Cliquer sur **Bibliothèque** dans le Board Tactique.
 
@@ -267,7 +321,7 @@ Cliquer sur **Bibliothèque** dans le Board Tactique.
 
 ---
 
-## 8. Accès tablette (Android)
+## 10. Accès tablette (Android)
 
 1. Le PC et la tablette doivent être sur le même réseau Wi-Fi
 2. Lancer le serveur sur le PC — l'URL réseau s'affiche dans le terminal (ex: `http://192.168.1.125:3000`)
@@ -278,15 +332,15 @@ Cliquer sur **Bibliothèque** dans le Board Tactique.
 
 ---
 
-## 9. Architecture technique
+## 11. Architecture technique
 
 | Composant | Technologie | Rôle |
 |---|---|---|
 | Interface | HTML5 + CSS3 + JS Vanilla | Rendu, interactions |
 | Dessin | Canvas API (2D) | Terrain, joueurs, trajectoires, animation |
 | Interactions tactiles | Pointer Events API | Souris + tactile unifiés |
-| Serveur local | Node.js (sans framework) | Fichiers statiques + API REST exercices |
-| Stockage | Fichiers JSON dans `bibli/` | Persistance des exercices |
+| Serveur local | Node.js (sans framework) | Fichiers statiques + API REST (exercices, séances, planning) |
+| Stockage | Fichiers JSON dans `data/bibli/`, `data/seances/`, `data/planning/` | Persistance des exercices, séances et événements du planning |
 | PWA | `manifest.json` | Installation sur tablette, mode paysage forcé |
 | Sécurité | CSP, X-Frame-Options, path traversal, body limit | Protection du serveur local |
 
@@ -295,16 +349,24 @@ Cliquer sur **Bibliothèque** dans le Board Tactique.
 | Fichier | Rôle |
 |---|---|
 | `index.html` | Menu d'accueil |
-| `board.html` | Interface du board tactique |
-| `app.js` | Logique complète du board (dessin, animation, save) |
-| `styles.css` | Styles du board |
-| `timeout.html` | Tableau tactique temps mort |
-| `timeout.js` | Logique du temps mort (terrain, formations, drag, flèches) |
-| `timeout.css` | Styles du temps mort |
-| `explanation.html` | Page d'explication et fiche document |
-| `explanation.css` | Styles de la fiche (A4 + print) |
+| `pages/board.html` | Interface du board tactique |
+| `src/js/app.js` | Logique complète du board (dessin, animation, save) |
+| `src/css/styles.css` | Styles du board |
+| `pages/seance.html` | Éditeur de séances (blocs, bibliothèque, vue document) |
+| `src/js/seance.js` | Logique des séances (blocs, matériel consolidé, fiche imprimable) |
+| `src/css/seance.css` | Styles des séances |
+| `pages/planning.html` | Calendrier des entraînements et matchs |
+| `src/js/planning.js` | Logique du planning (calendrier, événements, liaison séance) |
+| `src/css/planning.css` | Styles du planning |
+| `pages/timeout.html` | Tableau tactique temps mort |
+| `src/js/timeout.js` | Logique du temps mort (terrain, formations, drag, flèches) |
+| `src/css/timeout.css` | Styles du temps mort |
+| `pages/explanation.html` | Page d'explication et fiche document |
+| `src/css/explanation.css` | Styles de la fiche (A4 + print) |
 | `server.js` | Serveur Node.js local sécurisé |
 | `manifest.json` | PWA (installation tablette, orientation paysage) |
 | `Lancer-Board.sh` | Script de lancement Linux |
 | `Handball-Board.desktop` | Raccourci bureau Linux |
-| `bibli/` | Dossier des exercices sauvegardés (non versionné) |
+| `data/bibli/` | Dossier des exercices sauvegardés (non versionné) |
+| `data/seances/` | Dossier des séances sauvegardées (non versionné) |
+| `data/planning/` | Dossier des événements du planning (non versionné) |
