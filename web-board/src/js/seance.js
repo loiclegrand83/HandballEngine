@@ -624,22 +624,24 @@ function buildDocument() {
       emptyEl.textContent = 'Aucun exercice';
       body.appendChild(emptyEl);
     } else {
-      ateliers.forEach((atelier, aidx) => {
-        const atelierEl = document.createElement('div');
-        atelierEl.className = 'doc-bloc-atelier';
-        atelierEl.innerHTML = `
-          <div class="doc-bloc-schema">
+      const gridEl = document.createElement('div');
+      gridEl.className = 'doc-bloc-grid';
+      ateliers.forEach(atelier => {
+        const cellEl = document.createElement('div');
+        cellEl.className = 'doc-atelier-cell';
+        cellEl.innerHTML = `
+          <div class="doc-atelier-schema">
             ${atelier.snapshot
-              ? `<img src="${atelier.snapshot}" alt="schéma ${escapeHtml(atelier.nom)}" />`
+              ? `<img src="${atelier.snapshot}" alt="schéma ${escapeHtml(atelier.nom) || 'exercice'}" />`
               : `<div class="doc-bloc-schema-empty">Schéma<br>non disponible</div>`}
           </div>
-          <div class="doc-bloc-content" id="doc-bloc-content-${idx}-${aidx}">
-            <div class="doc-step-desc"><strong>${escapeHtml(atelier.nom) || '—'}</strong>${atelier.duree ? ` — ${atelier.duree} min` : ''}</div>
-            ${atelier.description ? `<div class="doc-step-desc">${escapeHtml(atelier.description)}</div>` : ''}
-          </div>
+          <div class="doc-atelier-name">${escapeHtml(atelier.nom) || '—'}${atelier.duree ? ` <span class="doc-atelier-dur">${atelier.duree} min</span>` : ''}</div>
+          ${atelier.description ? `<div class="doc-atelier-desc">${escapeHtml(atelier.description)}</div>` : ''}
+          ${atelier.materiel?.trim() ? `<div class="doc-atelier-materiel">⬡ ${escapeHtml(atelier.materiel)}</div>` : ''}
         `;
-        body.appendChild(atelierEl);
+        gridEl.appendChild(cellEl);
       });
+      body.appendChild(gridEl);
     }
 
     // Notes coach

@@ -580,7 +580,6 @@ body::before {
 /* ── Bloc exercice doc ──────────────────────────────────────────── */
 .doc-bloc {
   border-bottom: 2px solid #e0e4ef;
-  page-break-inside: avoid;
 }
 .doc-bloc:last-child { border-bottom: none; }
 
@@ -631,70 +630,63 @@ body::before {
   display: flex; flex-direction: column;
 }
 
-.doc-bloc-atelier {
+/* Grille compacte multi-ateliers : remplissage auto en ordre de Bloc,
+   cellule à template fixe (schéma + nom/durée + description + matériel). */
+.doc-bloc-grid {
   display: grid;
-  grid-template-columns: 280px 1fr;
-  border-bottom: 1px solid #eceef3;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  padding: 14px 18px;
 }
-.doc-bloc-atelier:last-child { border-bottom: none; }
 
-.doc-bloc-schema {
-  padding: 14px 16px;
-  background: #f5f7fa;
-  border-right: 1px solid #e0e4ef;
-  display: flex; align-items: center; justify-content: center;
+.doc-atelier-cell {
+  display: flex; flex-direction: column; gap: 6px;
+  border: 1px solid #e0e4ef; border-radius: 3px;
+  padding: 10px;
+  break-inside: avoid; /* saut de page CSS par cellule, pas par bloc */
 }
-.doc-bloc-schema img {
-  width: 100%; height: auto; max-height: 180px;
-  object-fit: contain; border-radius: 3px;
-  border: 1px solid #dde0ea;
+
+.doc-atelier-schema {
+  background: #f5f7fa;
+  border: 1px solid #e0e4ef; border-radius: 3px;
+  display: flex; align-items: center; justify-content: center;
+  min-height: 110px; overflow: hidden;
+}
+.doc-atelier-schema img {
+  width: 100%; height: auto; max-height: 110px;
+  object-fit: contain;
 }
 .doc-bloc-schema-empty {
-  width: 100%; height: 160px;
+  width: 100%; height: 110px;
   display: flex; align-items: center; justify-content: center;
   border: 1px dashed #c8d0dc; border-radius: 3px;
   font-family: 'DM Mono', monospace;
-  font-size: 0.65rem; color: #9aa5b4; letter-spacing: 0.08em;
+  font-size: 0.62rem; color: #9aa5b4; letter-spacing: 0.08em;
   text-transform: uppercase; text-align: center;
 }
 
-.doc-bloc-content {
-  padding: 14px 18px;
-  display: flex; flex-direction: column; gap: 12px;
+.doc-atelier-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.9rem; font-weight: 700; color: #1a1a2e;
+}
+.doc-atelier-dur {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.68rem; font-weight: 500; color: #6a7d9e;
+}
+.doc-atelier-desc {
+  font-size: 0.76rem; color: #3a4257; line-height: 1.45;
+}
+.doc-atelier-materiel {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.66rem; color: #8a6c00; letter-spacing: 0.02em;
 }
 
 /* Notes coach */
 .doc-bloc-notes-coach {
   font-size: 0.8rem; color: #1a1a2e; line-height: 1.6;
-  font-style: italic; padding-bottom: 10px;
+  font-style: italic; padding: 0 18px 10px;
   border-bottom: 1px solid #f0f2f8;
-}
-
-/* Étapes */
-.doc-step {
-  display: flex; flex-direction: column; gap: 5px;
-  padding-bottom: 10px; border-bottom: 1px solid #f0f2f8;
-}
-.doc-step:last-child { border-bottom: none; padding-bottom: 0; }
-
-.doc-step-num {
-  font-family: 'DM Mono', monospace;
-  font-size: 0.58rem; font-weight: 500; letter-spacing: 0.16em;
-  text-transform: uppercase; color: #9aa5b4;
-}
-.doc-step-desc {
-  font-size: 0.82rem; color: #1a1a2e; line-height: 1.55;
-}
-.doc-step-attention {
-  display: flex; gap: 6px; align-items: flex-start;
-  background: #fffbea;
-  border-left: 3px solid #f5c400;
-  padding: 5px 8px;
-  border-radius: 0 3px 3px 0;
-  font-size: 0.78rem; color: #5a4200; line-height: 1.5;
-}
-.doc-step-attention-icon {
-  font-size: 0.75rem; flex-shrink: 0; padding-top: 1px;
+  break-inside: avoid;
 }
 
 /* Zone annotation tablette */
@@ -739,8 +731,7 @@ body::before {
   .doc-material-bar    { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
   .doc-footer          { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
   .doc-bloc-rail       { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-  .doc-step-attention  { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-  .doc-bloc            { break-inside: avoid; }
+  .doc-bloc-header     { break-after: avoid; break-inside: avoid; } /* pas d'en-tête de bloc orphelin en bas de page */
   .doc-annotation-zone { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 
   @page {
