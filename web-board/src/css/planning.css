@@ -100,6 +100,17 @@ body::before {
 .btn--home { color: var(--muted); }
 .btn--home:hover { color: var(--text); }
 
+.view-toggle {
+  display: flex; gap: 2px;
+  padding: 2px; border-radius: var(--r-sm);
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+.view-toggle .btn--toggle {
+  border: none; background: transparent; height: 30px; padding: 0 12px;
+}
+.view-toggle .btn--toggle.active { background: var(--yellow); color: #080b0f; }
+
 .month-label {
   font-family: 'Bebas Neue', sans-serif;
   font-size: 1.15rem; letter-spacing: 0.06em;
@@ -149,6 +160,7 @@ body::before {
   transition: border-color 0.15s var(--ease);
   position: relative;
 }
+.calendar-grid--week .day-cell { min-height: 260px; }
 .day-cell:hover { border-color: rgba(245,196,0,0.3); }
 .day-cell.other-month { opacity: 0.35; }
 .day-cell.today { border-color: rgba(245,196,0,0.6); }
@@ -280,6 +292,7 @@ body::before {
 @media (max-width: 700px) {
   .calendar-grid, .weekday-row { grid-template-columns: repeat(7, minmax(0,1fr)); }
   .day-cell { min-height: 72px; padding: 6px; }
+  .calendar-grid--week .day-cell { min-height: 140px; }
   .event-chip { font-size: 0.62rem; }
   .month-label { min-width: auto; }
 }

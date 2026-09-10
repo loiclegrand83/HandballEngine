@@ -4,21 +4,26 @@
 
 let events = [];       // toutes les entrées planning chargées du serveur
 let allSeances = [];   // pour le lien "Séance liée"
-let viewYear, viewMonth; // mois affiché (0-indexé)
+let viewDate = new Date(); // jour d'ancrage de la vue affichée (mois ou semaine)
+let viewMode = 'month';    // 'month' | 'week'
 let editingId = null;    // id de l'événement en cours d'édition (null = création)
 let editingType = 'entrainement';
 let toastTimer = null;
 
 document.addEventListener('DOMContentLoaded', () => {
-  const today = new Date();
-  viewYear = today.getFullYear();
-  viewMonth = today.getMonth();
-
   bindToolbar();
   bindModal();
   loadSeancesForLink();
   loadEvents();
 });
+
+// Lundi de la semaine contenant d (Lundi = 0 ... Dimanche = 6, même convention que le rendu mensuel).
+function mondayOf(d) {
+  const offset = (d.getDay() + 6) % 7;
+  const monday = new Date(d);
+  monday.setDate(d.getDate() - offset);
+  return monday;
+}
 
 /* ══════════════════════════════════════════════════════════════
    CHARGEMENT
@@ -59,26 +64,46 @@ const MONTH_NAMES = [
 ];
 
 function renderCalendar() {
-  document.getElementById('monthLabel').textContent = `${MONTH_NAMES[viewMonth]} ${viewYear}`;
-
   const grid = document.getElementById('calendarGrid');
   grid.innerHTML = '';
+  grid.classList.toggle('calendar-grid--week', viewMode === 'week');
+  const btnViewMonth = document.getElementById('btnViewMonth');
+  const btnViewWeek  = document.getElementById('btnViewWeek');
+  btnViewMonth.classList.toggle('active', viewMode === 'month');
+  btnViewWeek.classList.toggle('active', viewMode === 'week');
+  btnViewMonth.setAttribute('aria-pressed', String(viewMode === 'month'));
+  btnViewWeek.setAttribute('aria-pressed', String(viewMode === 'week'));
 
-  const firstOfMonth = new Date(viewYear, viewMonth, 1);
-  // Lundi = 0 ... Dimanche = 6
-  const startOffset = (firstOfMonth.getDay() + 6) % 7;
-  const gridStart = new Date(viewYear, viewMonth, 1 - startOffset);
+  let gridStart, cellCount, currentMonth;
+  if (viewMode === 'week') {
+    gridStart = mondayOf(viewDate);
+    cellCount = 7;
+    currentMonth = null; // pas de notion de "hors mois" en vue semaine
+    const gridEnd = new Date(gridStart);
+    gridEnd.setDate(gridStart.getDate() + 6);
+    const startLabel = `${gridStart.getDate()} ${MONTH_NAMES[gridStart.getMonth()]}` +
+      (gridStart.getFullYear() !== gridEnd.getFullYear() ? ` ${gridStart.getFullYear()}` : '');
+    document.getElementById('monthLabel').textContent =
+      `${startLabel} – ${gridEnd.getDate()} ${MONTH_NAMES[gridEnd.getMonth()]} ${gridEnd.getFullYear()}`;
+  } else {
+    const firstOfMonth = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1);
+    const startOffset = (firstOfMonth.getDay() + 6) % 7; // Lundi = 0 ... Dimanche = 6
+    gridStart = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1 - startOffset);
+    cellCount = 42;
+    currentMonth = viewDate.getMonth();
+    document.getElementById('monthLabel').textContent = `${MONTH_NAMES[viewDate.getMonth()]} ${viewDate.getFullYear()}`;
+  }
 
   const todayIso = todayISO();
 
-  for (let i = 0; i < 42; i++) {
+  for (let i = 0; i < cellCount; i++) {
     const cellDate = new Date(gridStart);
     cellDate.setDate(gridStart.getDate() + i);
     const iso = isoDate(cellDate);
 
     const cell = document.createElement('div');
     cell.className = 'day-cell';
-    if (cellDate.getMonth() !== viewMonth) cell.classList.add('other-month');
+    if (currentMonth !== null && cellDate.getMonth() !== currentMonth) cell.classList.add('other-month');
     if (iso === todayIso) cell.classList.add('today');
 
     const num = document.createElement('div');
@@ -118,17 +143,35 @@ function bindToolbar() {
     window.location.href = '../index.html';
   });
   document.getElementById('btnPrevMonth').addEventListener('click', () => {
-    viewMonth--; if (viewMonth < 0) { viewMonth = 11; viewYear--; }
+    if (viewMode === 'week') {
+      const d = new Date(viewDate);
+      d.setDate(d.getDate() - 7);
+      viewDate = d;
+    } else {
+      viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth() - 1, 1);
+    }
     renderCalendar();
   });
   document.getElementById('btnNextMonth').addEventListener('click', () => {
-    viewMonth++; if (viewMonth > 11) { viewMonth = 0; viewYear++; }
+    if (viewMode === 'week') {
+      const d = new Date(viewDate);
+      d.setDate(d.getDate() + 7);
+      viewDate = d;
+    } else {
+      viewDate = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 1);
+    }
     renderCalendar();
   });
   document.getElementById('btnToday').addEventListener('click', () => {
-    const today = new Date();
-    viewYear = today.getFullYear();
-    viewMonth = today.getMonth();
+    viewDate = new Date();
+    renderCalendar();
+  });
+  document.getElementById('btnViewMonth').addEventListener('click', () => {
+    viewMode = 'month';
+    renderCalendar();
+  });
+  document.getElementById('btnViewWeek').addEventListener('click', () => {
+    viewMode = 'week';
     renderCalendar();
   });
   document.getElementById('btnAddEntrainement').addEventListener('click', () => openModal(null, todayISO(), 'entrainement'));
