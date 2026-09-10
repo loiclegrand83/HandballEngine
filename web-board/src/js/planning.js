@@ -4,16 +4,17 @@
 
 let events = [];       // toutes les entrées planning chargées du serveur
 let allSeances = [];   // pour le lien "Séance liée"
+let seancesLoaded = false; // false tant que allSeances n'a pas été chargé avec succès (évite les faux positifs "introuvable")
 let viewDate = new Date(); // jour d'ancrage de la vue affichée (mois ou semaine)
 let viewMode = 'month';    // 'month' | 'week'
 let editingId = null;    // id de l'événement en cours d'édition (null = création)
 let editingType = 'entrainement';
 let toastTimer = null;
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   bindToolbar();
   bindModal();
-  loadSeancesForLink();
+  await loadSeancesForLink(); // allSeances doit être chargé avant le premier rendu (détection des références orphelines)
   loadEvents();
 });
 
@@ -50,8 +51,10 @@ async function loadSeancesForLink() {
       opt.textContent = s.titre || '(sans titre)';
       sel.appendChild(opt);
     }
+    seancesLoaded = true;
   } catch(e) {
-    // lien vers séance optionnel — pas bloquant si indisponible
+    // lien vers séance optionnel — pas bloquant si indisponible, mais la détection
+    // de référence orpheline reste désactivée tant que allSeances n'est pas fiable
   }
 }
 
@@ -124,6 +127,11 @@ function renderCalendar() {
         chip.textContent = `vs ${ev.adversaire || '?'}`;
       } else {
         chip.textContent = ev.titre || 'Entraînement';
+        if (ev.seanceId && seancesLoaded && !allSeances.some(s => s.id === ev.seanceId)) {
+          chip.classList.add('event-chip--orphan');
+          chip.textContent += ' ⚠ séance introuvable';
+          chip.title = 'La séance liée à cet événement a été supprimée de la bibliothèque.';
+        }
       }
       chip.addEventListener('click', evt => { evt.stopPropagation(); openModal(ev); });
       evWrap.appendChild(chip);
@@ -189,6 +197,36 @@ function bindModal() {
   });
   document.getElementById('btnSaveEvent').addEventListener('click', saveEvent);
   document.getElementById('btnDeleteEvent').addEventListener('click', deleteCurrentEvent);
+  document.getElementById('fSeanceLink').addEventListener('change', updateOpenSeanceButton);
+  document.getElementById('btnOpenSeance').addEventListener('click', () => {
+    const id = document.getElementById('fSeanceLink').value;
+    if (id) window.open('seance.html?id=' + encodeURIComponent(id), '_blank', 'noopener,noreferrer');
+  });
+}
+
+// Sélectionne seanceId dans #fSeanceLink sans jamais le perdre silencieusement :
+// si aucune <option> ne correspond (séance supprimée), une option temporaire est
+// injectée pour que le champ conserve la valeur au lieu de retomber sur "" au
+// prochain Enregistrer (ce qui effacerait la référence orpheline sans confirmation).
+function setSeanceLinkValue(seanceId) {
+  const sel = document.getElementById('fSeanceLink');
+  const previousPlaceholder = sel.querySelector('option[data-orphan-placeholder]');
+  if (previousPlaceholder) previousPlaceholder.remove();
+
+  if (seanceId && !allSeances.some(s => s.id === seanceId)) {
+    const opt = document.createElement('option');
+    opt.value = seanceId;
+    opt.textContent = 'Séance introuvable (supprimée)';
+    opt.dataset.orphanPlaceholder = 'true';
+    sel.appendChild(opt);
+  }
+
+  sel.value = seanceId || '';
+}
+
+function updateOpenSeanceButton() {
+  const hasLink = !!document.getElementById('fSeanceLink').value;
+  document.getElementById('btnOpenSeance').style.display = hasLink ? '' : 'none';
 }
 
 function openModal(event, defaultDate, forcedType) {
@@ -207,7 +245,8 @@ function openModal(event, defaultDate, forcedType) {
   if (editingType === 'entrainement') {
     document.getElementById('fTitre').value = event?.titre || '';
     document.getElementById('fHeure').value = event?.heure || '';
-    document.getElementById('fSeanceLink').value = event?.seanceId || '';
+    setSeanceLinkValue(event?.seanceId || '');
+    updateOpenSeanceButton();
     document.getElementById('fNotesEnt').value = event?.notes || '';
   } else {
     document.getElementById('fAdversaire').value = event?.adversaire || '';

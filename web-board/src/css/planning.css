@@ -191,6 +191,13 @@ body::before {
 .event-chip--match.won  { border-left-color: var(--green); }
 .event-chip--match.lost { border-left-color: var(--danger); }
 
+/* Appliqué uniquement aux chips entrainement (seanceId orphelin) ; si un jour
+   réutilisé sur un chip match, revoir l'interaction avec .event-chip--match.won/.lost. */
+.event-chip--orphan {
+  background: var(--danger-soft); color: var(--danger);
+  border-left-color: var(--danger);
+}
+
 /* ══════════════════════════════════════════════════════════════
    MODALE ÉVÉNEMENT
 ══════════════════════════════════════════════════════════════ */
