@@ -3,3 +3,5 @@ node_modules/
 *.pdf
 web-board/bibli/
 web-board/data/
+playwright-report/
+test-results/

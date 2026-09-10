@@ -263,7 +263,7 @@ function createBlocEl(bloc, idx) {
         <div>
           <label class="field-label">Notes coach (consignes spécifiques à cette séance)</label>
           <textarea class="field-textarea" rows="2" data-field="notesCoach" data-idx="${idx}"
-            placeholder="Insister sur…">${bloc.notesCoach || ''}</textarea>
+            placeholder="Insister sur…">${escapeHtml(bloc.notesCoach)}</textarea>
         </div>
       </div>
     </div>
@@ -477,9 +477,9 @@ function filterModal() {
     const card = document.createElement('div');
     card.className = 'ex-card';
     card.innerHTML = `
-      <div class="ex-card-name">${ex.name}</div>
+      <div class="ex-card-name">${escapeHtml(ex.name)}</div>
       <div class="ex-card-cat" data-cat="${ex.thematique}">${thematiqueLabel(ex.thematique)}</div>
-      ${ex.notes ? `<div class="ex-card-notes">${ex.notes}</div>` : ''}
+      ${ex.notes ? `<div class="ex-card-notes">${escapeHtml(ex.notes)}</div>` : ''}
     `;
     card.addEventListener('click', () => {
       if (modalCallback) modalCallback(ex);
@@ -515,10 +515,10 @@ async function renderLibrary() {
     const nbBlocs = s.blocs?.length || 0;
     const dur     = computeDureeTotal(s);
     card.innerHTML = `
-      <div class="lib-card-date">${formatDate(s.date)}</div>
-      <div class="lib-card-title">${s.titre || 'Sans titre'}</div>
-      ${s.theme ? `<div class="lib-card-theme">${s.theme}</div>` : ''}
-      <div class="lib-card-meta">${nbBlocs} bloc${nbBlocs > 1 ? 's' : ''}${dur ? ' · ' + dur + ' min' : ''}${s.coach ? ' · ' + s.coach : ''}</div>
+      <div class="lib-card-date">${escapeHtml(formatDate(s.date))}</div>
+      <div class="lib-card-title">${escapeHtml(s.titre) || 'Sans titre'}</div>
+      ${s.theme ? `<div class="lib-card-theme">${escapeHtml(s.theme)}</div>` : ''}
+      <div class="lib-card-meta">${nbBlocs} bloc${nbBlocs > 1 ? 's' : ''}${dur ? ' · ' + dur + ' min' : ''}${s.coach ? ' · ' + escapeHtml(s.coach) : ''}</div>
       <div class="lib-card-actions">
         <button class="lib-btn" data-action="edit" data-id="${s.id}">Ouvrir</button>
         <button class="lib-btn" data-action="doc"  data-id="${s.id}">Document</button>
@@ -561,21 +561,21 @@ function buildDocument() {
   page.innerHTML = `
     <div class="doc-seance-header">
       <div class="doc-seance-tag">Handball Engine · Feuille de route séance</div>
-      <div class="doc-seance-title">${seance.titre || 'Séance sans titre'}</div>
+      <div class="doc-seance-title">${escapeHtml(seance.titre) || 'Séance sans titre'}</div>
       <div class="doc-seance-meta-row">
         <div class="doc-seance-meta-item">
           <span class="doc-seance-meta-label">Date</span>
-          <span class="doc-seance-meta-value">${formatDate(seance.date)}</span>
+          <span class="doc-seance-meta-value">${escapeHtml(formatDate(seance.date))}</span>
         </div>
         ${seance.theme ? `
         <div class="doc-seance-meta-item">
           <span class="doc-seance-meta-label">Thématique</span>
-          <span class="doc-seance-meta-value">${seance.theme}</span>
+          <span class="doc-seance-meta-value">${escapeHtml(seance.theme)}</span>
         </div>` : ''}
         ${seance.coach ? `
         <div class="doc-seance-meta-item">
           <span class="doc-seance-meta-label">Coach</span>
-          <span class="doc-seance-meta-value">${seance.coach}</span>
+          <span class="doc-seance-meta-value">${escapeHtml(seance.coach)}</span>
         </div>` : ''}
         ${computeDureeTotal(seance) ? `
         <div class="doc-seance-meta-item">
@@ -583,7 +583,7 @@ function buildDocument() {
           <span class="doc-seance-meta-value">${computeDureeTotal(seance)} min</span>
         </div>` : ''}
       </div>
-      ${seance.objectif ? `<div class="doc-seance-objectif">${seance.objectif}</div>` : ''}
+      ${seance.objectif ? `<div class="doc-seance-objectif">${escapeHtml(seance.objectif)}</div>` : ''}
     </div>
 
     <div class="doc-material-bar">
@@ -664,7 +664,7 @@ function buildDocument() {
   footer.className = 'doc-footer';
   footer.innerHTML = `
     <span class="doc-footer-brand"><strong>Handball Engine</strong> · Feuille de route</span>
-    <span class="doc-footer-page">${formatDate(seance.date)}</span>
+    <span class="doc-footer-page">${escapeHtml(formatDate(seance.date))}</span>
   `;
   page.appendChild(footer);
 }
@@ -685,7 +685,7 @@ function todayISO() {
 }
 
 function formatDate(iso) {
-  if (!iso) return '';
+  if (typeof iso !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(iso)) return '';
   const [y, m, d] = iso.split('-');
   return `${d}/${m}/${y}`;
 }

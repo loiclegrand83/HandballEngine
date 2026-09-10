@@ -1,0 +1,13 @@
+{
+  "name": "handball-engine-tests",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "test:api": "node --test --test-concurrency=1 \"tests/api/*.test.js\"",
+    "test:e2e": "playwright test",
+    "test": "npm run test:api && npm run test:e2e"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.0"
+  }
+}

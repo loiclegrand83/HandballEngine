@@ -144,9 +144,11 @@ function handleCrudRoute(req, res, prefix, dir, validate) {
 }
 
 const server = http.createServer((req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  // Pas d'en-têtes CORS : la page et son API sont toujours servies depuis la même
+  // origine (ce serveur). Un accès cross-origin permissif (Access-Control-Allow-Origin: *)
+  // sans authentification permettrait à n'importe quel site ouvert dans le même
+  // navigateur de lire/modifier/supprimer les données locales pendant que le
+  // serveur tourne — aucun cas d'usage légitime ne le nécessite ici.
   setSecurityHeaders(res);
 
   if (req.method === 'OPTIONS') {
@@ -221,8 +223,10 @@ server.listen(PORT, '0.0.0.0', () => {
   console.log(`Serveur démarré sur http://localhost:${PORT}`);
   console.log(`Accessible sur le réseau : http://${localIp}:${PORT}`);
   console.log(`Le dossier de sauvegarde est : ${BIBLI_DIR}`);
-  console.log('Ouverture du navigateur...');
 
+  if (process.env.NO_OPEN_BROWSER) return;
+
+  console.log('Ouverture du navigateur...');
   const url = `http://localhost:${PORT}`;
   const startCmd = process.platform === 'darwin' ? 'open'
                  : process.platform === 'win32'  ? 'start'
