@@ -32,8 +32,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   const editId = params.get('id');
 
   if (editId) {
-    await loadSeance(editId);
-    showEditor();
+    const ok = await loadSeance(editId);
+    if (ok) {
+      showEditor();
+    } else {
+      history.replaceState(null, '', location.pathname); // évite de re-déclencher le "introuvable" au rechargement
+      await renderLibrary();
+      showLibrary();
+    }
   } else if (params.get('view') === 'library') {
     await renderLibrary();
     showLibrary();
@@ -129,11 +135,17 @@ async function loadSeance(id) {
     const res = await fetch('/api/seances');
     const list = await res.json();
     const found = list.find(s => s.id === id);
-    if (found) seance = found;
+    if (found) {
+      seance = found;
+      renderEditor();
+      return true;
+    }
+    toast('Séance introuvable', 'err');
+    return false;
   } catch(e) {
     toast('Erreur chargement séance', 'err');
+    return false;
   }
-  renderEditor();
 }
 
 async function saveSeance() {
@@ -518,11 +530,9 @@ async function renderLibrary() {
         e.stopPropagation();
         const id = btn.dataset.id;
         if (btn.dataset.action === 'edit') {
-          await loadSeance(id);
-          showEditor();
+          if (await loadSeance(id)) showEditor();
         } else if (btn.dataset.action === 'doc') {
-          await loadSeance(id);
-          showDocument();
+          if (await loadSeance(id)) showDocument();
         } else if (btn.dataset.action === 'del') {
           await deleteSeance(id);
         }
