@@ -10,24 +10,22 @@
 2. [Lancement](#2-lancement)
 3. [Menu d'accueil](#3-menu-daccueil)
 4. [Board Tactique](#4-board-tactique)
-5. [Tableau Temps mort](#5-tableau-temps-mort)
-6. [Séances](#6-séances)
-7. [Planning](#7-planning)
-8. [Page d'explication & Fiche document](#8-page-dexplication--fiche-document)
-9. [Bibliothèque d'exercices](#9-bibliothèque-dexercices)
-10. [Accès tablette (Android)](#10-accès-tablette-android)
-11. [Architecture technique](#11-architecture-technique)
+5. [Séances](#5-séances)
+6. [Planning](#6-planning)
+7. [Page d'explication & Fiche document](#7-page-dexplication--fiche-document)
+8. [Bibliothèque d'exercices](#8-bibliothèque-dexercices)
+9. [Accès tablette (Android)](#9-accès-tablette-android)
+10. [Architecture technique](#10-architecture-technique)
 
 ---
 
 ## 1. Vue d'ensemble
 
-Handball Engine est un outil local (aucune connexion internet requise) conçu pour les entraîneurs de handball. Il regroupe cinq modules :
+Handball Engine est un outil local (aucune connexion internet requise) conçu pour les entraîneurs de handball. Il regroupe quatre modules :
 
 | Module | Usage |
 |---|---|
 | **Board Tactique** | Créer et animer des exercices d'entraînement |
-| **Temps mort** | Donner des instructions tactiques rapides pendant un match |
 | **Séances** | Construire une feuille de route d'entraînement (blocs d'exercices) |
 | **Planning** | Calendrier des entraînements et des matchs, avec résultats |
 | **Page d'explication** | Générer une fiche pédagogique imprimable par exercice |
@@ -58,7 +56,6 @@ Au démarrage, `http://localhost:3000` affiche les cartes des modules disponible
 - **Board Tactique** → ouvre `pages/board.html`
 - **Séances** → ouvre `pages/seance.html`
 - **Planning** → ouvre `pages/planning.html`
-- **Temps mort** → ouvre `pages/timeout.html`
 
 ---
 
@@ -156,84 +153,21 @@ Cliquer sur **▶ Animation** pour lancer la lecture séquentielle des phases.
 
 ---
 
-## 5. Tableau Temps mort
-
-Conçu pour une utilisation rapide pendant les 60 secondes d'un temps mort.
-
-### 5.1 Interface
-
-Le terrain occupe **tout l'écran** (vue du dessus, proportions 40m × 20m).  
-Une barre de contrôle flottante est fixée en bas de l'écran.
-
-Sur un appareil tactile avec navigateur (ex. Chromebook), le bouton **⛶ Plein écran** masque l'interface du navigateur (barre d'adresse, onglets) pour un usage terrain sans distraction. Cliquer à nouveau (ou `Échap`) pour revenir en mode fenêtré.
-
-### 5.2 Formations automatiques
-
-Sélectionner une formation dans les deux menus déroulants puis cliquer **⟳ Formation auto**.
-
-**Équipe A (attaque, rouge) :**
-
-| Formation | Description |
-|---|---|
-| 3-3 | 3 arrières + 2 ailiers + 1 pivot + gardien |
-| 2-4 | 2 arrières + 4 avants + gardien |
-| 2-5 | 2 arrières + 5 avants (sans gardien) |
-| 1-6 | 1 meneur + 6 avants (sans gardien) |
-
-**Équipe B (défense, bleu) :**
-
-| Formation | Description |
-|---|---|
-| 6-0 | 6 défenseurs alignés sur la ligne des 9m |
-| 5-1 | 5 défenseurs + 1 avancé |
-| 4-2 | 4 défenseurs + 2 avancés |
-| 3-3 | 3 défenseurs profonds + 3 avancés |
-
-> Les joueurs sont positionnés aux emplacements réglementaires de chaque système.  
-> Changer le menu déroulant repositionne immédiatement l'équipe concernée sans toucher à l'autre.
-
-### 5.3 Déplacer les joueurs
-
-**Appuyer-glisser** directement sur un joueur — aucun mode à activer.  
-Les joueurs sont larges pour un confort tactile sur tablette.
-
-### 5.4 Dessiner des flèches
-
-1. Cliquer **✏️ Stylo** pour activer le mode dessin (le bouton s'illumine)
-2. Tracer librement sur le terrain — une flèche colorée se forme
-   - Rouge pour l'équipe A, Bleu pour l'équipe B
-3. Cliquer à nouveau sur **✏️ Stylo** pour revenir au mode déplacement
-
-> **Tap sur une flèche** (hors mode stylo) : supprime cette flèche  
-> **✕ Effacer flèches** : supprime toutes les flèches  
-> **↺ Réinitialiser** : remet joueurs et flèches à zéro  
-> **← Accueil** : retour au menu principal
-
-### 5.5 Utilisation au stylet (tablette/Chromebook tactile)
-
-Le mode Stylo fonctionne aussi bien au doigt qu'au stylet — le stylet apporte simplement plus de précision pour le tracé.
-
-- Pendant un tracé en mode Stylo, tout contact tactile secondaire (ex. paume posée sur l'écran) est **ignoré automatiquement** : seul le pointeur qui a commencé le tracé est pris en compte jusqu'à son relâchement.
-- Si le tracé est interrompu par le système (perte de contact, ex. sortie de la zone tactile), la flèche en cours est proprement finalisée plutôt que perdue ou fantôme.
-- Le déplacement des joueurs (glisser sans mode Stylo actif) reste utilisable au doigt à tout moment, y compris pendant que l'autre main tient le stylet.
-
----
-
-## 6. Séances
+## 5. Séances
 
 Cliquer sur **Séances** depuis le menu d'accueil, ou **Bibliothèque** puis **Nouvelle séance** depuis le module lui-même.
 
-### 6.1 Informations générales
+### 5.1 Informations générales
 
 En haut de l'éditeur : titre, thématique, date, durée totale, coach, objectif de séance. Le champ **Matériel** se remplit automatiquement à partir du matériel utilisé dans les exercices ajoutés.
 
-### 6.2 Construire le déroulé
+### 5.2 Construire le déroulé
 
 Utiliser les boutons **+ Échauffement**, **+ Exercice**, **+ Opposition libre**, **+ Retour au calme** pour ajouter des blocs, dans l'ordre voulu.
 
 Chaque bloc **Exercice** permet de choisir un exercice existant dans la bibliothèque du Board Tactique (recherche + filtre par catégorie) ; un aperçu du schéma s'affiche automatiquement. Chaque bloc affiche sa durée, qui contribue à la durée totale de la séance.
 
-### 6.3 Enregistrer et consulter
+### 5.3 Enregistrer et consulter
 
 - **💾 Enregistrer** : sauvegarde la séance dans la bibliothèque des séances
 - **Bibliothèque** : liste des séances sauvegardées, chargement ou suppression
@@ -243,23 +177,23 @@ Chaque bloc **Exercice** permet de choisir un exercice existant dans la biblioth
 
 ---
 
-## 7. Planning
+## 6. Planning
 
 Cliquer sur **Planning** depuis le menu d'accueil. Le module affiche un calendrier mensuel regroupant les entraînements et les matchs de la saison.
 
-### 7.1 Navigation
+### 6.1 Navigation
 
 Les flèches **‹** / **›** changent de mois, **Aujourd'hui** revient au mois courant. Cliquer sur une case du calendrier ouvre directement le formulaire de création d'un événement à cette date.
 
-### 7.2 Ajouter un entraînement
+### 6.2 Ajouter un entraînement
 
 Bouton **+ Entraînement** : titre, heure, notes libres, et un lien optionnel vers une **séance** créée dans le module Séances — pratique pour retrouver rapidement la feuille de route du jour depuis le planning.
 
-### 7.3 Ajouter un match
+### 6.3 Ajouter un match
 
 Bouton **+ Match** : adversaire, heure, domicile ou extérieur, score (une fois joué) et notes. Le calendrier affiche directement le score sur la case du jour, avec un liseré vert (victoire), rouge (défaite) ou neutre (match à venir / nul).
 
-### 7.4 Modifier ou supprimer
+### 6.4 Modifier ou supprimer
 
 Cliquer sur un événement existant (dans une case du calendrier) rouvre le formulaire pré-rempli, avec un bouton **Supprimer**.
 
@@ -267,14 +201,14 @@ Cliquer sur un événement existant (dans une case du calendrier) rouvre le form
 
 ---
 
-## 8. Page d'explication & Fiche document
+## 7. Page d'explication & Fiche document
 
-### 6.1 Ouvrir
+### 7.1 Ouvrir
 
 Depuis le Board Tactique, cliquer sur **📋 Explication & Points d'attention**.  
 La page s'ouvre dans un nouvel onglet avec les snapshots de chaque phase et les descriptions générées automatiquement.
 
-### 6.2 Vue Éditeur
+### 7.2 Vue Éditeur
 
 Chaque phase dispose de :
 - Un snapshot du terrain à cet instant
@@ -294,7 +228,7 @@ La section **Informations pour la fiche document** (repliable) permet de renseig
 | Nombre de gardiens | Optionnel |
 | Niveau | Tag de niveau (Débutant / Intermédiaire / Avancé / Elite) |
 
-### 6.3 Vue Document (fiche imprimable)
+### 7.3 Vue Document (fiche imprimable)
 
 Cliquer sur **Vue Document** pour basculer vers la fiche au format A4, structurée comme une fiche HandXPrience :
 
@@ -310,7 +244,7 @@ Cliquer sur **Vue Document** pour basculer vers la fiche au format A4, structur�
 
 ---
 
-## 9. Bibliothèque d'exercices
+## 8. Bibliothèque d'exercices
 
 Cliquer sur **Bibliothèque** dans le Board Tactique.
 
@@ -321,18 +255,16 @@ Cliquer sur **Bibliothèque** dans le Board Tactique.
 
 ---
 
-## 10. Accès tablette (Android)
+## 9. Accès tablette (Android)
 
 1. Le PC et la tablette doivent être sur le même réseau Wi-Fi
 2. Lancer le serveur sur le PC — l'URL réseau s'affiche dans le terminal (ex: `http://192.168.1.125:3000`)
 3. Sur la tablette : ouvrir Chrome et naviguer vers cette URL
 4. Menu Chrome (⋮) → **"Ajouter à l'écran d'accueil"** pour installer comme application PWA
 
-> Le module **Temps mort** est particulièrement adapté à la tablette : plein écran, grandes zones tactiles, aucune navigation nécessaire pendant le match.
-
 ---
 
-## 11. Architecture technique
+## 10. Architecture technique
 
 | Composant | Technologie | Rôle |
 |---|---|---|
@@ -358,9 +290,6 @@ Cliquer sur **Bibliothèque** dans le Board Tactique.
 | `pages/planning.html` | Calendrier des entraînements et matchs |
 | `src/js/planning.js` | Logique du planning (calendrier, événements, liaison séance) |
 | `src/css/planning.css` | Styles du planning |
-| `pages/timeout.html` | Tableau tactique temps mort |
-| `src/js/timeout.js` | Logique du temps mort (terrain, formations, drag, flèches) |
-| `src/css/timeout.css` | Styles du temps mort |
 | `pages/explanation.html` | Page d'explication et fiche document |
 | `src/css/explanation.css` | Styles de la fiche (A4 + print) |
 | `server.js` | Serveur Node.js local sécurisé |

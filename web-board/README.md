@@ -17,7 +17,6 @@ Le serveur démarre sur `http://localhost:3000` et ouvre automatiquement le navi
 | Accueil | `/` | Menu principal |
 | Board Tactique | `/pages/board.html` | Création et animation d'exercices |
 | Séances | `/pages/seance.html` | Planification et impression de séances |
-| Temps Mort | `/pages/timeout.html` | Instructions tactiques rapides pendant le match |
 | Explication | `/pages/explanation.html` | Fiche pédagogique d'un exercice (vue éditeur + vue document imprimable) |
 
 ## Board Tactique
@@ -42,14 +41,6 @@ Le serveur démarre sur `http://localhost:3000` et ouvre automatiquement le navi
 - Export PDF via le navigateur (Imprimer → Enregistrer en PDF)
 - Bibliothèque de séances avec historique trié par date
 
-## Temps Mort
-
-- Terrain plein écran
-- Formations attaque et défense configurables (3-3, 5-1, 6-0…)
-- Positionnement automatique des joueurs
-- Mode stylo pour annoter en direct
-- Effacement des flèches en un clic
-
 ## Architecture
 
 ```
@@ -59,18 +50,15 @@ web-board/
 ├── pages/
 │   ├── board.html
 │   ├── seance.html
-│   ├── timeout.html
 │   └── explanation.html
 ├── src/
 │   ├── css/
 │   │   ├── styles.css       # Board tactique
 │   │   ├── seance.css       # Séances
-│   │   ├── timeout.css      # Temps mort
 │   │   └── explanation.css  # Fiche exercice
 │   └── js/
 │       ├── app.js           # Logique du board
-│       ├── seance.js        # Logique des séances
-│       └── timeout.js       # Logique du temps mort
+│       └── seance.js        # Logique des séances
 ├── assets/             # SVG joueurs et icônes
 └── data/
     ├── bibli/          # Exercices sauvegardés (JSON)
