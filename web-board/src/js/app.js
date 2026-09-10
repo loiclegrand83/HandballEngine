@@ -29,11 +29,15 @@ const teamButtons = document.getElementById('teamButtons');
 const playAnimationButton = document.getElementById('playAnimation');
 const exerciseCategory = document.getElementById('exerciseCategory');
 const exerciseThematique = document.getElementById('exerciseThematique');
+const exerciseDuree = document.getElementById('exerciseDuree');
+const exerciseNbJoueurs = document.getElementById('exerciseNbJoueurs');
+const exerciseNiveau = document.getElementById('exerciseNiveau');
 const openLibraryBtn = document.getElementById('openLibrary');
 const libraryModal = document.getElementById('libraryModal');
 const closeLibraryBtn = document.getElementById('closeLibrary');
 const libraryGrid = document.getElementById('libraryGrid');
 const libraryFilter = document.getElementById('libraryFilter');
+const librarySearch = document.getElementById('librarySearch');
 
 const playerImage = new Image();
 playerImage.src = '../../assets/player.png';
@@ -1627,6 +1631,9 @@ async function _persistExercise() {
     name: exerciseName.value || 'Sans nom',
     category: exerciseCategory.value,
     thematique: exerciseThematique.value,
+    duree: exerciseDuree.value === '' ? null : Number(exerciseDuree.value),
+    nbJoueurs: exerciseNbJoueurs.value === '' ? null : Number(exerciseNbJoueurs.value),
+    niveau: String(exerciseNiveau.value || '').slice(0, 200),
     notes: exerciseNotes.value,
     items: state.items,
     paths: state.paths,
@@ -1682,6 +1689,9 @@ function loadExerciseFromData(d) {
   exerciseName.value = String(d.name || '').slice(0, 100);
   exerciseCategory.value = d.category || 'none';
   exerciseThematique.value = ['attaque', 'defense', 'gardien', 'enclenchement'].includes(d.thematique) ? d.thematique : 'attaque';
+  exerciseDuree.value = (typeof d.duree === 'number' && !isNaN(d.duree)) ? d.duree : '';
+  exerciseNbJoueurs.value = (typeof d.nbJoueurs === 'number' && !isNaN(d.nbJoueurs)) ? d.nbJoueurs : '';
+  exerciseNiveau.value = String(d.niveau || '').slice(0, 200);
   exerciseNotes.value = String(d.notes || '').slice(0, 2000);
   state.items = Array.isArray(d.items) ? d.items.map(sanitizeItem).filter(Boolean) : [];
   state.paths = Array.isArray(d.paths) ? d.paths.map(sanitizePath).filter(Boolean) : [];
@@ -1728,14 +1738,42 @@ function importJsonFile(file) {
 
 // ─── UI de la Bibliothèque ────────────────────────────────────────────────────
 
+// Dérive postes et matériel depuis les items de l'exercice (jamais persisté séparément).
+function deriveSearchIndex(ex) {
+  const items = Array.isArray(ex.items) ? ex.items : [];
+  const postes = new Set();
+  const materiel = new Set();
+  items.forEach(item => {
+    const isHuman = typeof item.id === 'string' && (item.id.startsWith('player') || item.id.startsWith('G'));
+    if (isHuman) {
+      if (item.post) postes.add(String(item.post));
+    } else if (item.label) {
+      materiel.add(String(item.label));
+    }
+  });
+  return {
+    name: String(ex.name || '').toLowerCase(),
+    postes: Array.from(postes).join(' ').toLowerCase(),
+    materiel: Array.from(materiel).join(' ').toLowerCase(),
+    niveau: String(ex.niveau || '').toLowerCase(),
+  };
+}
+
+function matchesSearch(ex, query) {
+  if (!query) return true;
+  const idx = deriveSearchIndex(ex);
+  return idx.name.includes(query) || idx.postes.includes(query) || idx.materiel.includes(query) || idx.niveau.includes(query);
+}
+
 async function renderLibrary() {
   libraryGrid.innerHTML = '<p style="color:var(--text-muted); padding:20px;">Chargement...</p>';
-  
+
   try {
     const res = await fetch('/api/exercises');
     const lib = await res.json();
     const filterVal = libraryFilter.value;
-    
+    const searchVal = librarySearch.value.trim().toLowerCase();
+
     lib.sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0));
     libraryGrid.innerHTML = '';
     
@@ -1751,9 +1789,16 @@ async function renderLibrary() {
       'enclenchement': 'Enclenchement'
     };
 
-    lib.forEach(ex => {
-      if (filterVal !== 'all' && ex.thematique !== filterVal) return;
+    const visible = lib.filter(ex =>
+      (filterVal === 'all' || ex.thematique === filterVal) && matchesSearch(ex, searchVal)
+    );
 
+    if (visible.length === 0) {
+      libraryGrid.innerHTML = '<p style="color:var(--text-muted); padding:20px;">Aucun exercice ne correspond à la recherche/au filtre.</p>';
+      return;
+    }
+
+    visible.forEach(ex => {
       const them = thematiqueLabels[ex.thematique] ? ex.thematique : null;
       let dateStr = 'Inconnue';
       const validDate = new Date(ex.updatedAt || ex.exportedAt);
@@ -1836,6 +1881,9 @@ document.getElementById('newExercise').addEventListener('click', () => {
   exerciseName.value = 'Nouveau exercice';
   exerciseCategory.value = 'none';
   exerciseThematique.value = 'attaque';
+  exerciseDuree.value = '';
+  exerciseNbJoueurs.value = '';
+  exerciseNiveau.value = '';
   exerciseNotes.value = '';
   state.items = []; state.paths = [];
   render(); setStatus('Nouvel exercice (non sauvegardé)');
@@ -1856,6 +1904,12 @@ closeLibraryBtn.addEventListener('click', () => {
 
 libraryFilter.addEventListener('change', () => {
   renderLibrary();
+});
+
+let librarySearchDebounce = null;
+librarySearch.addEventListener('input', () => {
+  clearTimeout(librarySearchDebounce);
+  librarySearchDebounce = setTimeout(renderLibrary, 200);
 });
 
 // Fallback for browsers without :has() support (Chrome < 105)

@@ -82,6 +82,18 @@
           </select>
         </label>
         <label>
+          Durée estimée (min)
+          <input id="exerciseDuree" type="number" min="0" step="1" />
+        </label>
+        <label>
+          Nombre de joueurs
+          <input id="exerciseNbJoueurs" type="number" min="0" step="1" />
+        </label>
+        <label>
+          Niveau / catégorie d'âge
+          <input id="exerciseNiveau" type="text" placeholder="ex: -15 ans, Confirmés" />
+        </label>
+        <label>
           Notes
           <textarea id="exerciseNotes" rows="2"></textarea>
         </label>
@@ -136,6 +148,8 @@
       </div>
       <div class="modal-body">
         <div class="library-filters">
+          <label>Rechercher :</label>
+          <input id="librarySearch" type="text" placeholder="Nom, poste, matériel..." />
           <label>Filtrer :</label>
           <select id="libraryFilter">
             <option value="all">Toutes les thématiques</option>
