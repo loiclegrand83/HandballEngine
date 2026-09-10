@@ -28,6 +28,7 @@ const drawModeButtons = document.getElementById('drawModeButtons');
 const teamButtons = document.getElementById('teamButtons');
 const playAnimationButton = document.getElementById('playAnimation');
 const exerciseCategory = document.getElementById('exerciseCategory');
+const exerciseThematique = document.getElementById('exerciseThematique');
 const openLibraryBtn = document.getElementById('openLibrary');
 const libraryModal = document.getElementById('libraryModal');
 const closeLibraryBtn = document.getElementById('closeLibrary');
@@ -1625,6 +1626,7 @@ async function _persistExercise() {
     id: state.currentExerciseId,
     name: exerciseName.value || 'Sans nom',
     category: exerciseCategory.value,
+    thematique: exerciseThematique.value,
     notes: exerciseNotes.value,
     items: state.items,
     paths: state.paths,
@@ -1679,6 +1681,7 @@ function loadExerciseFromData(d) {
   state.userSaved = true; // Déjà dans la bibliothèque, l'autosave peut fonctionner
   exerciseName.value = String(d.name || '').slice(0, 100);
   exerciseCategory.value = d.category || 'none';
+  exerciseThematique.value = ['attaque', 'defense', 'gardien', 'enclenchement'].includes(d.thematique) ? d.thematique : 'attaque';
   exerciseNotes.value = String(d.notes || '').slice(0, 2000);
   state.items = Array.isArray(d.items) ? d.items.map(sanitizeItem).filter(Boolean) : [];
   state.paths = Array.isArray(d.paths) ? d.paths.map(sanitizePath).filter(Boolean) : [];
@@ -1834,6 +1837,7 @@ document.getElementById('newExercise').addEventListener('click', () => {
   state.userSaved = false; // Pas de sauvegarde tant que l'utilisateur n'a pas cliqué "Enregistrer"
   exerciseName.value = 'Nouveau exercice';
   exerciseCategory.value = 'none';
+  exerciseThematique.value = 'attaque';
   exerciseNotes.value = '';
   state.items = []; state.paths = [];
   render(); setStatus('Nouvel exercice (non sauvegardé)');

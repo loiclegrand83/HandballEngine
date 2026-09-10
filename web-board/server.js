@@ -44,7 +44,16 @@ function isValidId(id) {
   return typeof id === 'string' && /^[a-zA-Z0-9_-]+$/.test(id);
 }
 
-function handleCrudRoute(req, res, prefix, dir) {
+const THEMATIQUE_VALUES = ['attaque', 'defense', 'gardien', 'enclenchement'];
+
+function validateExercise(data) {
+  if (!THEMATIQUE_VALUES.includes(data.thematique)) {
+    return `Thématique invalide ou manquante (attendu: ${THEMATIQUE_VALUES.join(', ')})`;
+  }
+  return null;
+}
+
+function handleCrudRoute(req, res, prefix, dir, validate) {
   if (!req.url.startsWith(prefix)) return false;
 
   if (req.method === 'GET') {
@@ -88,6 +97,13 @@ function handleCrudRoute(req, res, prefix, dir) {
         if (!isValidId(data.id)) {
           res.writeHead(400, { 'Content-Type': 'application/json' });
           return res.end(JSON.stringify({ error: 'ID invalide ou manquant' }));
+        }
+        if (typeof validate === 'function') {
+          const validationError = validate(data);
+          if (validationError) {
+            res.writeHead(400, { 'Content-Type': 'application/json' });
+            return res.end(JSON.stringify({ error: validationError }));
+          }
         }
         const filePath = path.join(dir, `${data.id}.json`);
         if (!filePath.startsWith(dir + path.sep)) {
@@ -153,7 +169,7 @@ const server = http.createServer((req, res) => {
 
   // --- API CRUD génériques (séances, exercices, planning) ---
   if (handleCrudRoute(req, res, '/api/seances', SEANCES_DIR))   return;
-  if (handleCrudRoute(req, res, '/api/exercises', BIBLI_DIR))   return;
+  if (handleCrudRoute(req, res, '/api/exercises', BIBLI_DIR, validateExercise)) return;
   if (handleCrudRoute(req, res, '/api/planning', PLANNING_DIR)) return;
 
   // --- Serveur statique ---
