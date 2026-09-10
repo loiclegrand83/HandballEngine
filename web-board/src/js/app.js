@@ -26,7 +26,6 @@ const importJson = document.getElementById('importJson');
 const viewModeButtons = document.getElementById('viewModeButtons');
 const drawModeButtons = document.getElementById('drawModeButtons');
 const teamButtons = document.getElementById('teamButtons');
-const finishPathButton = document.getElementById('finishPath');
 const playAnimationButton = document.getElementById('playAnimation');
 const exerciseCategory = document.getElementById('exerciseCategory');
 const openLibraryBtn = document.getElementById('openLibrary');
@@ -182,6 +181,7 @@ function selectViewMode(mode) {
 function selectDrawMode(mode) {
   state.drawMode = mode;
   state.currentPath = null;
+  lastPointerDown = null; // évite qu'un clic dans l'ancien mode soit lu comme un double-clic dans le nouveau
   updateModeButtons(drawModeButtons, mode);
   setStatus(`Mode : ${state.drawMode}`);
 }
@@ -1413,9 +1413,22 @@ function canvasPoint(event) {
 
 // ─── Événements canvas ────────────────────────────────────────────────────────
 
+// Détection double-clic/double-tap unifiée (souris + tactile) via pointerdown,
+// pour terminer une trajectoire en cours sans passer par un bouton dédié.
+const DOUBLE_TAP_MS = 350;
+const DOUBLE_TAP_DIST = 20;
+let lastPointerDown = null;
+
 canvas.addEventListener('pointerdown', event => {
   if (event.button !== 0) return;
   const point = canvasPoint(event);
+
+  const previous = lastPointerDown;
+  lastPointerDown = { time: event.timeStamp, x: point.x, y: point.y };
+  const isDoubleTap = previous
+    && (event.timeStamp - previous.time) < DOUBLE_TAP_MS
+    && Math.hypot(point.x - previous.x, point.y - previous.y) < DOUBLE_TAP_DIST;
+
   const mode  = state.drawMode;
   const ai    = getItemIndexAt(point.x, point.y);
 
@@ -1480,6 +1493,21 @@ canvas.addEventListener('pointerdown', event => {
       state.currentPath.points.push(newPoint);
       setStatus(`Point ajouté`);
     }
+
+    // Le double-clic/double-tap termine le tracé au dernier point simple-cliqué :
+    // la seconde frappe vient d'ajouter un point en doublon (quasi même position),
+    // on l'annule avant de clore la trajectoire — comme le ferait dblclick natif,
+    // mais unifié souris/tactile puisqu'il repose sur pointerdown.
+    if (isDoubleTap && state.currentPath) {
+      // La frappe qui déclenche le double-clic/tap vient de pousser un point en doublon
+      // (branche `else` ci-dessus) : le tracé a donc toujours >= 2 points ici.
+      state.currentPath.points.pop();
+      state.currentPath = null;
+      lastPointerDown = null;
+      saveLocal();
+      setStatus('Trajectoire terminée');
+    }
+
     render();
   }
 });
@@ -1879,7 +1907,6 @@ postButtonsEl.addEventListener('click', e => {
     setStatus(`Poste : ${post} — cliquer sur le terrain pour placer`);
   }
 });
-finishPathButton.addEventListener('click', () => { if (state.currentPath) { state.currentPath = null; saveLocal(); render(); setStatus('Trajectoire terminée'); } });
 playAnimationButton.addEventListener('click', () => {
   if (!state.paths.length) { setStatus('Aucune trajectoire'); return; }
   if (state.animation.active) {

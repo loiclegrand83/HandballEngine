@@ -118,7 +118,7 @@ Sélectionner un asset dans la palette **Haies & Assets** puis cliquer sur le te
 
 ### 4.5 Trajectoires
 
-Choisir un mode dans la section **Mode**, cliquer successivement les points sur le terrain, puis cliquer **Terminer traj.**.
+Choisir un mode dans la section **Mode**, cliquer successivement les points sur le terrain, puis **double-cliquer** (ou **double-tap** sur tablette) pour terminer le tracé.
 
 | Mode | Couleur | Usage |
 |---|---|---|
