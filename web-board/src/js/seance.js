@@ -9,10 +9,15 @@ let seance = {
   date: todayISO(),
   theme: '',
   coach: '',
-  dureeTotal: 0,
   objectif: '',
   blocs: [],
 };
+
+// Durée totale = somme des durées de tous les Ateliers, jamais persistée (AD-9) — recalculée à chaque affichage.
+function computeDureeTotal(s) {
+  return (s.blocs || []).reduce((total, bloc) =>
+    total + (bloc.ateliers || []).reduce((sum, a) => sum + (parseInt(a.duree, 10) || 0), 0), 0);
+}
 
 let allExercises = [];
 let modalCallback = null; // fonction appelée quand l'utilisateur sélectionne un exercice
@@ -113,7 +118,6 @@ function newSeance() {
     date: todayISO(),
     theme: '',
     coach: '',
-    dureeTotal: 0,
     objectif: '',
     blocs: [],
   };
@@ -182,10 +186,13 @@ function renderEditor() {
   document.getElementById('fTheme').value    = seance.theme    || '';
   document.getElementById('fCoach').value    = seance.coach    || '';
   document.getElementById('fObjectif').value = seance.objectif || '';
-  document.getElementById('fDuree').value    = seance.dureeTotal || '';
 
   renderBlocList();
   updateMaterialSummary();
+}
+
+function updateDureeTotalDisplay() {
+  document.getElementById('fDureeTotal').value = computeDureeTotal(seance);
 }
 
 function collectMeta() {
@@ -194,7 +201,6 @@ function collectMeta() {
   seance.theme      = document.getElementById('fTheme').value.trim();
   seance.coach      = document.getElementById('fCoach').value.trim();
   seance.objectif   = document.getElementById('fObjectif').value.trim();
-  seance.dureeTotal = parseInt(document.getElementById('fDuree').value) || 0;
 }
 
 function renderBlocList() {
@@ -205,6 +211,7 @@ function renderBlocList() {
     const el = createBlocEl(bloc, idx);
     container.appendChild(el);
   });
+  updateDureeTotalDisplay();
 }
 
 const BLOC_PRESET_LABELS = ['Échauffement', 'Exercice', 'Opposition libre', 'Retour au calme'];
@@ -494,7 +501,7 @@ async function renderLibrary() {
     const card = document.createElement('div');
     card.className = 'lib-card';
     const nbBlocs = s.blocs?.length || 0;
-    const dur     = s.dureeTotal   || 0;
+    const dur     = computeDureeTotal(s);
     card.innerHTML = `
       <div class="lib-card-date">${formatDate(s.date)}</div>
       <div class="lib-card-title">${s.titre || 'Sans titre'}</div>
@@ -560,10 +567,10 @@ function buildDocument() {
           <span class="doc-seance-meta-label">Coach</span>
           <span class="doc-seance-meta-value">${seance.coach}</span>
         </div>` : ''}
-        ${seance.dureeTotal ? `
+        ${computeDureeTotal(seance) ? `
         <div class="doc-seance-meta-item">
           <span class="doc-seance-meta-label">Durée totale</span>
-          <span class="doc-seance-meta-value">${seance.dureeTotal} min</span>
+          <span class="doc-seance-meta-value">${computeDureeTotal(seance)} min</span>
         </div>` : ''}
       </div>
       ${seance.objectif ? `<div class="doc-seance-objectif">${seance.objectif}</div>` : ''}
