@@ -32,12 +32,12 @@ Le serveur démarre sur `http://localhost:3000` et ouvre automatiquement le navi
 
 ## Séances
 
-- Éditeur de séance : titre, date, thématique, coach, durée totale, objectif
-- Blocs ordonnables : Échauffement, Exercice, Opposition libre, Retour au calme
-- Sélection des exercices depuis la bibliothèque (filtre par catégorie / recherche)
+- Éditeur de séance : titre, date, thématique, coach, objectif ; durée totale calculée automatiquement
+- Blocs nommés (texte libre) réordonnables, chacun contenant un ou plusieurs Ateliers réordonnables
+- Ateliers choisis depuis la bibliothèque (filtre par Thématique + recherche), snapshottés à l'ajout
 - Notes coach spécifiques par bloc
-- Matériel consolidé automatiquement depuis tous les exercices de la séance
-- **Vue document imprimable (A4)** : schéma tactique + consignes étape par étape + points d'attention ⚠ + zone d'annotation pour stylet tablette
+- Matériel consolidé automatiquement depuis tous les Ateliers de la séance
+- **Vue document imprimable (A4)** : grille compacte multi-ateliers, saut de page automatique, zone d'annotation pour stylet tablette
 - Export PDF via le navigateur (Imprimer → Enregistrer en PDF)
 - Bibliothèque de séances avec historique trié par date
 

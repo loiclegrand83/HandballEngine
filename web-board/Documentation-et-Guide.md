@@ -141,10 +141,11 @@ Cliquer sur **▶ Animation** pour lancer la lecture séquentielle des phases.
 
 ### 4.7 Sauvegarder un exercice
 
-1. Renseigner le **Nom** et la **Catégorie** de l'exercice (section "Exercice")
-2. Cliquer sur **Enregistrer** — l'exercice est enregistré dans la bibliothèque locale
+1. Renseigner le **Nom** et la **Thématique** de l'exercice (Attaque, Défense, Gardien, Enclenchement — obligatoire) ; la **Catégorie** reste disponible pour compatibilité mais n'est plus utilisée pour filtrer la Bibliothèque
+2. Facultatif : **Durée estimée**, **Nombre de joueurs**, **Niveau / catégorie d'âge**
+3. Cliquer sur **Enregistrer** — l'exercice est enregistré dans la bibliothèque locale
 
-> Les exercices ne sont jamais sauvegardés automatiquement — seul le bouton "Enregistrer" déclenche la sauvegarde.
+> Les exercices ne sont jamais sauvegardés automatiquement — seul le bouton "Enregistrer" déclenche la sauvegarde. Les champs facultatifs ne bloquent jamais une sauvegarde rapide.
 
 ### 4.8 Importer / Exporter
 
@@ -159,13 +160,13 @@ Cliquer sur **Séances** depuis le menu d'accueil, ou **Bibliothèque** puis **N
 
 ### 5.1 Informations générales
 
-En haut de l'éditeur : titre, thématique, date, durée totale, coach, objectif de séance. Le champ **Matériel** se remplit automatiquement à partir du matériel utilisé dans les exercices ajoutés.
+En haut de l'éditeur : titre, thématique, date, coach, objectif de séance. Le champ **Matériel** se remplit automatiquement à partir du matériel utilisé dans les exercices ajoutés. La **Durée totale** n'est plus saisie manuellement : elle est calculée automatiquement à partir de la durée de chaque Atelier et se met à jour en temps réel.
 
-### 5.2 Construire le déroulé
+### 5.2 Construire le déroulé : Blocs et Ateliers
 
-Utiliser les boutons **+ Échauffement**, **+ Exercice**, **+ Opposition libre**, **+ Retour au calme** pour ajouter des blocs, dans l'ordre voulu.
+Un **Bloc** porte un nom libre (les boutons **+ Échauffement**, **+ Exercice**, **+ Opposition libre**, **+ Retour au calme** pré-remplissent ce nom, éditable ensuite) et peut contenir zéro, un ou plusieurs **Ateliers**.
 
-Chaque bloc **Exercice** permet de choisir un exercice existant dans la bibliothèque du Board Tactique (recherche + filtre par catégorie) ; un aperçu du schéma s'affiche automatiquement. Chaque bloc affiche sa durée, qui contribue à la durée totale de la séance.
+Pour ajouter un Atelier à un Bloc, cliquer sur **Choisir** puis sélectionner un exercice dans la Bibliothèque (filtre par Thématique + recherche par nom/poste/matériel). Le nom, la description, le matériel et une durée par défaut de l'exercice sont recopiés dans l'Atelier au moment de l'ajout — modifier l'exercice source ensuite ne change plus cet Atelier. Chaque Atelier a sa propre durée éditable, et peut être réordonné (↑/↓) ou remplacé (**Changer**) indépendamment des autres Ateliers du Bloc. Les Blocs eux-mêmes sont réordonnables.
 
 ### 5.3 Enregistrer et consulter
 
@@ -179,15 +180,15 @@ Chaque bloc **Exercice** permet de choisir un exercice existant dans la biblioth
 
 ## 6. Planning
 
-Cliquer sur **Planning** depuis le menu d'accueil. Le module affiche un calendrier mensuel regroupant les entraînements et les matchs de la saison.
+Cliquer sur **Planning** depuis le menu d'accueil. Le module affiche un calendrier regroupant les entraînements et les matchs de la saison, en vue **Mois** ou **Semaine**.
 
 ### 6.1 Navigation
 
-Les flèches **‹** / **›** changent de mois, **Aujourd'hui** revient au mois courant. Cliquer sur une case du calendrier ouvre directement le formulaire de création d'un événement à cette date.
+Les boutons **Mois** / **Semaine** basculent entre les deux vues, qui affichent toujours les mêmes événements. Les flèches **‹** / **›** changent de mois ou de semaine selon la vue active, **Aujourd'hui** revient à la période courante. Cliquer sur une case du calendrier ouvre directement le formulaire de création d'un événement à cette date. La navigation vers le passé n'a pas de limite.
 
 ### 6.2 Ajouter un entraînement
 
-Bouton **+ Entraînement** : titre, heure, notes libres, et un lien optionnel vers une **séance** créée dans le module Séances — pratique pour retrouver rapidement la feuille de route du jour depuis le planning.
+Bouton **+ Entraînement** : titre, heure, notes libres, et un lien optionnel vers une **séance** créée dans le module Séances. Quand une séance est liée, un bouton **Ouvrir la séance →** apparaît dans le formulaire et ouvre sa feuille de route dans un nouvel onglet. Si la séance liée a été supprimée depuis, l'événement affiche directement sur le calendrier un repère "⚠ séance introuvable" — sans avoir besoin de cliquer dessus.
 
 ### 6.3 Ajouter un match
 
@@ -248,10 +249,13 @@ Cliquer sur **Vue Document** pour basculer vers la fiche au format A4, structur�
 
 Cliquer sur **Bibliothèque** dans le Board Tactique.
 
-- **Filtrer** par catégorie via le menu déroulant
+- **Rechercher** : filtre par nom, poste impliqué ou matériel, combinable avec le filtre ci-dessous
+- **Filtrer** par Thématique (Attaque, Défense, Gardien, Enclenchement) via le menu déroulant
 - **Charger** : recharge l'exercice complet sur le terrain
 - **Supprimer** : efface définitivement l'exercice
-- Les exercices sont stockés sous forme de fichiers JSON dans `web-board/bibli/`
+- Les exercices sont stockés sous forme de fichiers JSON dans `web-board/data/bibli/`
+
+> **Migration ponctuelle** : les exercices créés avant l'introduction de la Thématique ont été reclassés une seule fois via `node scripts/migrate-thematique.js` (sauvegarde automatique avant modification, script idempotent — le relancer ne modifie pas les exercices déjà migrés).
 
 ---
 

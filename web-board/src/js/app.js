@@ -1507,10 +1507,18 @@ canvas.addEventListener('pointerdown', event => {
       // La frappe qui déclenche le double-clic/tap vient de pousser un point en doublon
       // (branche `else` ci-dessus) : le tracé a donc toujours >= 2 points ici.
       state.currentPath.points.pop();
+      if (state.currentPath.points.length <= 1) {
+        // Double-clic dès le tout premier point : aucun tracé réel n'a été fait,
+        // on annule complètement plutôt que de laisser un point isolé orphelin.
+        const idx = state.paths.indexOf(state.currentPath);
+        if (idx >= 0) state.paths.splice(idx, 1);
+        setStatus('Trajectoire annulée (un seul point)');
+      } else {
+        setStatus('Trajectoire terminée');
+      }
       state.currentPath = null;
       lastPointerDown = null;
       saveLocal();
-      setStatus('Trajectoire terminée');
     }
 
     render();

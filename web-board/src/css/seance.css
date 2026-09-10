@@ -697,6 +697,7 @@ body::before {
   margin-top: 8px;
   background: #fafbfc;
   display: flex; align-items: center; justify-content: center;
+  break-inside: avoid; break-before: avoid;
   font-family: 'DM Mono', monospace;
   font-size: 0.6rem; color: #c8d0dc; letter-spacing: 0.1em; text-transform: uppercase;
 }

@@ -14,7 +14,9 @@ let toastTimer = null;
 document.addEventListener('DOMContentLoaded', async () => {
   bindToolbar();
   bindModal();
-  await loadSeancesForLink(); // allSeances doit être chargé avant le premier rendu (détection des références orphelines)
+  // allSeances doit être chargé avant le premier rendu (détection des références orphelines),
+  // mais un fetch qui ne répond jamais ne doit pas empêcher le calendrier de s'afficher.
+  await Promise.race([loadSeancesForLink(), new Promise(resolve => setTimeout(resolve, 5000))]);
   loadEvents();
 });
 
@@ -216,7 +218,9 @@ function setSeanceLinkValue(seanceId) {
   if (seanceId && !allSeances.some(s => s.id === seanceId)) {
     const opt = document.createElement('option');
     opt.value = seanceId;
-    opt.textContent = 'Séance introuvable (supprimée)';
+    // Tant que allSeances n'a pas fini de charger, on ne sait pas encore si la
+    // séance existe vraiment : éviter de l'accuser d'être supprimée à tort.
+    opt.textContent = seancesLoaded ? 'Séance introuvable (supprimée)' : 'Séance (chargement…)';
     opt.dataset.orphanPlaceholder = 'true';
     sel.appendChild(opt);
   }

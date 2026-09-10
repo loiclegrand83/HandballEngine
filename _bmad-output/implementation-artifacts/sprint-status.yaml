@@ -29,32 +29,49 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 # - Retrospective appends its action items to action_items; the status view surfaces open ones
 generated: 09-10-2026 10:41
-last_updated: 09-10-2026 17:20
+last_updated: 09-10-2026 16:26
 project: haweb
 project_key: NOKEY
 tracking_system: file-system
 story_location: _bmad-output/implementation-artifacts
 development_status:
-  epic-1: in-progress
-  1-1-terminer-un-tracé-par-double-clic-double-tap: review
-  1-2-suppression-du-module-temps-mort: review
+  epic-1: done
+  1-1-terminer-un-tracé-par-double-clic-double-tap: done
+  1-2-suppression-du-module-temps-mort: done
   epic-1-retrospective: optional
 
-  epic-2: in-progress
-  2-1-migration-de-la-taxonomie-vers-thématique: review
-  2-2-assigner-une-thématique-et-filtrer-la-bibliothèque: review
-  2-3-recherche-par-mot-clé-champs-enrichis-de-la-fiche: review
+  epic-2: done
+  2-1-migration-de-la-taxonomie-vers-thématique: done
+  2-2-assigner-une-thématique-et-filtrer-la-bibliothèque: done
+  2-3-recherche-par-mot-clé-champs-enrichis-de-la-fiche: done
   epic-2-retrospective: optional
 
-  epic-3: in-progress
-  3-1-construire-une-séance-en-blocs-ateliers: review
-  3-2-ajuster-les-durées-avec-total-automatique: review
-  3-3-sauvegarder-et-rouvrir-une-séance: review
-  3-4-export-imprimable-de-la-séance: review
+  epic-3: done
+  3-1-construire-une-séance-en-blocs-ateliers: done
+  3-2-ajuster-les-durées-avec-total-automatique: done
+  3-3-sauvegarder-et-rouvrir-une-séance: done
+  3-4-export-imprimable-de-la-séance: done
   epic-3-retrospective: optional
 
-  epic-4: in-progress
-  4-1-vue-mensuelle-hebdomadaire: review
-  4-2-planifier-séance-et-match: review
+  epic-4: done
+  4-1-vue-mensuelle-hebdomadaire: done
+  4-2-planifier-séance-et-match: done
   4-3-historique-du-calendrier: done
-  epic-4-retrospective: optional
+  epic-4-retrospective: done
+action_items:
+  - id: "epic-4-retro-item-1-consolidate-planning-js-monday-offset-du"
+    epic: 4
+    action: "Consolidate planning.js Monday-offset duplication: renderCalendar() month
+      branch should call mondayOf(firstOfMonth) instead of recomputing the offset
+      inline (planning.js:95 vs :25)."
+    owner: "next dev session touching planning.js"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-4-retro-2026-09-10.md"
+  - id: "epic-4-retro-item-2-commit-the-two-already-applied-whole-bra"
+    epic: 4
+    action: "Commit the two already-applied whole-branch-code-review fixes in planning.js
+      (setSeanceLinkValue seancesLoaded guard + loadSeancesForLink fetch timeout)
+      — currently uncommitted in the working tree."
+    owner: "Loic"
+    status: open
+    ref: "_bmad-output/implementation-artifacts/epic-4-retro-2026-09-10.md"
