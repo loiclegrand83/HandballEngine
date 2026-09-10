@@ -214,10 +214,10 @@ body::before {
   width: var(--rail); background: var(--bloc-color, var(--muted)); opacity: 0.6;
 }
 
-.bloc[data-type="echauffement"]  { --bloc-color: #f5c400; }
-.bloc[data-type="exercice"]      { --bloc-color: #00e676; }
-.bloc[data-type="opposition"]    { --bloc-color: #b97fff; }
-.bloc[data-type="retour_calme"]  { --bloc-color: #5a6070; }
+.bloc[data-type="Échauffement"]     { --bloc-color: #f5c400; }
+.bloc[data-type="Exercice"]         { --bloc-color: #00e676; }
+.bloc[data-type="Opposition libre"] { --bloc-color: #b97fff; }
+.bloc[data-type="Retour au calme"]  { --bloc-color: #5a6070; }
 
 .bloc-header {
   display: flex; align-items: center; gap: 10px;
@@ -247,6 +247,21 @@ body::before {
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
+.bloc-name-input {
+  flex: 1;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 0.9rem; font-weight: 600;
+  height: 30px;
+}
+
+.bloc-ateliers-list { display: flex; flex-direction: column; gap: 10px; }
+
+.atelier-row {
+  display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-start;
+  padding-bottom: 10px; border-bottom: 1px dashed var(--border);
+}
+.atelier-row:last-child { border-bottom: none; padding-bottom: 0; }
+
 .bloc-duration {
   font-family: 'DM Mono', monospace;
   font-size: 0.72rem; color: var(--muted);
@@ -267,10 +282,9 @@ body::before {
 
 .bloc-body {
   padding: 14px 18px;
-  display: grid; grid-template-columns: 200px 1fr;
+  display: grid; grid-template-columns: 1fr;
   gap: 16px; align-items: start;
 }
-@media (max-width: 700px) { .bloc-body { grid-template-columns: 1fr; } }
 
 .bloc-thumb {
   width: 200px; height: 120px;
@@ -607,16 +621,22 @@ body::before {
   letter-spacing: 0.02em;
 }
 
-.doc-bloc[data-type="echauffement"] { --doc-bloc-color: #c8960a; }
-.doc-bloc[data-type="exercice"]     { --doc-bloc-color: #00875a; }
-.doc-bloc[data-type="opposition"]   { --doc-bloc-color: #6a3fa0; }
-.doc-bloc[data-type="retour_calme"] { --doc-bloc-color: #5a6070; }
+.doc-bloc[data-type="Échauffement"]     { --doc-bloc-color: #c8960a; }
+.doc-bloc[data-type="Exercice"]         { --doc-bloc-color: #00875a; }
+.doc-bloc[data-type="Opposition libre"] { --doc-bloc-color: #6a3fa0; }
+.doc-bloc[data-type="Retour au calme"]  { --doc-bloc-color: #5a6070; }
 
-/* Corps du bloc : schéma + contenu */
+/* Corps du bloc : liste d'ateliers + contenu */
 .doc-bloc-body {
+  display: flex; flex-direction: column;
+}
+
+.doc-bloc-atelier {
   display: grid;
   grid-template-columns: 280px 1fr;
+  border-bottom: 1px solid #eceef3;
 }
+.doc-bloc-atelier:last-child { border-bottom: none; }
 
 .doc-bloc-schema {
   padding: 14px 16px;

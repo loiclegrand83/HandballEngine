@@ -29,3 +29,11 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-2-3-recherche-mot-cle-champs-enrichis-fiche.md`
   summary: Bibliothèque cards (`renderLibrary()`) don't surface the new `duree`/`nbJoueurs`/`niveau` fields visually — they're searchable and editable but not shown at a glance on the library tile.
   evidence: Review suggestion; not required by Story 2.3's AC, which only requires the fields to exist and be optional/editable.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-3-1-construire-seance-blocs-ateliers.md`
+  summary: Once an Atelier is snapshotted into a Bloc, only its `duree` is editable in the builder UI — `description` and `materiel` have no edit field, only "Changer" (replace with a different Exercice entirely) or "Supprimer".
+  evidence: Review suggestion; not required by this story's AC (snapshot-at-add-time + reorder + replace), but a coach who wants to tweak the copied description/matériel text for this specific Séance currently can't.
+
+- source_spec: `_bmad-output/implementation-artifacts/spec-3-1-construire-seance-blocs-ateliers.md`
+  summary: The old per-Bloc-type default duration (échauffement=15, retour au calme=10, other=20 min) was dropped when duration moved from Bloc-level to per-Atelier; new Ateliers default to a flat 15 min with no type-based nudge.
+  evidence: Review observation; consistent with the new per-Atelier model (a Bloc no longer has one type), but loses a small piece of the old UI's guidance. Not required by any AC.

@@ -207,27 +207,26 @@ function renderBlocList() {
   });
 }
 
-function createBlocEl(bloc, idx) {
-  const typeLabels = {
-    echauffement: 'Échauffement',
-    exercice:     'Exercice',
-    opposition:   'Opposition libre',
-    retour_calme: 'Retour au calme',
-  };
+const BLOC_PRESET_LABELS = ['Échauffement', 'Exercice', 'Opposition libre', 'Retour au calme'];
 
+function blocDataType(nom) {
+  const match = BLOC_PRESET_LABELS.find(label => label.toLowerCase() === (nom || '').trim().toLowerCase());
+  return match || 'default';
+}
+
+function createBlocEl(bloc, idx) {
   const div = document.createElement('div');
   div.className = 'bloc';
-  div.dataset.type = bloc.type;
+  div.dataset.type = blocDataType(bloc.nom);
 
-  const ex = allExercises.find(e => e.id === bloc.exerciceId);
-  const snap = ex?.explanation?.steps?.[0]?.snapshot || null;
+  const totalDuree = (bloc.ateliers || []).reduce((sum, a) => sum + (a.duree || 0), 0);
 
   div.innerHTML = `
     <div class="bloc-header">
       <span class="bloc-num">BLOC ${String(idx + 1).padStart(2, '0')}</span>
-      <span class="bloc-type-badge">${typeLabels[bloc.type] || bloc.type}</span>
-      <span class="bloc-name">${ex ? ex.name : (bloc.type === 'opposition' ? 'Opposition libre' : '— Aucun exercice —')}</span>
-      <span class="bloc-duration">${bloc.duree ? bloc.duree + ' min' : ''}</span>
+      <input class="field-input bloc-name-input" type="text" data-field="nom" data-idx="${idx}"
+        value="${escapeHtml(bloc.nom)}" placeholder="Nom du bloc" />
+      <span class="bloc-duration">${totalDuree ? totalDuree + ' min' : ''}</span>
       <div class="bloc-actions">
         <button class="bloc-action-btn" title="Monter" data-action="up" data-idx="${idx}">↑</button>
         <button class="bloc-action-btn" title="Descendre" data-action="down" data-idx="${idx}">↓</button>
@@ -235,38 +234,12 @@ function createBlocEl(bloc, idx) {
       </div>
     </div>
     <div class="bloc-body">
-      <div class="bloc-thumb">
-        ${snap
-          ? `<img src="${snap}" alt="schéma" />`
-          : `<div class="bloc-thumb-empty">Schéma<br>disponible<br>à la sauvegarde<br>de l'exercice</div>`}
-      </div>
       <div class="bloc-fields">
+        <div class="bloc-ateliers-list" id="bloc-ateliers-${idx}"></div>
         <div>
-          <label class="field-label">Exercice</label>
-          <div style="display:flex;gap:6px;align-items:center;">
-            <span style="font-family:'Barlow Condensed',sans-serif;font-size:0.88rem;color:var(--text);flex:1;">
-              ${ex ? ex.name : '—'}
-            </span>
-            <button class="btn" style="height:30px;padding:0 10px;font-size:0.72rem;" data-action="pick" data-idx="${idx}">
-              ${ex ? 'Changer' : 'Choisir'}
-            </button>
-          </div>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-          <div>
-            <label class="field-label">Durée (min)</label>
-            <input class="field-input" type="number" min="1" max="120"
-              value="${bloc.duree || ''}" data-field="duree" data-idx="${idx}" placeholder="15" />
-          </div>
-          <div>
-            <label class="field-label">Type de bloc</label>
-            <select class="field-select" data-field="type" data-idx="${idx}">
-              <option value="echauffement"  ${bloc.type === 'echauffement'  ? 'selected' : ''}>Échauffement</option>
-              <option value="exercice"      ${bloc.type === 'exercice'      ? 'selected' : ''}>Exercice</option>
-              <option value="opposition"    ${bloc.type === 'opposition'    ? 'selected' : ''}>Opposition libre</option>
-              <option value="retour_calme"  ${bloc.type === 'retour_calme'  ? 'selected' : ''}>Retour au calme</option>
-            </select>
-          </div>
+          <button class="btn" style="height:30px;padding:0 10px;font-size:0.72rem;" data-action="pick" data-idx="${idx}">
+            + Ajouter un atelier
+          </button>
         </div>
         <div>
           <label class="field-label">Notes coach (consignes spécifiques à cette séance)</label>
@@ -276,6 +249,16 @@ function createBlocEl(bloc, idx) {
       </div>
     </div>
   `;
+
+  const ateliersList = div.querySelector(`#bloc-ateliers-${idx}`);
+  const ateliers = bloc.ateliers || [];
+  if (ateliers.length === 0) {
+    ateliersList.innerHTML = '<div class="bloc-thumb-empty">— Aucun exercice —</div>';
+  } else {
+    ateliers.forEach((atelier, aidx) => {
+      ateliersList.appendChild(createAtelierEl(bloc, idx, atelier, aidx));
+    });
+  }
 
   // Events
   div.querySelectorAll('[data-action]').forEach(btn => {
@@ -294,15 +277,9 @@ function createBlocEl(bloc, idx) {
     input.addEventListener('change', () => {
       const i     = parseInt(input.dataset.idx);
       const field = input.dataset.field;
-      if (field === 'type') {
-        seance.blocs[i].type = input.value;
-        div.dataset.type = input.value;
-        div.querySelector('.bloc-type-badge').textContent =
-          { echauffement:'Échauffement', exercice:'Exercice',
-            opposition:'Opposition libre', retour_calme:'Retour au calme' }[input.value] || input.value;
-      } else if (field === 'duree') {
-        seance.blocs[i].duree = parseInt(input.value) || 0;
-        div.querySelector('.bloc-duration').textContent = seance.blocs[i].duree ? seance.blocs[i].duree + ' min' : '';
+      if (field === 'nom') {
+        seance.blocs[i].nom = input.value;
+        div.dataset.type = blocDataType(input.value);
       } else if (field === 'notesCoach') {
         seance.blocs[i].notesCoach = input.value;
       }
@@ -313,8 +290,72 @@ function createBlocEl(bloc, idx) {
   return div;
 }
 
-function addBloc(type) {
-  seance.blocs.push({ type, exerciceId: null, duree: type === 'echauffement' ? 15 : type === 'retour_calme' ? 10 : 20, notesCoach: '' });
+function createAtelierEl(bloc, blocIdx, atelier, atelierIdx) {
+  const snap = atelier.snapshot || null;
+
+  const row = document.createElement('div');
+  row.className = 'atelier-row';
+  row.innerHTML = `
+    <div class="bloc-thumb">
+      ${snap
+        ? `<img src="${snap}" alt="schéma" />`
+        : `<div class="bloc-thumb-empty">Schéma<br>disponible<br>à la sauvegarde<br>de l'exercice</div>`}
+    </div>
+    <div style="flex:1; min-width: 180px;">
+      <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
+        <span style="font-family:'Barlow Condensed',sans-serif;font-size:0.88rem;color:var(--text);flex:1;min-width:120px;">
+          ${escapeHtml(atelier.nom) || '—'}
+        </span>
+        <input class="field-input" type="number" min="1" max="120" style="width:70px;"
+          value="${atelier.duree || ''}" data-atelier-field="duree" placeholder="min" />
+        <button class="bloc-action-btn" title="Monter" data-atelier-action="up">↑</button>
+        <button class="bloc-action-btn" title="Descendre" data-atelier-action="down">↓</button>
+        <button class="btn" style="height:30px;padding:0 10px;font-size:0.72rem;" data-atelier-action="pick">Changer</button>
+        <button class="bloc-action-btn danger" title="Supprimer" data-atelier-action="del">✕</button>
+      </div>
+    </div>
+  `;
+
+  row.querySelectorAll('[data-atelier-action]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const action = btn.dataset.atelierAction;
+      if (action === 'up')   moveAtelier(blocIdx, atelierIdx, -1);
+      if (action === 'down') moveAtelier(blocIdx, atelierIdx,  1);
+      if (action === 'del')  removeAtelier(blocIdx, atelierIdx);
+      if (action === 'pick') openExercisePicker(blocIdx, atelierIdx);
+    });
+  });
+
+  row.querySelectorAll('[data-atelier-field]').forEach(input => {
+    input.addEventListener('change', () => {
+      const field = input.dataset.atelierField;
+      if (field === 'duree') {
+        seance.blocs[blocIdx].ateliers[atelierIdx].duree = parseInt(input.value) || 0;
+        renderBlocList();
+      }
+    });
+  });
+
+  return row;
+}
+
+function removeAtelier(blocIdx, atelierIdx) {
+  seance.blocs[blocIdx].ateliers.splice(atelierIdx, 1);
+  renderBlocList();
+  updateMaterialSummary();
+}
+
+function moveAtelier(blocIdx, atelierIdx, dir) {
+  const ateliers = seance.blocs[blocIdx].ateliers;
+  const to = atelierIdx + dir;
+  if (to < 0 || to >= ateliers.length) return;
+  [ateliers[atelierIdx], ateliers[to]] = [ateliers[to], ateliers[atelierIdx]];
+  renderBlocList();
+}
+
+function addBloc(presetNom) {
+  seance.blocs.push({ nom: presetNom, ateliers: [], notesCoach: '' });
   renderBlocList();
   updateMaterialSummary();
 }
@@ -338,9 +379,10 @@ function moveBloc(idx, dir) {
 function updateMaterialSummary() {
   const materials = new Set();
   seance.blocs.forEach(bloc => {
-    const ex = allExercises.find(e => e.id === bloc.exerciceId);
-    const mat = ex?.explanation?.material?.trim();
-    if (mat) mat.split(/[,;\n]+/).map(s => s.trim()).filter(Boolean).forEach(m => materials.add(m));
+    (bloc.ateliers || []).forEach(atelier => {
+      const mat = atelier.materiel?.trim();
+      if (mat) mat.split(/[,;\n]+/).map(s => s.trim()).filter(Boolean).forEach(m => materials.add(m));
+    });
   });
 
   const el = document.getElementById('materialSummary');
@@ -363,9 +405,23 @@ function bindModal() {
   document.getElementById('modalCat').addEventListener('change', filterModal);
 }
 
-function openExercisePicker(blocIdx) {
-  modalCallback = (exId) => {
-    seance.blocs[blocIdx].exerciceId = exId;
+function openExercisePicker(blocIdx, atelierIdx) {
+  modalCallback = (ex) => {
+    const atelier = {
+      exerciceId: ex.id,
+      nom: ex.name || '',
+      description: ex.notes || '',
+      materiel: ex.explanation?.material || '',
+      duree: 15,
+      snapshot: ex.explanation?.steps?.[0]?.snapshot || null,
+    };
+    if (!seance.blocs[blocIdx].ateliers) seance.blocs[blocIdx].ateliers = [];
+    if (atelierIdx === undefined) {
+      seance.blocs[blocIdx].ateliers.push(atelier);
+    } else {
+      atelier.duree = seance.blocs[blocIdx].ateliers[atelierIdx].duree; // garde la durée déjà ajustée
+      seance.blocs[blocIdx].ateliers[atelierIdx] = atelier;
+    }
     renderBlocList();
     updateMaterialSummary();
   };
@@ -381,13 +437,13 @@ function closeModal() {
 }
 
 function filterModal() {
-  const q   = document.getElementById('modalSearch').value.toLowerCase();
-  const cat = document.getElementById('modalCat').value;
+  const q     = document.getElementById('modalSearch').value.toLowerCase();
+  const them  = document.getElementById('modalCat').value;
 
   const filtered = allExercises.filter(ex => {
-    const matchCat  = !cat || ex.category === cat;
+    const matchThem = !them || ex.thematique === them;
     const matchQ    = !q || ex.name.toLowerCase().includes(q) || (ex.notes || '').toLowerCase().includes(q);
-    return matchCat && matchQ;
+    return matchThem && matchQ;
   });
 
   const grid = document.getElementById('exGrid');
@@ -403,11 +459,11 @@ function filterModal() {
     card.className = 'ex-card';
     card.innerHTML = `
       <div class="ex-card-name">${ex.name}</div>
-      <div class="ex-card-cat" data-cat="${ex.category}">${catLabel(ex.category)}</div>
+      <div class="ex-card-cat" data-cat="${ex.thematique}">${thematiqueLabel(ex.thematique)}</div>
       ${ex.notes ? `<div class="ex-card-notes">${ex.notes}</div>` : ''}
     `;
     card.addEventListener('click', () => {
-      if (modalCallback) modalCallback(ex.id);
+      if (modalCallback) modalCallback(ex);
       closeModal();
     });
     grid.appendChild(card);
@@ -473,19 +529,13 @@ async function renderLibrary() {
    VUE DOCUMENT IMPRIMABLE
 ══════════════════════════════════════════════════════════════ */
 function buildDocument() {
-  const typeLabels = {
-    echauffement: 'Échauffement',
-    exercice:     'Exercice',
-    opposition:   'Opposition libre',
-    retour_calme: 'Retour au calme',
-  };
-
   // Matériel consolidé
   const materials = new Set();
   seance.blocs.forEach(bloc => {
-    const ex = allExercises.find(e => e.id === bloc.exerciceId);
-    const mat = ex?.explanation?.material?.trim();
-    if (mat) mat.split(/[,;\n]+/).map(s => s.trim()).filter(Boolean).forEach(m => materials.add(m));
+    (bloc.ateliers || []).forEach(atelier => {
+      const mat = atelier.materiel?.trim();
+      if (mat) mat.split(/[,;\n]+/).map(s => s.trim()).filter(Boolean).forEach(m => materials.add(m));
+    });
   });
 
   const page = document.getElementById('docPage');
@@ -521,20 +571,18 @@ function buildDocument() {
 
     <div class="doc-material-bar">
       <span class="doc-material-label">⬡ Matériel</span>
-      <span class="doc-material-value">${materials.size > 0 ? [...materials].join(' · ') : 'Non renseigné dans les exercices'}</span>
+      <span class="doc-material-value">${materials.size > 0 ? escapeHtml([...materials].join(' · ')) : 'Non renseigné dans les exercices'}</span>
     </div>
   `;
 
   // Blocs
   seance.blocs.forEach((bloc, idx) => {
-    const ex     = allExercises.find(e => e.id === bloc.exerciceId);
-    const steps  = ex?.explanation?.steps || [];
-    const snap   = steps[0]?.snapshot || null;
-    const name   = ex ? ex.name : (bloc.type === 'opposition' ? 'Opposition libre' : 'Exercice libre');
+    const ateliers   = bloc.ateliers || [];
+    const totalDuree = ateliers.reduce((sum, a) => sum + (a.duree || 0), 0);
 
     const blocEl = document.createElement('div');
     blocEl.className = 'doc-bloc';
-    blocEl.dataset.type = bloc.type;
+    blocEl.dataset.type = blocDataType(bloc.nom);
 
     // Header du bloc
     blocEl.innerHTML = `
@@ -542,67 +590,54 @@ function buildDocument() {
         <div class="doc-bloc-rail"></div>
         <div class="doc-bloc-label">
           <span class="doc-bloc-num">BLOC ${String(idx + 1).padStart(2, '0')}</span>
-          <span class="doc-bloc-type">${typeLabels[bloc.type] || bloc.type}</span>
-          ${bloc.duree ? `<span class="doc-bloc-dur">${bloc.duree} min</span>` : ''}
+          ${totalDuree ? `<span class="doc-bloc-dur">${totalDuree} min</span>` : ''}
         </div>
-        <div class="doc-bloc-name">${name}</div>
+        <div class="doc-bloc-name">${escapeHtml(bloc.nom) || 'Bloc sans nom'}</div>
       </div>
-      <div class="doc-bloc-body">
-        <div class="doc-bloc-schema">
-          ${snap
-            ? `<img src="${snap}" alt="schéma ${name}" />`
-            : `<div class="doc-bloc-schema-empty">Schéma<br>non disponible</div>`}
-        </div>
-        <div class="doc-bloc-content" id="doc-bloc-content-${idx}"></div>
-      </div>
+      <div class="doc-bloc-body" id="doc-bloc-body-${idx}"></div>
     `;
 
     page.appendChild(blocEl);
 
-    const content = blocEl.querySelector(`#doc-bloc-content-${idx}`);
+    const body = blocEl.querySelector(`#doc-bloc-body-${idx}`);
+
+    if (ateliers.length === 0) {
+      const emptyEl = document.createElement('div');
+      emptyEl.className = 'doc-bloc-schema-empty';
+      emptyEl.textContent = 'Aucun exercice';
+      body.appendChild(emptyEl);
+    } else {
+      ateliers.forEach((atelier, aidx) => {
+        const atelierEl = document.createElement('div');
+        atelierEl.className = 'doc-bloc-atelier';
+        atelierEl.innerHTML = `
+          <div class="doc-bloc-schema">
+            ${atelier.snapshot
+              ? `<img src="${atelier.snapshot}" alt="schéma ${escapeHtml(atelier.nom)}" />`
+              : `<div class="doc-bloc-schema-empty">Schéma<br>non disponible</div>`}
+          </div>
+          <div class="doc-bloc-content" id="doc-bloc-content-${idx}-${aidx}">
+            <div class="doc-step-desc"><strong>${escapeHtml(atelier.nom) || '—'}</strong>${atelier.duree ? ` — ${atelier.duree} min` : ''}</div>
+            ${atelier.description ? `<div class="doc-step-desc">${escapeHtml(atelier.description)}</div>` : ''}
+          </div>
+        `;
+        body.appendChild(atelierEl);
+      });
+    }
 
     // Notes coach
     if (bloc.notesCoach?.trim()) {
       const notes = document.createElement('div');
       notes.className = 'doc-bloc-notes-coach';
       notes.textContent = bloc.notesCoach;
-      content.appendChild(notes);
-    }
-
-    // Étapes de l'exercice
-    if (steps.length > 0) {
-      steps.forEach((step, si) => {
-        const stepEl = document.createElement('div');
-        stepEl.className = 'doc-step';
-        stepEl.innerHTML = `
-          <div class="doc-step-num">Étape ${step.step || si + 1}</div>
-          ${step.description ? `<div class="doc-step-desc">${step.description}</div>` : ''}
-          ${step.attention ? `
-            <div class="doc-step-attention">
-              <span class="doc-step-attention-icon">⚠</span>
-              <span>${step.attention}</span>
-            </div>` : ''}
-        `;
-        content.appendChild(stepEl);
-      });
-    } else if (bloc.type === 'opposition') {
-      const oppEl = document.createElement('div');
-      oppEl.className = 'doc-step';
-      oppEl.innerHTML = `
-        <div class="doc-step-desc">Opposition libre — application des principes travaillés en séance.</div>
-        <div class="doc-step-attention">
-          <span class="doc-step-attention-icon">⚠</span>
-          <span>Observer l'application des thèmes tactiques abordés.</span>
-        </div>
-      `;
-      content.appendChild(oppEl);
+      body.appendChild(notes);
     }
 
     // Zone annotation tablette
     const annotEl = document.createElement('div');
     annotEl.className = 'doc-annotation-zone';
     annotEl.textContent = 'Zone annotations';
-    content.appendChild(annotEl);
+    body.appendChild(annotEl);
   });
 
   // Pied de page
@@ -618,6 +653,14 @@ function buildDocument() {
 /* ══════════════════════════════════════════════════════════════
    UTILITAIRES
 ══════════════════════════════════════════════════════════════ */
+function escapeHtml(str) {
+  return String(str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
 function todayISO() {
   return new Date().toISOString().split('T')[0];
 }
@@ -628,9 +671,9 @@ function formatDate(iso) {
   return `${d}/${m}/${y}`;
 }
 
-function catLabel(cat) {
-  return { echauffement:'Échauffement', offensif:'Offensif', defensif:'Défensif',
-           montee_balle:'Montée de balle', physique:'Physique' }[cat] || cat;
+function thematiqueLabel(them) {
+  return { attaque:'Attaque', defense:'Défense', gardien:'Gardien',
+           enclenchement:'Enclenchement' }[them] || them || '—';
 }
 
 let toastTimer = null;
