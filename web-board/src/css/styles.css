@@ -780,11 +780,10 @@ canvas {
   align-self: flex-start;
 }
 
-.library-card-badge[data-category="echauffement"] { background: rgba(245,196,0,0.12);    color: #f5c400; border: 1px solid rgba(245,196,0,0.3); }
-.library-card-badge[data-category="physique"]     { background: rgba(255,59,48,0.12);     color: #ff6b6b; border: 1px solid rgba(255,59,48,0.3); }
-.library-card-badge[data-category="offensif"]     { background: rgba(0,230,118,0.12);     color: #00e676; border: 1px solid rgba(0,230,118,0.3); }
-.library-card-badge[data-category="defensif"]     { background: rgba(33,150,243,0.12);    color: #64b5f6; border: 1px solid rgba(33,150,243,0.3); }
-.library-card-badge[data-category="montee_balle"] { background: rgba(156,39,176,0.12);    color: #ce93d8; border: 1px solid rgba(156,39,176,0.3); }
+.library-card-badge[data-thematique="attaque"]       { background: rgba(0,230,118,0.12);  color: #00e676; border: 1px solid rgba(0,230,118,0.3); }
+.library-card-badge[data-thematique="defense"]       { background: rgba(33,150,243,0.12); color: #64b5f6; border: 1px solid rgba(33,150,243,0.3); }
+.library-card-badge[data-thematique="gardien"]       { background: rgba(245,196,0,0.12);  color: #f5c400; border: 1px solid rgba(245,196,0,0.3); }
+.library-card-badge[data-thematique="enclenchement"] { background: rgba(156,39,176,0.12); color: #ce93d8; border: 1px solid rgba(156,39,176,0.3); }
 
 .library-card-actions {
   display: flex;

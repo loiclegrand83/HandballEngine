@@ -1744,19 +1744,17 @@ async function renderLibrary() {
       return;
     }
     
-    const categoryLabels = {
-      'none': 'Sans catégorie',
-      'echauffement': 'Échauffement',
-      'physique': 'Physique',
-      'offensif': 'Offensif',
-      'defensif': 'Défensif',
-      'montee_balle': 'Montée de balle'
+    const thematiqueLabels = {
+      'attaque': 'Attaque',
+      'defense': 'Défense',
+      'gardien': 'Gardien',
+      'enclenchement': 'Enclenchement'
     };
 
     lib.forEach(ex => {
-      if (filterVal !== 'all' && ex.category !== filterVal && !(filterVal === 'none' && !ex.category)) return;
-      
-      const cat = ex.category || 'none';
+      if (filterVal !== 'all' && ex.thematique !== filterVal) return;
+
+      const them = thematiqueLabels[ex.thematique] ? ex.thematique : null;
       let dateStr = 'Inconnue';
       const validDate = new Date(ex.updatedAt || ex.exportedAt);
       if (!isNaN(validDate.getTime())) {
@@ -1769,8 +1767,8 @@ async function renderLibrary() {
       
       const badge = document.createElement('span');
       badge.className = 'library-card-badge';
-      badge.dataset.category = cat;
-      badge.textContent = categoryLabels[cat] || 'Inconnue';
+      badge.dataset.thematique = them || 'inconnue';
+      badge.textContent = them ? thematiqueLabels[them] : 'Inconnue';
 
       const title = document.createElement('h3');
       title.className = 'library-card-title';
