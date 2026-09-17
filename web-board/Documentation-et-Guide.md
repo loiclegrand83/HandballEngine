@@ -34,18 +34,29 @@ Handball Engine est un outil local (aucune connexion internet requise) conçu po
 
 ## 2. Lancement
 
-### Linux — raccourci bureau
-Double-cliquer sur `Handball-Board.desktop` dans le dossier `web-board/`.
+### Raccourci bureau (Linux/macOS)
+
+**Linux :** Double-cliquer sur `handball-engine.desktop` (ou copier dans `~/.local/share/applications/`)
+
+**macOS :** Double-cliquer sur `Handball-Engine.command`
 
 ### Ligne de commande
+
 ```bash
 cd web-board
-bash Lancer-Board.sh
+./launcher.sh
 ```
 
 Le serveur démarre sur `http://localhost:3000` et ouvre le navigateur automatiquement.
 
-> **Arrêt :** `Ctrl+C` dans le terminal ou fermeture de la fenêtre du bureau.
+#### Gestion des processus
+
+Le launcher vérifie automatiquement les **PIDs orphelins** avant lancement :
+- Détecte tout serveur déjà actif sur le port 3000
+- Tue proprement les processus zombie
+- Garantit un démarrage sans conflit
+
+> **Arrêt :** `Ctrl+C` dans le terminal — arrêt graceful avec cleanup
 
 ---
 
@@ -298,8 +309,9 @@ Cliquer sur **Bibliothèque** dans le Board Tactique.
 | `src/css/explanation.css` | Styles de la fiche (A4 + print) |
 | `server.js` | Serveur Node.js local sécurisé |
 | `manifest.json` | PWA (installation tablette, orientation paysage) |
-| `Lancer-Board.sh` | Script de lancement Linux |
-| `Handball-Board.desktop` | Raccourci bureau Linux |
+| `launcher.sh` | Script de lancement bash (gestion PIDs orphelins) |
+| `handball-engine.desktop` | Raccourci bureau Linux |
+| `Handball-Engine.command` | Lanceur macOS |
 | `data/bibli/` | Dossier des exercices sauvegardés (non versionné) |
 | `data/seances/` | Dossier des séances sauvegardées (non versionné) |
 | `data/planning/` | Dossier des événements du planning (non versionné) |
