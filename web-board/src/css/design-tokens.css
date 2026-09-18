@@ -1,0 +1,173 @@
+/* ── DESIGN TOKENS — Dock UI ────────────────────────────────────────────────────
+   Centralized design system for Dock UI, responsive layout, and Material Design 3
+   integration. All values use CSS custom properties for consistency and DRY principle.
+*/
+
+:root {
+  /* ── Color System ────────────────────────────────────────────────────────── */
+
+  /* Primary & Accent */
+  --color-primary:              #f5c400;  /* Yellow (Handball Engine brand) */
+  --color-primary-dark:         #d4a000;  /* Darker shade for hover/active */
+  --color-primary-light:        #ffe082;  /* Lighter shade for subtle states */
+
+  /* Neutral Background */
+  --color-bg-darkest:           #080b0f;  /* Darkest bg (main page) */
+  --color-bg-dark:              #0d1015;  /* Dark bg (panels, dock) */
+  --color-surface:              #111419;  /* Surface (cards, elevated) */
+  --color-surface-hover:        #181c22;  /* Surface hover state */
+  --color-surface-variant:      #1e2228;  /* Variant for borders, dividers */
+
+  /* Text & Foreground */
+  --color-text-primary:         #f0ece0;  /* Main text (high contrast) */
+  --color-text-secondary:       #a0a5b0;  /* Secondary text (muted) */
+  --color-text-muted:           #5a6070;  /* Muted text (hints, disabled) */
+
+  /* Semantic Colors */
+  --color-success:              #00e676;  /* Green (success state) */
+  --color-success-soft:         rgba(0, 230, 118, 0.1);
+  --color-warning:              #ffa726;  /* Orange (warning state) */
+  --color-warning-soft:         rgba(255, 167, 38, 0.1);
+  --color-error:                #ff3b30;  /* Red (error state) */
+  --color-error-soft:           rgba(255, 59, 48, 0.1);
+
+  /* Overlay & Glassmorphism */
+  --color-overlay-light:        rgba(255, 255, 255, 0.05);
+  --color-overlay-medium:       rgba(255, 255, 255, 0.08);
+  --color-overlay-strong:       rgba(255, 255, 255, 0.12);
+  --color-scrim:                rgba(0, 0, 0, 0.32);  /* For modals/overlays */
+
+  /* ── Spacing Scale ──────────────────────────────────────────────────────── */
+
+  --spacing-xs:                 4px;
+  --spacing-sm:                 8px;
+  --spacing-md:                 12px;
+  --spacing-lg:                 16px;
+  --spacing-xl:                 24px;
+  --spacing-2xl:                32px;
+  --spacing-3xl:                48px;
+
+  /* ── Typography ─────────────────────────────────────────────────────────── */
+
+  /* Font Families */
+  --font-family-sans:           'Barlow', system-ui, -apple-system, sans-serif;
+  --font-family-display:        'Bebas Neue', sans-serif;
+  --font-family-mono:           'DM Mono', monospace;
+
+  /* Font Sizes */
+  --font-size-xs:               0.75rem;   /* 12px */
+  --font-size-sm:               0.875rem;  /* 14px */
+  --font-size-base:             1rem;      /* 16px */
+  --font-size-lg:               1.125rem;  /* 18px */
+  --font-size-xl:               1.25rem;   /* 20px */
+  --font-size-2xl:              1.5rem;    /* 24px */
+
+  /* Font Weights */
+  --font-weight-regular:        400;
+  --font-weight-medium:         500;
+  --font-weight-semibold:       600;
+  --font-weight-bold:           700;
+  --font-weight-extrabold:      800;
+
+  /* Line Heights */
+  --line-height-tight:          1.2;
+  --line-height-normal:         1.5;
+  --line-height-relaxed:        1.75;
+
+  /* ── Border Radius ──────────────────────────────────────────────────────── */
+
+  --radius-sm:                  4px;    /* Small: buttons, inputs */
+  --radius-md:                  8px;    /* Medium: cards, panels */
+  --radius-lg:                  12px;   /* Large: modals, dock */
+  --radius-full:                9999px; /* Full: pills, badges */
+
+  /* ── Shadows (Material Design 3) ───────────────────────────────────────── */
+
+  --shadow-xs:                  0 1px 2px 0 rgba(0, 0, 0, 0.2);
+  --shadow-sm:                  0 2px 4px 0 rgba(0, 0, 0, 0.25);
+  --shadow-md:                  0 4px 8px 0 rgba(0, 0, 0, 0.3);
+  --shadow-lg:                  0 8px 16px 0 rgba(0, 0, 0, 0.35);
+  --shadow-xl:                  0 12px 24px 0 rgba(0, 0, 0, 0.4);
+
+  /* Elevation shadows (for glassmorphism panels) */
+  --shadow-elevation-1:         0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12);
+  --shadow-elevation-2:         0 5px 3px -1px rgba(0, 0, 0, 0.2), 0 3px 4px 0 rgba(0, 0, 0, 0.14), 0 1px 8px 0 rgba(0, 0, 0, 0.12);
+  --shadow-elevation-3:         0 8px 5px -2px rgba(0, 0, 0, 0.2), 0 5px 6px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12);
+  --shadow-elevation-4:         0 12px 7px -4px rgba(0, 0, 0, 0.2), 0 7px 8px 0 rgba(0, 0, 0, 0.14), 0 2px 13px 0 rgba(0, 0, 0, 0.12);
+
+  /* ── Animation & Transitions ────────────────────────────────────────────── */
+
+  /* Easing functions (cubic-bezier for Material Design 3) */
+  --ease-standard:              cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-emphasized:            cubic-bezier(0.2, 0, 0, 1);
+  --ease-decelerated:           cubic-bezier(0, 0, 0.2, 1);
+  --ease-accelerated:           cubic-bezier(0.4, 0, 1, 1);
+
+  /* Duration */
+  --duration-short:             150ms;
+  --duration-medium:            250ms;
+  --duration-long:              350ms;
+  --duration-extra-long:        500ms;
+
+  /* ── Backdrop Filter (Glassmorphism) ───────────────────────────────────── */
+
+  --blur-sm:                    8px;
+  --blur-md:                    10px;
+  --blur-lg:                    16px;
+
+  /* ── Layout & Grid ───────────────────────────────────────────────────────── */
+
+  /* Dock & Sidebar dimensions */
+  --dock-height:                64px;
+  --sidebar-width-tablet:       120px;  /* ≤1024px */
+  --sidebar-width-desktop:      180px;  /* 1024–1399px */
+  --sidebar-width-desktop-lg:   220px;  /* ≥1400px */
+
+  /* Rail accent (left border on sidebar) */
+  --rail-width:                 3px;
+
+  /* ── Z-Index Scale ──────────────────────────────────────────────────────── */
+
+  --z-canvas:                   1;
+  --z-sidebar:                  10;
+  --z-dock:                     100;
+  --z-panel:                    99;   /* Just below dock to avoid overlap */
+  --z-tooltip:                  101;
+  --z-modal:                    200;
+}
+
+/* ── Responsive Spacing (based on viewport) ─────────────────────────────────── */
+
+/* Tablet breakpoint: ≤1024px */
+@media (max-width: 1023px) {
+  :root {
+    --sidebar-width:            var(--sidebar-width-tablet);
+    --font-size-sm:             0.8125rem;  /* Slightly smaller on tablet */
+    --font-size-base:           0.9375rem;
+  }
+}
+
+/* Desktop breakpoint: 1024–1399px */
+@media (min-width: 1024px) and (max-width: 1399px) {
+  :root {
+    --sidebar-width:            var(--sidebar-width-desktop);
+  }
+}
+
+/* Large desktop: ≥1400px */
+@media (min-width: 1400px) {
+  :root {
+    --sidebar-width:            var(--sidebar-width-desktop-lg);
+  }
+}
+
+/* Fallback for mobile (portrait): <600px — not in scope for v1, but defined for future */
+@media (max-width: 599px) {
+  :root {
+    --spacing-xs:               2px;
+    --spacing-sm:               4px;
+    --spacing-md:               8px;
+    --font-size-xs:             0.65rem;
+    --font-size-sm:             0.75rem;
+  }
+}
