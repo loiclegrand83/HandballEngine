@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(node server.js)",
-      "Bash(curl -s http://localhost:3000 -o /dev/null -w \"%{http_code}\")"
+      "Bash(curl -s http://localhost:3000 -o /dev/null -w \"%{http_code}\")",
+      "Bash(chmod +x /home/loic/Software/haweb/web-board/launcher.sh /home/loic/Software/haweb/Handball-Engine.command)"
     ]
   }
 }

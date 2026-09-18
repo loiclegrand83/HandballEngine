@@ -1,0 +1,380 @@
+/* ── ASSETS GRID — 12-Item Grid for Asset Selection Mode ──────────────────────────
+   Responsive 4×3 grid (desktop), 3×4 (tablet), 2×6 (mobile).
+   Appears when Assets icon clicked, replaces dock icons.
+   Material Design 3 + smooth transitions.
+*/
+
+/* ── Assets Grid Container (Shown when Dock is in Assets Mode) ─────────────────– */
+
+.assets-grid {
+  position: fixed;
+  bottom: var(--spacing-lg);
+  left: 50%;
+  transform: translateX(-50%);
+
+  /* Dimensions */
+  width: fit-content;
+  max-width: calc(100vw - var(--spacing-2xl));
+  z-index: var(--z-dock);
+
+  /* Layout: 4×3 grid (desktop) */
+  display: grid;
+  grid-template-columns: repeat(4, minmax(72px, 1fr));
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg) var(--spacing-2xl);
+
+  /* Styling */
+  background: rgba(13, 16, 21, 0.7);
+  backdrop-filter: blur(var(--blur-lg));
+  -webkit-backdrop-filter: blur(var(--blur-lg));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-elevation-2);
+
+  /* Animation */
+  animation: slideUp var(--duration-medium) var(--ease-standard));
+  opacity: 1;
+
+  /* Fallback for older browsers */
+  @supports not (backdrop-filter: blur(1px)) {
+    background: var(--color-surface);
+    border: 1px solid var(--color-surface-variant);
+  }
+}
+
+/* Slide up animation for grid appearance */
+@keyframes slideUp {
+  from {
+    transform: translateX(-50%) translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Hidden state */
+.assets-grid.hidden {
+  display: none;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ── Assets Grid Item (Individual Asset Button) ──────────────────────────────────– */
+
+.asset-grid-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+
+  /* Size: 72×72px, responsive */
+  width: 72px;
+  height: 72px;
+  min-width: 72px;
+  min-height: 72px;
+
+  /* Appearance */
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+
+  /* Text & icon */
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-semibold);
+  font-family: var(--font-family-sans);
+
+  /* Transitions */
+  transition: all var(--duration-short) var(--ease-standard));
+
+  /* Remove default button styles */
+  padding: 0;
+  margin: 0;
+  font-family: inherit;
+
+  /* Ensure touch target ≥44px */
+  min-height: 44px;
+}
+
+/* ── Asset Item: Default State ───────────────────────────────────────────────────– */
+
+.asset-grid-item {
+  opacity: 0.7;
+  color: var(--color-text-secondary);
+}
+
+/* ── Asset Item: Hover State ────────────────────────────────────────────────────– */
+
+.asset-grid-item:hover {
+  opacity: 1;
+  background: var(--color-overlay-medium);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: var(--shadow-elevation-1));
+  transform: scale(1.08);
+  color: var(--color-text-primary);
+}
+
+/* ── Asset Item: Active State (Selected) ────────────────────────────────────────– */
+
+.asset-grid-item.active {
+  opacity: 1;
+  background: rgba(245, 196, 0, 0.15);
+  border: 1.5px solid var(--color-primary);
+  box-shadow: 0 0 8px rgba(245, 196, 0, 0.3),
+              var(--shadow-elevation-2));
+  color: var(--color-primary);
+}
+
+.asset-grid-item.active:hover {
+  background: rgba(245, 196, 0, 0.2);
+  box-shadow: 0 0 12px rgba(245, 196, 0, 0.4),
+              var(--shadow-elevation-2));
+}
+
+/* ── Asset Item Icon (Emoji or SVG, Large) ──────────────────────────────────────– */
+
+.asset-grid-item::before {
+  font-size: 32px;
+  line-height: 1;
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Asset Item Label ────────────────────────────────────────────────────────────– */
+
+.asset-grid-item::after {
+  content: attr(data-label);
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* ── Asset Item Focus (Keyboard Navigation) ─────────────────────────────────────– */
+
+.asset-grid-item:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* ── Asset Item: Disabled State ──────────────────────────────────────────────────– */
+
+.asset-grid-item:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.asset-grid-item:disabled:hover {
+  background: transparent;
+  border-color: transparent;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ── Specific Asset Icons (Emojis for Each Asset) ────────────────────────────────– */
+
+.asset-grid-item[data-asset="ballon"]::before { content: "⚽"; }
+.asset-grid-item[data-asset="haie"]::before { content: "🏃"; }
+.asset-grid-item[data-asset="haltere"]::before { content: "🏋️"; }
+.asset-grid-item[data-asset="cible"]::before { content: "🎯"; }
+.asset-grid-item[data-asset="swiss-ball"]::before { content: "⚪"; }
+.asset-grid-item[data-asset="coupelle"]::before { content: "🪣"; }
+.asset-grid-item[data-asset="cerceau"]::before { content: "⭕"; }
+.asset-grid-item[data-asset="echelle"]::before { content: "🪜"; }
+.asset-grid-item[data-asset="mannequin"]::before { content: "🤼"; }
+.asset-grid-item[data-asset="mur"]::before { content: "🧱"; }
+.asset-grid-item[data-asset="plot"]::before { content: "📍"; }
+.asset-grid-item[data-asset="zone"]::before { content: "📦"; }
+
+/* ── Responsive Breakpoints ──────────────────────────────────────────────────────– */
+
+/* Desktop Large (≥1400px): 4×3 grid, 72×72px items */
+@media (min-width: 1400px) {
+  .assets-grid {
+    grid-template-columns: repeat(4, minmax(72px, 1fr));
+    gap: var(--spacing-lg);
+    padding: var(--spacing-xl) var(--spacing-2xl);
+  }
+
+  .asset-grid-item {
+    width: 72px;
+    height: 72px;
+    min-width: 72px;
+    min-height: 72px;
+  }
+
+  .asset-grid-item::before {
+    font-size: 32px;
+    width: 40px;
+    height: 40px;
+  }
+
+  .asset-grid-item::after {
+    font-size: var(--font-size-xs);
+  }
+}
+
+/* Desktop (1024–1399px): 4×3 grid, 68×68px items */
+@media (min-width: 1024px) and (max-width: 1399px) {
+  .assets-grid {
+    grid-template-columns: repeat(4, minmax(68px, 1fr));
+    gap: var(--spacing-md);
+    padding: var(--spacing-lg) var(--spacing-xl);
+  }
+
+  .asset-grid-item {
+    width: 68px;
+    height: 68px;
+    min-width: 68px;
+    min-height: 68px;
+  }
+
+  .asset-grid-item::before {
+    font-size: 28px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .asset-grid-item::after {
+    font-size: var(--font-size-xs);
+  }
+}
+
+/* Tablet (≤1024px): 3×4 grid, 60×60px items */
+@media (max-width: 1023px) {
+  .assets-grid {
+    grid-template-columns: repeat(3, minmax(56px, 1fr));
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md) var(--spacing-lg);
+    max-width: calc(100vw - var(--spacing-xl));
+    bottom: var(--spacing-md);
+  }
+
+  .asset-grid-item {
+    width: 56px;
+    height: 56px;
+    min-width: 56px;
+    min-height: 56px;
+  }
+
+  .asset-grid-item::before {
+    font-size: 24px;
+    width: 32px;
+    height: 32px;
+  }
+
+  .asset-grid-item::after {
+    font-size: 0.65rem;
+  }
+}
+
+/* Mobile (≤768px, future): 2×6 grid, 52×52px items */
+@media (max-width: 768px) {
+  .assets-grid {
+    grid-template-columns: repeat(2, minmax(52px, 1fr));
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    max-width: calc(100vw - var(--spacing-lg));
+  }
+
+  .asset-grid-item {
+    width: 52px;
+    height: 52px;
+    min-width: 52px;
+    min-height: 52px;
+  }
+
+  .asset-grid-item::before {
+    font-size: 20px;
+    width: 28px;
+    height: 28px;
+  }
+
+  .asset-grid-item::after {
+    font-size: 0.6rem;
+    white-space: normal;
+    text-align: center;
+  }
+}
+
+/* ── Performance Optimization ───────────────────────────────────────────────────– */
+
+.assets-grid {
+  will-change: opacity, transform;
+}
+
+.asset-grid-item:hover {
+  will-change: transform, box-shadow;
+}
+
+.asset-grid-item {
+  will-change: auto;
+}
+
+/* Remove will-change after animation */
+.asset-grid-item:not(:hover) {
+  will-change: auto;
+}
+
+/* ── Back Button (Navigate Back to Dock) ──────────────────────────────────────────– */
+
+.assets-back-button {
+  position: fixed;
+  bottom: calc(var(--dock-height) + var(--spacing-xl));
+  left: 50%;
+  transform: translateX(-50%);
+
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: 20px;
+  color: var(--color-text-secondary);
+  transition: all var(--duration-short) var(--ease-standard));
+  z-index: calc(var(--z-dock) - 1);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.assets-back-button::before {
+  content: "←";
+}
+
+.assets-back-button:hover {
+  background: var(--color-overlay-medium);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--color-text-primary);
+  transform: scale(1.08);
+}
+
+.assets-back-button:active {
+  transform: translateX(-50%) scale(0.95);
+}
+
+.assets-back-button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Hidden when not in assets mode */
+.assets-back-button.hidden {
+  display: none;
+  opacity: 0;
+  pointer-events: none;
+}

@@ -15,27 +15,41 @@
 </head>
 <body>
   <div class="app-shell">
+    <!-- ─── SIDEBAR ─────────────────────────────────────────────────────────── -->
     <aside class="sidebar">
       <h1>Board</h1>
+
+      <!-- Quick Actions -->
       <div class="button-group small" style="margin-bottom: 6px;">
         <button id="newExercise" title="Nouvel exercice">Nouveau</button>
-        <button id="saveLocal" title="Enregistrer l'exercice">Enregistrer</button>
+        <button id="saveLocal" title="Enregistrer l’exercice">Enregistrer</button>
         <button id="openLibrary" title="Ouvrir la bibliothèque">Bibliothèque</button>
         <button id="exportJson" title="Exporter JSON">Export JSON</button>
       </div>
-      <button id="openExplanation" title="Ouvrir la page explication" style="width:100%;margin-bottom:5px;padding:9px 12px;background:rgba(245,196,0,0.08);border:1px solid rgba(245,196,0,0.3);border-radius:4px;color:#f5c400;font:700 0.82rem 'Barlow Condensed',system-ui;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;text-align:left;">📋 Explication &amp; Points d'attention</button>
+      <button id="openExplanation" title="Ouvrir la page explication" style="width:100%;margin-bottom:5px;padding:9px 12px;background:rgba(245,196,0,0.08);border:1px solid rgba(245,196,0,0.3);border-radius:4px;color:#f5c400;font:700 0.82rem ‘Barlow Condensed’,system-ui;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;text-align:left;">📋 Explication &amp; Points d’attention</button>
       <input id="importJson" type="file" accept="application/json" title="Importer JSON" />
+
       <hr />
-      <section>
-        <h2>Vue</h2>
+
+      <!-- Vue Section (Collapsible) -->
+      <details class="sidebar-section" data-section="vue" open>
+        <summary>
+          <h2>Vue</h2>
+          <span class="summary-icon">▼</span>
+        </summary>
         <div class="button-group" id="viewModeButtons">
           <button type="button" data-mode="full">Terrain complet</button>
           <button type="button" data-mode="half">Demi-terrain</button>
           <button type="button" data-mode="perspective">Perspective</button>
         </div>
-      </section>
-      <section>
-        <h2>Mode</h2>
+      </details>
+
+      <!-- Mode Section (Collapsible) -->
+      <details class="sidebar-section" data-section="mode" open>
+        <summary>
+          <h2>Mode</h2>
+          <span class="summary-icon">▼</span>
+        </summary>
         <div class="button-group" id="drawModeButtons">
           <button type="button" data-mode="asset">Asset</button>
           <button type="button" data-mode="select">Sélect</button>
@@ -45,18 +59,23 @@
           <button type="button" data-mode="croise">Croisé</button>
           <button type="button" data-mode="fixation" style="grid-column: span 2;">Fixation</button>
         </div>
-        
+
         <label class="toggle-btn" style="margin-bottom: 6px;">
           <input type="checkbox" id="syncCheckbox" />
           <span class="toggle-label">Lié à la trajectoire précédente</span>
         </label>
-        
+
         <div class="button-group small">
           <button id="playAnimation">▶ Animation</button>
         </div>
-      </section>
-      <section>
-        <h2>Exercice</h2>
+      </details>
+
+      <!-- Exercice Section (Collapsible) -->
+      <details class="sidebar-section" data-section="exercice" open>
+        <summary>
+          <h2>Exercice</h2>
+          <span class="summary-icon">▼</span>
+        </summary>
         <label>
           Nom
           <input id="exerciseName" type="text" value="Exercice 1" />
@@ -90,16 +109,21 @@
           <input id="exerciseNbJoueurs" type="number" min="0" step="1" />
         </label>
         <label>
-          Niveau / catégorie d'âge
+          Niveau / catégorie d’âge
           <input id="exerciseNiveau" type="text" placeholder="ex: -15 ans, Confirmés" />
         </label>
         <label>
           Notes
           <textarea id="exerciseNotes" rows="2"></textarea>
         </label>
-      </section>
-      <section>
-        <h2>Postes</h2>
+      </details>
+
+      <!-- Postes Section (Collapsible) -->
+      <details class="sidebar-section" data-section="postes" open>
+        <summary>
+          <h2>Postes</h2>
+          <span class="summary-icon">▼</span>
+        </summary>
         <div class="button-group small" id="postButtons">
           <button type="button" data-post="AG">AG</button>
           <button type="button" data-post="ARG">ARG</button>
@@ -109,14 +133,20 @@
           <button type="button" data-post="AD">AD</button>
         </div>
         <p style="font-size:0.72rem;opacity:0.55;margin-top:4px;">Sélectionner un poste avant de placer un joueur</p>
-      </section>
-      <section>
-        <h2>Aide</h2>
+      </details>
+
+      <!-- Aide Section (Collapsible) -->
+      <details class="sidebar-section" data-section="aide" open>
+        <summary>
+          <h2>Aide</h2>
+          <span class="summary-icon">▼</span>
+        </summary>
         <p>Cliquer sur un asset, puis sur le terrain pour l’ajouter.</p>
         <p>Drag pour déplacer.</p>
-      </section>
+      </details>
     </aside>
 
+    <!-- ─── MAIN CONTENT (CANVAS) ────────────────────────────────────────────── -->
     <main class="main-panel">
       <div class="canvas-container">
         <canvas id="boardCanvas" width="1000" height="600"></canvas>
@@ -140,10 +170,58 @@
     </main>
   </div>
 
+  <!-- ─── DOCK (Bottom Toolbar with Icons) ─────────────────────────────────── -->
+  <nav class="dock" id="dock" role="toolbar" aria-label="Outils principaux">
+    <!-- Players -->
+    <button class="dock-icon" data-tool="players" aria-label="Joueurs" title="Joueurs"></button>
+
+    <!-- Assets/Grid -->
+    <button class="dock-icon" data-tool="assets" aria-label="Assets" title="Assets"></button>
+
+    <!-- Trajectories -->
+    <button class="dock-icon" data-tool="trajectories" aria-label="Trajectoires" title="Trajectoires"></button>
+
+    <!-- Animation -->
+    <button class="dock-icon" data-tool="animation" aria-label="Animation" title="Animation"></button>
+
+    <!-- Bibliothèque -->
+    <button class="dock-icon" data-tool="bibliothèque" aria-label="Bibliothèque" title="Bibliothèque"></button>
+
+    <!-- Séance -->
+    <button class="dock-icon" data-tool="séance" aria-label="Séance" title="Séance"></button>
+
+    <!-- Planning -->
+    <button class="dock-icon" data-tool="planning" aria-label="Planning" title="Planning"></button>
+
+    <!-- Postes -->
+    <button class="dock-icon" data-tool="postes" aria-label="Postes" title="Postes"></button>
+
+    <!-- Vue -->
+    <button class="dock-icon" data-tool="vue" aria-label="Vue" title="Vue"></button>
+
+    <!-- Undo -->
+    <button class="dock-icon" data-tool="undo" aria-label="Annuler" title="Annuler"></button>
+  </nav>
+
+  <!-- ─── PANEL (Hidden by Default, Opens on Icon Click) ─────────────────────── -->
+  <div id="panel" class="panel hidden">
+    <div class="panel-header">
+      <div class="panel-title">
+        <span class="panel-icon"></span>
+        <h2 id="panelTitle">Titre du panel</h2>
+      </div>
+      <button class="panel-close" aria-label="Fermer le panel">&times;</button>
+    </div>
+    <div class="panel-content" id="panelContent">
+      <!-- Panel content injected here -->
+    </div>
+  </div>
+
+  <!-- ─── LIBRARY MODAL ────────────────────────────────────────────────────────── -->
   <div class="modal-overlay" id="libraryModal" style="display: none;">
     <div class="modal-content library-modal">
       <div class="modal-header">
-        <h2>Bibliothèque d'exercices</h2>
+        <h2>Bibliothèque d’exercices</h2>
         <button class="close-btn" id="closeLibrary">&times;</button>
       </div>
       <div class="modal-body">
@@ -166,6 +244,10 @@
     </div>
   </div>
 
+  <!-- ─── SCRIPTS ──────────────────────────────────────────────────────────────── -->
   <script src="../src/js/app.js"></script>
+  <script src="../src/js/canvas-reflow.js"></script>
+  <script src="../src/js/dock.js"></script>
+  <script src="../src/js/keyboard-nav.js"></script>
 </body>
 </html>

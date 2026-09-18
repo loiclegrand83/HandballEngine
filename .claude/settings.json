@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C /home/loic/Software/haweb push origin dev)",
+      "Bash(rtk git *)",
+      "Bash(git reset *)",
+      "Bash(git checkout *)",
+      "Bash(gh pr create --title 'feat: launcher avec gestion des PIDs orphelins' --body ' *)",
+      "Bash(uv run *)",
+      "Bash(mkdir -p /home/loic/Software/haweb/_bmad-output/prd-runs/dock-ui-2026-09-17)",
+      "Bash(rtk ls *)",
+      "Bash(rtk wc *)",
+      "Bash(grep -E \"\\\\.\\(md|json|txt\\)$\")",
+      "Bash(find /home/loic/Software -type d -name \"*board*\" -o -name \"*tactique*\" 2>/dev/null | head -10)",
+      "Read(//home/loic/Software/**)",
+      "Bash(npm list *)",
+      "Bash(rtk read *)"
+    ]
+  }
+}
