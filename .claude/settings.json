@@ -14,7 +14,12 @@
       "Bash(find /home/loic/Software -type d -name \"*board*\" -o -name \"*tactique*\" 2>/dev/null | head -10)",
       "Read(//home/loic/Software/**)",
       "Bash(npm list *)",
-      "Bash(rtk read *)"
+      "Bash(rtk read *)",
+      "Bash(node -c pages/board.html)",
+      "Bash(rtk grep *)",
+      "Bash(rtk find *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }
