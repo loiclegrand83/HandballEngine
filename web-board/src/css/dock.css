@@ -1,0 +1,425 @@
+/* ── DOCK UI — Dock Container & Icon Buttons ─────────────────────────────────────
+   Horizontal toolbar at bottom of screen (64px height).
+   Centered icon buttons with hover/active states, tooltips.
+   Material Design 3 + Glassmorphism styling.
+*/
+
+/* ── Dock Container ──────────────────────────────────────────────────────────── */
+
+.dock {
+  /* Fixed position at bottom of viewport */
+  position: fixed;
+  bottom: var(--spacing-lg);
+  left: 50%;
+  transform: translateX(-50%);
+
+  /* Dimensions */
+  width: fit-content;
+  max-width: calc(100vw - var(--spacing-2xl));
+  height: var(--dock-height);
+  z-index: var(--z-dock);
+
+  /* Layout */
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-xl);
+
+  /* Styling */
+  background: rgba(13, 16, 21, 0.7);
+  backdrop-filter: blur(var(--blur-lg));
+  -webkit-backdrop-filter: blur(var(--blur-lg));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-elevation-2);
+
+  /* Fallback for older browsers */
+  @supports not (backdrop-filter: blur(1px)) {
+    background: var(--color-surface);
+    border: 1px solid var(--color-surface-variant);
+  }
+}
+
+/* Tablet responsiveness: reduce padding on small screens */
+@media (max-width: 1023px) {
+  .dock {
+    padding: var(--spacing-md) var(--spacing-lg);
+    gap: var(--spacing-xs);
+    bottom: var(--spacing-md);
+  }
+}
+
+/* ── Dock Icon Button ────────────────────────────────────────────────────────── */
+
+.dock-icon {
+  /* Base styling */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+
+  /* Size: 48×48px button, icon ~24–32px inside */
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  min-height: 48px;
+
+  /* Appearance */
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+
+  /* Text & icon */
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+  font-family: var(--font-family-sans);
+
+  /* Transitions */
+  transition: all var(--duration-short) var(--ease-standard);
+
+  /* Remove default button styles */
+  padding: 0;
+  margin: 0;
+  font-family: inherit;
+}
+
+/* ── Dock Icon: Default State ────────────────────────────────────────────────── */
+
+.dock-icon {
+  opacity: 0.7;
+  color: var(--color-text-secondary);
+}
+
+/* ── Dock Icon: Hover State ──────────────────────────────────────────────────── */
+
+.dock-icon:hover {
+  opacity: 1;
+  background: var(--color-overlay-medium);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: var(--shadow-elevation-1);
+  transform: scale(1.05);
+  color: var(--color-text-primary);
+}
+
+/* ── Dock Icon: Active State (Selected Tool) ─────────────────────────────────– */
+
+.dock-icon.active {
+  opacity: 1;
+  background: rgba(245, 196, 0, 0.15);
+  border: 1.5px solid var(--color-primary);
+  box-shadow: 0 0 8px rgba(245, 196, 0, 0.3),
+              var(--shadow-elevation-2);
+  color: var(--color-primary);
+}
+
+.dock-icon.active:hover {
+  background: rgba(245, 196, 0, 0.2);
+  box-shadow: 0 0 12px rgba(245, 196, 0, 0.4),
+              var(--shadow-elevation-2);
+}
+
+/* ── Dock Icon: Disabled State ───────────────────────────────────────────────── */
+
+.dock-icon:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.dock-icon:disabled:hover {
+  background: transparent;
+  border-color: transparent;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ── Dock Icon: Focus/Focus-visible (Keyboard Navigation) ────────────────────– */
+
+.dock-icon:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* ── Tooltip (Hover Label) ───────────────────────────────────────────────────── */
+
+.dock-icon::after {
+  content: attr(aria-label);
+  position: absolute;
+  bottom: calc(var(--dock-height) + var(--spacing-md));
+  left: 50%;
+  transform: translateX(-50%);
+
+  /* Typography */
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+  color: var(--color-text-primary);
+
+  /* Appearance */
+  background: var(--color-surface);
+  border: 1px solid var(--color-surface-variant);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-md);
+
+  /* Animation */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-short) var(--ease-standard);
+
+  /* Z-index: above dock */
+  z-index: var(--z-tooltip);
+}
+
+/* Show tooltip on hover (with delay) */
+.dock-icon:hover::after {
+  opacity: 1;
+  transition-delay: 200ms;
+}
+
+/* ── Dock Icon: Large Icon (emoji or SVG) ───────────────────────────────────── */
+
+.dock-icon::before {
+  /* Placeholder for icon (emoji or SVG) */
+  font-size: 24px;
+  line-height: 1;
+}
+
+/* ── Dock Icon Positioning for Tooltips ─────────────────────────────────────– */
+
+/* Ensure dock-icon uses position: relative for tooltip positioning */
+.dock-icon {
+  position: relative;
+}
+
+/* ── Specific Icon Labels (via data attribute or aria-label) ─────────────────– */
+
+/* Players icon */
+.dock-icon[data-tool="players"]::before { content: "🎮"; }
+
+/* Assets icon */
+.dock-icon[data-tool="assets"]::before { content: "🎯"; }
+
+/* Trajectories icon */
+.dock-icon[data-tool="trajectories"]::before { content: "📍"; }
+
+/* Animation icon */
+.dock-icon[data-tool="animation"]::before { content: "▶️"; }
+
+/* Bibliothèque icon */
+.dock-icon[data-tool="bibliothèque"]::before { content: "📚"; }
+
+/* Séance icon */
+.dock-icon[data-tool="séance"]::before { content: "📋"; }
+
+/* Planning icon */
+.dock-icon[data-tool="planning"]::before { content: "📅"; }
+
+/* Postes icon */
+.dock-icon[data-tool="postes"]::before { content: "🏢"; }
+
+/* Vue icon */
+.dock-icon[data-tool="vue"]::before { content: "👁️"; }
+
+/* Undo icon */
+.dock-icon[data-tool="undo"]::before { content: "↶"; }
+
+/* ── Back Button (for Assets Mode Exit) ─────────────────────────────────────── */
+
+.dock-back-button {
+  /* Same as dock-icon but with specific styling */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: 18px;
+  color: var(--color-text-secondary);
+  transition: all var(--duration-short) var(--ease-standard);
+  padding: 0;
+  margin: 0;
+  font-family: inherit;
+}
+
+.dock-back-button:hover {
+  background: var(--color-overlay-medium);
+  color: var(--color-text-primary);
+  transform: scale(1.05);
+}
+
+.dock-back-button::before {
+  content: "←";
+}
+
+/* ── Dock Responsive Behavior ───────────────────────────────────────────────── */
+
+/* Tablet (≤1024px): compact spacing */
+@media (max-width: 1023px) {
+  .dock-icon {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .dock-icon::before {
+    font-size: 20px;
+  }
+
+  /* Tooltip: move higher to avoid screen edge */
+  .dock-icon::after {
+    bottom: calc(var(--dock-height) + var(--spacing-sm));
+    font-size: var(--font-size-xs);
+  }
+}
+
+/* Mobile portrait (future, <600px): smaller */
+@media (max-width: 599px) {
+  .dock-icon {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    min-height: 40px;
+    gap: 0;
+  }
+
+  .dock-icon::before {
+    font-size: 18px;
+  }
+
+  /* Hide label text on very small screens */
+  .dock-icon::after {
+    display: none;
+  }
+}
+
+/* ── Dock Layout: Grid or Flex Justification ────────────────────────────────── */
+
+/* When dock has many icons, ensure they don't wrap */
+.dock {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* But normally, prevent scrolling via scroll-behavior */
+.dock {
+  scroll-behavior: smooth;
+}
+
+/* ── Dock Assets Mode (Hidden by default) ───────────────────────────────────── */
+
+.dock-assets-grid {
+  /* Hidden until assets mode activated */
+  display: none;
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+
+  /* Grid of 12 items (4×3 desktop, responsive on tablet) */
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+  gap: var(--spacing-md);
+  padding: var(--spacing-lg);
+  max-width: 90vw;
+
+  z-index: var(--z-dock);
+}
+
+/* Show when dock is in assets mode */
+.dock.assets-mode .dock-assets-grid {
+  display: grid;
+}
+
+/* Hide regular icons when in assets mode */
+.dock.assets-mode .dock-icon {
+  display: none;
+}
+
+/* ── Asset Grid Item ────────────────────────────────────────────────────────── */
+
+.asset-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+
+  width: 60px;
+  height: 60px;
+  min-width: 60px;
+  min-height: 60px;
+
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  transition: all var(--duration-short) var(--ease-standard);
+  padding: 0;
+  margin: 0;
+  font-family: inherit;
+}
+
+/* Asset item: hover */
+.asset-item:hover {
+  background: var(--color-overlay-medium);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--color-text-primary);
+  transform: scale(1.08);
+}
+
+/* Asset item: active (selected) */
+.asset-item.active {
+  background: rgba(245, 196, 0, 0.15);
+  border: 1.5px solid var(--color-primary);
+  box-shadow: 0 0 8px rgba(245, 196, 0, 0.3);
+  color: var(--color-primary);
+}
+
+/* Asset item icon */
+.asset-item::before {
+  font-size: 28px;
+}
+
+/* Asset item responsive */
+@media (max-width: 1023px) {
+  .asset-item {
+    width: 52px;
+    height: 52px;
+    min-width: 52px;
+    min-height: 52px;
+  }
+
+  .asset-item::before {
+    font-size: 24px;
+  }
+}
+
+/* ── Performance Optimization ───────────────────────────────────────────────── */
+
+/* Use will-change sparingly for animated elements */
+.dock-icon:hover {
+  will-change: transform, box-shadow;
+}
+
+.dock-icon {
+  will-change: auto;
+}
+
+/* Remove will-change after animation */
+.dock-icon:not(:hover) {
+  will-change: auto;
+}

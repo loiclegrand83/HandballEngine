@@ -1,0 +1,411 @@
+/* ── SIDEBAR — Responsive Hierarchical Menu ──────────────────────────────────────
+   Restructured sidebar with collapsible sections (Vue, Exercice, Options).
+   Responsive width: 120px (tablet ≤1024px), 180–220px (desktop).
+   Material Design 3 + Glassmorphism styling.
+*/
+
+/* ── Sidebar Container ───────────────────────────────────────────────────────– */
+
+.sidebar {
+  /* Responsive width */
+  width: var(--sidebar-width-tablet);  /* Default: 120px */
+
+  /* Layout & overflow */
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  /* Styling */
+  background: var(--color-bg-dark);
+  border-right: 1px solid var(--color-surface-variant);
+  padding: var(--spacing-lg) var(--spacing-md);
+
+  /* Scrollbar styling (subtle) */
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-surface-variant) transparent;
+
+  /* Z-index */
+  z-index: var(--z-sidebar);
+}
+
+/* Scrollbar for webkit browsers */
+.sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: var(--color-surface-variant);
+  border-radius: 2px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* ── Responsive Breakpoints ──────────────────────────────────────────────────– */
+
+/* Tablet (≤1024px): compact sidebar, 120px */
+@media (max-width: 1023px) {
+  .sidebar {
+    width: var(--sidebar-width-tablet);
+    padding: var(--spacing-md) var(--spacing-sm);
+    gap: var(--spacing-xs);
+  }
+}
+
+/* Desktop (1024–1399px): expanded sidebar, 180px */
+@media (min-width: 1024px) and (max-width: 1399px) {
+  .sidebar {
+    width: var(--sidebar-width-desktop);
+    padding: var(--spacing-lg) var(--spacing-md);
+  }
+}
+
+/* Large desktop (≥1400px): wide sidebar, 220px */
+@media (min-width: 1400px) {
+  .sidebar {
+    width: var(--sidebar-width-desktop-lg);
+    padding: var(--spacing-lg) var(--spacing-lg);
+  }
+}
+
+/* ── Sidebar Title ───────────────────────────────────────────────────────────– */
+
+.sidebar > h1 {
+  margin: 0 0 var(--spacing-md);
+  font-family: var(--font-family-display);
+  font-size: 1.4rem;
+  font-weight: var(--font-weight-bold);
+  letter-spacing: 0.05em;
+  color: var(--color-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Compact title on tablet */
+@media (max-width: 1023px) {
+  .sidebar > h1 {
+    font-size: 1rem;
+    margin-bottom: var(--spacing-sm);
+  }
+}
+
+/* ── Collapsible Section (using <details> element) ────────────────────────────– */
+
+.sidebar > section,
+.sidebar > details {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-md);
+}
+
+.sidebar > details {
+  background: var(--color-surface);
+  border: 1px solid var(--color-surface-variant);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md) var(--spacing-sm);
+}
+
+/* ── Details Summary (Clickable Header) ──────────────────────────────────────– */
+
+.sidebar details > summary {
+  /* Styling */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-xs);
+
+  /* Typography */
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+
+  /* Interactive */
+  cursor: pointer;
+  user-select: none;
+
+  /* Padding & appearance */
+  padding: var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  transition: all var(--duration-short) var(--ease-standard);
+  list-style: none;
+}
+
+/* Remove default summary marker */
+.sidebar details > summary::-webkit-details-marker {
+  display: none;
+}
+
+.sidebar details > summary::marker {
+  display: none;
+}
+
+/* Summary hover state */
+.sidebar details > summary:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-primary);
+}
+
+/* Summary chevron icon (custom, added via CSS) */
+.sidebar details > summary::before {
+  content: "▼";
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-xs);
+  width: 16px;
+  height: 16px;
+  transition: transform var(--duration-short) var(--ease-standard);
+  order: 2;
+}
+
+/* Chevron rotation when details open */
+.sidebar details[open] > summary::before {
+  transform: rotate(-180deg);
+}
+
+/* ── Details Content (Collapsible Body) ──────────────────────────────────────– */
+
+.sidebar details > :not(summary) {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) 0;
+  border-top: 1px solid var(--color-surface-variant);
+  margin-top: var(--spacing-xs);
+
+  animation: slideDown var(--duration-short) var(--ease-standard);
+}
+
+/* Smooth opening animation */
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Close animation (handled by max-height transition) */
+.sidebar details:not([open]) > :not(summary) {
+  display: none;
+}
+
+/* ── Sidebar Labels (Grouped Content) ────────────────────────────────────────– */
+
+.sidebar label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  font-weight: var(--font-weight-medium);
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+/* Hide label text on tablet (icon-only mode) */
+@media (max-width: 1023px) {
+  .sidebar label {
+    font-size: 0;
+  }
+
+  .sidebar label::before {
+    content: "";
+    display: block;
+    width: 12px;
+    height: 12px;
+  }
+}
+
+/* ── Sidebar Inputs (Text, Select, Textarea) ────────────────────────────────– */
+
+.sidebar input[type="text"],
+.sidebar input[type="number"],
+.sidebar input[type="file"],
+.sidebar select,
+.sidebar textarea {
+  width: 100%;
+  padding: var(--spacing-sm) var(--spacing-md);
+
+  background: var(--color-bg-dark);
+  border: 1px solid var(--color-surface-variant);
+  border-radius: var(--radius-sm);
+
+  font-size: var(--font-size-xs);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-sans);
+
+  transition: all var(--duration-short) var(--ease-standard);
+}
+
+.sidebar input[type="text"]:focus,
+.sidebar input[type="number"]:focus,
+.sidebar select:focus,
+.sidebar textarea:focus {
+  outline: none;
+  background: var(--color-surface);
+  border-color: var(--color-primary);
+  box-shadow: 0 0 4px rgba(245, 196, 0, 0.2);
+}
+
+/* Hide inputs on tablet (compact mode) */
+@media (max-width: 1023px) {
+  .sidebar input[type="text"],
+  .sidebar input[type="number"],
+  .sidebar select,
+  .sidebar textarea {
+    display: none;
+  }
+}
+
+/* ── Sidebar Buttons ─────────────────────────────────────────────────────────– */
+
+.sidebar button {
+  padding: var(--spacing-md) var(--spacing-lg);
+  background: var(--color-surface);
+  border: 1px solid var(--color-surface-variant);
+  border-radius: var(--radius-sm);
+
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  cursor: pointer;
+
+  transition: all var(--duration-short) var(--ease-standard);
+}
+
+.sidebar button:hover {
+  background: var(--color-surface-hover);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.sidebar button:active {
+  background: var(--color-primary);
+  color: var(--color-bg-dark);
+  transform: scale(0.98);
+}
+
+/* ── Section Heading (h2) ────────────────────────────────────────────────────– */
+
+.sidebar h2 {
+  margin: 0;
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+
+  padding-bottom: var(--spacing-xs);
+  border-bottom: 1px solid var(--color-surface-variant);
+}
+
+/* Hide h2 text on tablet, show icon only */
+@media (max-width: 1023px) {
+  .sidebar h2 {
+    font-size: 0;
+  }
+}
+
+/* ── Button Groups (Multiple buttons in a row) ──────────────────────────────– */
+
+.sidebar .button-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(40px, 1fr));
+  gap: var(--spacing-xs);
+  width: 100%;
+}
+
+.sidebar .button-group.small {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* ── Separator (hr) ──────────────────────────────────────────────────────────– */
+
+.sidebar hr {
+  border: none;
+  border-top: 1px solid var(--color-surface-variant);
+  margin: var(--spacing-md) 0;
+  opacity: 0.5;
+}
+
+/* ── Toggle Button (Checkbox + Label) ────────────────────────────────────────– */
+
+.sidebar .toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  user-select: none;
+
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-surface);
+  border: 1px solid var(--color-surface-variant);
+  border-radius: var(--radius-sm);
+
+  transition: all var(--duration-short) var(--ease-standard);
+}
+
+.sidebar .toggle-btn:hover {
+  background: var(--color-surface-hover);
+  border-color: var(--color-primary);
+}
+
+.sidebar .toggle-btn input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--color-primary);
+}
+
+.sidebar .toggle-label {
+  flex-grow: 1;
+}
+
+/* ── Sidebar: No Scroll on First Load ────────────────────────────────────────– */
+
+/* Ensure sidebar sections don't require scrolling on tablet/desktop */
+.sidebar {
+  max-height: calc(100vh - var(--dock-height) - var(--spacing-lg));
+  will-change: auto;
+}
+
+/* ── Sidebar Item Hover (Generic) ───────────────────────────────────────────– */
+
+.sidebar > section > div,
+.sidebar > details > div {
+  transition: all var(--duration-short) var(--ease-standard);
+}
+
+/* ── Sidebar Paragraph (Hints, Help Text) ───────────────────────────────────– */
+
+.sidebar p {
+  margin: var(--spacing-xs) 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  line-height: var(--line-height-tight);
+}
+
+/* ── Performance Optimization ───────────────────────────────────────────────– */
+
+.sidebar {
+  will-change: auto;
+}
+
+.sidebar details > summary:hover {
+  will-change: background-color, transform;
+}

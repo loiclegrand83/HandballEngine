@@ -3,6 +3,8 @@
 /* ── Design System (Dock UI) ─────────────────────────────────────────────────── */
 @import 'design-tokens.css';
 @import 'glassmorphism.css';
+@import 'dock.css';
+@import 'sidebar.css';
 
 /* ── Tokens ──────────────────────────────────────────────────────────────────── */
 
