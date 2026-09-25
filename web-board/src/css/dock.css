@@ -7,11 +7,11 @@
 /* ── Dock Container ──────────────────────────────────────────────────────────── */
 
 .dock {
-  /* Fixed position at bottom of viewport */
-  position: fixed;
-  bottom: var(--spacing-lg);
-  left: 50%;
-  transform: translateX(-50%);
+  /* Grid item: occupies the "dock" row reserved by .app-shell (AD-10) */
+  grid-area: dock;
+  position: relative;
+  align-self: center;
+  justify-self: center;
 
   /* Dimensions */
   width: fit-content;
@@ -47,7 +47,6 @@
   .dock {
     padding: var(--spacing-md) var(--spacing-lg);
     gap: var(--spacing-xs);
-    bottom: var(--spacing-md);
   }
 }
 
