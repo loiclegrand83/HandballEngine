@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Board Tactique — Démarrer</title>
+  <link rel="manifest" href="../manifest.json" />
+  <meta name="theme-color" content="#080b0f" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #080b0f;
+      --surface:   #111419;
+      --border:    #1e2228;
+      --text:      #f0ece0;
+      --muted:     #5a6070;
+      --yellow:    #f5c400;
+      --green:     #00e676;
+      --danger:    #ff3b30;
+      --rail:      3px;
+    }
+
+    body {
+      background: var(--bg);
+      font-family: 'Barlow', system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      padding: 24px;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(245,196,0,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(245,196,0,0.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .startup-wrapper {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      max-width: 780px;
+    }
+
+    .startup-eyebrow {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--yellow);
+      margin-bottom: 10px;
+      opacity: 0.85;
+    }
+
+    .startup-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(2.4rem, 6vw, 3.6rem);
+      letter-spacing: 0.04em;
+      line-height: 0.95;
+      color: var(--text);
+      text-align: center;
+      margin-bottom: 44px;
+    }
+
+    .choices {
+      display: flex;
+      gap: 20px;
+      width: 100%;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 28px;
+    }
+
+    .choice-btn {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 300px;
+      padding: 28px 26px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      text-decoration: none;
+      color: inherit;
+      cursor: pointer;
+      transition: border-color 0.2s, transform 0.2s;
+      font: inherit;
+      text-align: left;
+    }
+
+    .choice-btn::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: var(--rail);
+      background: var(--btn-color, var(--yellow));
+      opacity: 0.6;
+    }
+
+    .choice-btn:hover {
+      transform: translateY(-3px);
+      border-color: var(--btn-color, var(--yellow));
+    }
+
+    .choice-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.6rem;
+      letter-spacing: 0.04em;
+      color: var(--text);
+    }
+
+    .choice-desc {
+      font-family: 'Barlow', sans-serif;
+      font-size: 0.82rem;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .back-link {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--text); }
+
+    /* ── Panneau de sélection d'exercice ─────────────────────── */
+    .exercise-panel {
+      display: none;
+      width: 100%;
+      max-width: 640px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 22px;
+      margin-bottom: 28px;
+    }
+    .exercise-panel.open { display: block; }
+
+    .exercise-panel h2 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.3rem;
+      letter-spacing: 0.04em;
+      margin-bottom: 14px;
+    }
+
+    .exercise-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      max-height: 360px;
+      overflow-y: auto;
+    }
+
+    .exercise-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 14px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      cursor: pointer;
+      font: inherit;
+      color: inherit;
+      text-align: left;
+      width: 100%;
+    }
+    .exercise-item:hover { border-color: var(--yellow); }
+
+    .exercise-item-name {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .exercise-item-meta {
+      font-family: 'DM Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    .exercise-empty,
+    .exercise-loading,
+    .exercise-error {
+      font-size: 0.85rem;
+      color: var(--muted);
+      padding: 16px 4px;
+    }
+    .exercise-error { color: var(--danger); }
+
+    @media (max-width: 680px) {
+      .choices { flex-direction: column; align-items: center; }
+      .choice-btn { width: 92vw; }
+    }
+  </style>
+</head>
+<body>
+  <div class="startup-wrapper">
+    <p class="startup-eyebrow">Board Tactique</p>
+    <h1 class="startup-title">Nouvelle séance<br>ou éditer un exercice&nbsp;?</h1>
+
+    <div class="choices">
+      <button type="button" class="choice-btn" id="btnNewSeance" style="--btn-color:#00e676;">
+        <span class="choice-title">Nouvelle Séance</span>
+        <span class="choice-desc">Démarrer sur un canvas vierge dans le board tactique.</span>
+      </button>
+
+      <button type="button" class="choice-btn" id="btnEditExercise" style="--btn-color:var(--yellow);">
+        <span class="choice-title">Éditer un exercice</span>
+        <span class="choice-desc">Choisir un exercice déjà enregistré et reprendre l’édition.</span>
+      </button>
+    </div>
+
+    <div class="exercise-panel" id="exercisePanel">
+      <h2>Choisir un exercice</h2>
+      <div class="exercise-list" id="exerciseList">
+        <p class="exercise-loading">Chargement…</p>
+      </div>
+    </div>
+
+    <a class="back-link" href="../index.html">&larr; Retour à l’accueil</a>
+  </div>
+
+  <script>
+    const btnNewSeance = document.getElementById('btnNewSeance');
+    const btnEditExercise = document.getElementById('btnEditExercise');
+    const exercisePanel = document.getElementById('exercisePanel');
+    const exerciseList = document.getElementById('exerciseList');
+
+    btnNewSeance.addEventListener('click', () => {
+      window.location.href = 'board.html?new=1';
+    });
+
+    btnEditExercise.addEventListener('click', async () => {
+      exercisePanel.classList.add('open');
+      await loadExerciseList();
+    });
+
+    async function loadExerciseList() {
+      exerciseList.innerHTML = '<p class="exercise-loading">Chargement…</p>';
+      try {
+        const res = await fetch('/api/exercises');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const lib = await res.json();
+
+        if (!Array.isArray(lib) || lib.length === 0) {
+          exerciseList.innerHTML = '<p class="exercise-empty">Aucun exercice enregistré pour le moment. Vous pouvez démarrer une nouvelle séance.</p>';
+          return;
+        }
+
+        lib.sort((a, b) => new Date(b.updatedAt || 0) - new Date(a.updatedAt || 0));
+
+        exerciseList.innerHTML = '';
+        lib.forEach(ex => {
+          const item = document.createElement('button');
+          item.type = 'button';
+          item.className = 'exercise-item';
+
+          const left = document.createElement('span');
+          const name = document.createElement('span');
+          name.className = 'exercise-item-name';
+          name.textContent = ex.name || 'Sans nom';
+          left.appendChild(name);
+
+          const meta = document.createElement('span');
+          meta.className = 'exercise-item-meta';
+          let dateStr = '';
+          const d = new Date(ex.updatedAt || ex.exportedAt);
+          if (!isNaN(d.getTime())) {
+            dateStr = d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' });
+          }
+          meta.textContent = dateStr;
+
+          item.appendChild(left);
+          item.appendChild(meta);
+
+          item.addEventListener('click', () => {
+            window.location.href = 'board.html?exercise=' + encodeURIComponent(ex.id);
+          });
+
+          exerciseList.appendChild(item);
+        });
+      } catch (e) {
+        console.error('Erreur lors du chargement des exercices', e);
+        exerciseList.innerHTML = '<p class="exercise-error">Erreur lors du chargement de la bibliothèque. Réessayez plus tard.</p>';
+      }
+    }
+  </script>
+</body>
+</html>

@@ -2583,8 +2583,35 @@ function openExplanationPage() {
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
 
+async function loadFromQueryParamOrDefault() {
+  const params = new URLSearchParams(window.location.search);
+  const exerciseId = params.get('exercise');
+  if (exerciseId) {
+    try {
+      const res = await fetch('/api/exercises');
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const lib = await res.json();
+      const found = Array.isArray(lib) ? lib.find(ex => ex.id === exerciseId) : null;
+      if (found) {
+        loadExerciseFromData(found);
+        return;
+      }
+      console.error('Exercice introuvable pour id=' + exerciseId);
+    } catch (e) {
+      console.error('Erreur lors du chargement de l\'exercice depuis le paramètre d\'URL', e);
+    }
+    return;
+  }
+  if (params.get('new') === '1') {
+    // Signal explicite "Nouvelle Séance" : canvas vierge, on ne charge rien du backend.
+    return;
+  }
+  // Pas de paramètre : comportement historique (accès direct/bookmark à board.html).
+  await loadLocal();
+}
+
 window.addEventListener('load', () => {
-  createAssetButtons(); loadLocal();
+  createAssetButtons(); loadFromQueryParamOrDefault();
   selectViewMode(board.viewMode);
   selectDrawMode(state.drawMode);
   updateModeButtons(teamButtons, state.selectedTeam);

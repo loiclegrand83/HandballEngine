@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Players, Assets & Trajectories — Architecture Overview</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+        .content {
+            padding: 40px;
+        }
+        section {
+            margin-bottom: 50px;
+        }
+        section h2 {
+            font-size: 1.8em;
+            color: #667eea;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+        section h3 {
+            font-size: 1.3em;
+            color: #764ba2;
+            margin-top: 25px;
+            margin-bottom: 15px;
+        }
+        p, li {
+            margin-bottom: 12px;
+            font-size: 1em;
+        }
+        ul, ol {
+            margin-left: 30px;
+        }
+        li {
+            margin-bottom: 8px;
+        }
+        .ad-box {
+            background: #f5f5f5;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 6px;
+        }
+        .ad-box strong {
+            color: #667eea;
+        }
+        .decision {
+            background: #e8f4fd;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 10px 0;
+            font-weight: 500;
+        }
+        .diagram-box {
+            background: #f9f9f9;
+            border: 2px dashed #667eea;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .diagram-box h4 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        .flow-step {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+        }
+        .step-num {
+            background: #667eea;
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        .flow-step span {
+            flex: 1;
+        }
+        .highlight {
+            background: #fff3cd;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        .grid-visual {
+            display: grid;
+            grid-template-columns: 120px 1fr;
+            grid-template-rows: 1fr 64px;
+            gap: 10px;
+            height: 400px;
+            margin: 20px 0;
+            background: #f5f5f5;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+        }
+        .grid-item {
+            background: white;
+            border: 2px solid #667eea;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+        .sidebar-item { background: #e3f2fd; }
+        .canvas-item { background: #f0f4c3; }
+        .dock-item { background: #fce4ec; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background: #667eea;
+            color: white;
+        }
+        tr:hover {
+            background: #f5f5f5;
+        }
+        .status-draft {
+            display: inline-block;
+            background: #fff3cd;
+            color: #856404;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+        .footer {
+            background: #f5f5f5;
+            padding: 20px 40px;
+            text-align: center;
+            color: #666;
+            font-size: 0.9em;
+        }
+        .key-point {
+            background: #c8e6c9;
+            border-left: 4px solid #4caf50;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎯 Players, Assets & Trajectories</h1>
+            <p>Architecture Overview — Exercise Builder for Board Tactique</p>
+        </header>
+
+        <div class="content">
+            <!-- Vision -->
+            <section>
+                <h2>Vision</h2>
+                <p>Coaches create <span class="highlight">custom exercises</span> without rigid templates. Select players (any position, any location), place assets (plots, cones), and draw trajectories linked to specific players. Build a complete exercise in minutes.</p>
+                <div class="key-point">
+                    <strong>✓ Key Achievement:</strong> No more manual adaptation of predefined simulations. Full strategic flexibility in <5 minutes per exercise.
+                </div>
+            </section>
+
+            <!-- Core Design Paradigm -->
+            <section>
+                <h2>Core Design Paradigm</h2>
+                <h3>Hybrid Rendering: Canvas + HTML Overlay</h3>
+                <p>Two-layer approach:</p>
+                <div class="ad-box">
+                    <strong>Layer 1 (Canvas):</strong> Static terrain rendering — drawn once, never changes. This is the court/field background.
+                </div>
+                <div class="ad-box">
+                    <strong>Layer 2 (HTML Overlay):</strong> Dynamic elements — players, assets, trajectories as absolutely-positioned `<div>` elements over the canvas. Simplified interactions, easy to move/delete.
+                </div>
+                <p><strong>Why this works:</strong> Separates concerns. Canvas stays simple. Overlay gets cheap re-renders. No canvas redraw on every element placement.</p>
+            </section>
+
+            <!-- UI Layout -->
+            <section>
+                <h2>UI Layout</h2>
+                <h3>Always-Visible Hybrid: Dock + Sidebar + Canvas</h3>
+                <div class="grid-visual">
+                    <div class="grid-item sidebar-item">Sidebar<br>(120–220px)</div>
+                    <div class="grid-item canvas-item">Canvas + Overlay<br>(Centered, Maximized)</div>
+                    <div class="grid-item dock-item" style="grid-column: 1 / -1;">Dock (64px) — Dropdown Menu: Joueurs | Assets | Trajectoires</div>
+                </div>
+                <p><strong>Grid Layout (CSS):</strong></p>
+                <ul>
+                    <li><code>grid-template-columns: 120–220px 1fr</code> (responsive sidebar width)</li>
+                    <li><code>grid-template-rows: 1fr 64px</code> (dock at bottom)</li>
+                    <li><code>grid-template-areas: "sidebar canvas" "dock dock"</code></li>
+                </ul>
+                <div class="key-point">
+                    <strong>✓ Result:</strong> Terrain stays centered and maximized. Dock + Sidebar always visible (no toggle needed). Coach always knows where controls are.
+                </div>
+            </section>
+
+            <!-- Player Placement Flow -->
+            <section>
+                <h2>User Flow: Place a Player</h2>
+                <div class="flow-step">
+                    <div class="step-num">1</div>
+                    <span>Coach clicks <strong>Dock dropdown</strong> → selects <span class="highlight">Joueurs</span></span>
+                </div>
+                <div class="flow-step">
+                    <div class="step-num">2</div>
+                    <span>Sidebar shows player list. Coach selects <span class="highlight">Équipe A + Poste DC</span></span>
+                </div>
+                <div class="flow-step">
+                    <div class="step-num">3</div>
+                    <span>Coach <span class="highlight">clicks terrain</span> at desired player location (x=150, y=200)</span>
+                </div>
+                <div class="flow-step">
+                    <div class="step-num">4</div>
+                    <span><strong>State updates</strong>: new player object added to state</span>
+                </div>
+                <div class="flow-step">
+                    <div class="step-num">5</div>
+                    <span><strong>Component re-renders</strong> overlay layer → new player div appears at (150, 200) with "DC" badge</span>
+                </div>
+                <div class="flow-step">
+                    <div class="step-num">6</div>
+                    <span>✓ <strong>Coach sees player on screen.</strong> Repeat for other players.</span>
+                </div>
+            </section>
+
+            <!-- Data Model -->
+            <section>
+                <h2>Data Model</h2>
+                <h3>Clean, Serializable JSON Structure</h3>
+                <p>Each exercise is a JSON object with three arrays:</p>
+
+                <h4 style="margin-top: 20px;">Player</h4>
+                <div class="ad-box" style="font-family: monospace; font-size: 0.9em;">
+                    { id, equipe: "A"/"B", poste: "AG"/"DC"/…, position: {x, y}, created_at }
+                </div>
+
+                <h4>Asset</h4>
+                <div class="ad-box" style="font-family: monospace; font-size: 0.9em;">
+                    { id, type: "Plot"/"Cone"/"Haie"/…, position: {x, y}, created_at }
+                </div>
+
+                <h4>Trajectory</h4>
+                <div class="ad-box" style="font-family: monospace; font-size: 0.9em;">
+                    { id, type: "Course"/"Passe"/…, linked_player_id, path: [{x,y}, …], created_at }
+                </div>
+
+                <div class="key-point">
+                    <strong>✓ Benefits:</strong> Simple JSON → easy to save to localStorage, easy to export to GitHub, ready for undo/redo (v2).
+                </div>
+            </section>
+
+            <!-- Storage -->
+            <section>
+                <h2>Data Persistence</h2>
+                <h3>localStorage + GitHub Sync (Manual)</h3>
+                <p><strong>Primary:</strong> Browser localStorage (coach's device, instant save)</p>
+                <p><strong>Backup:</strong> Coach manually syncs to GitHub (export JSON → commit, or import from repo)</p>
+                <div class="decision">
+                    <strong>No auto-sync.</strong> Coach controls when exercises are shared/backed up. Simple, no sync conflicts.
+                </div>
+            </section>
+
+            <!-- Technology Decisions -->
+            <section>
+                <h2>Key Technology Decisions</h2>
+                <table>
+                    <tr>
+                        <th>Decision</th>
+                        <th>Choice</th>
+                        <th>Why</th>
+                    </tr>
+                    <tr>
+                        <td><strong>Framework</strong></td>
+                        <td>React <em>or</em> Vue</td>
+                        <td>Both handle component state + re-renders cleanly. Final choice at Sprint 1.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>State Management</strong></td>
+                        <td>Context API (React) or Pinia (Vue)</td>
+                        <td>Lightweight, builtin. No Redux-level complexity needed.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Canvas Library</strong></td>
+                        <td>Native Canvas 2D API</td>
+                        <td>Terrain rendering is simple (lines, fill). No need for Pixi, Babylon, etc.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Coordinate Mapping</strong></td>
+                        <td>Canvas pixel coords ↔ HTML absolute positioning (1:1)</td>
+                        <td>Simple math. Click (x,y) on canvas = overlay div at (x,y). No complex transforms.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Undo/Redo</strong></td>
+                        <td>Deferred to v2</td>
+                        <td>MVP doesn't need it. Coach can delete/re-add. v2 adds state history stack.</td>
+                    </tr>
+                </table>
+            </section>
+
+            <!-- Open Questions -->
+            <section>
+                <h2>Open Questions</h2>
+                <p>These will be resolved during Sprint 1 planning:</p>
+                <ul>
+                    <li><strong>React vs Vue?</strong> Team preference + learning curve. Both work equally.</li>
+                    <li><strong>GitHub sync flow?</strong> CLI commands, or manual file upload? TBD.</li>
+                    <li><strong>Canvas size?</strong> Fixed (1000×600) or responsive to viewport? Test on tablet early.</li>
+                    <li><strong>Terrain view (demi vs complet)?</strong> Per-exercise or per-séance? Clarify with coach.</li>
+                    <li><strong>Performance ceiling?</strong> How many elements (players+assets+trajectories) before lag? Load test in Sprint 2.</li>
+                </ul>
+            </section>
+
+            <!-- What's Deferred -->
+            <section>
+                <h2>What's Deferred (v2+)</h2>
+                <ul>
+                    <li>✗ Undo/Redo — too complex for MVP</li>
+                    <li>✗ Collaborative editing — single-coach workflow is simpler</li>
+                    <li>✗ Animation playback — play courses/passes in sequence (fun, not critical)</li>
+                    <li>✗ Tactical AI — "this formation is weak defensively" suggestions</li>
+                    <li>✗ Templates — predefined 3v3, 6v6 formations (nice-to-have)</li>
+                    <li>✗ Video/image attach — annotate exercise with footage</li>
+                </ul>
+            </section>
+
+            <!-- Next Steps -->
+            <section>
+                <h2>Next Steps</h2>
+                <ol>
+                    <li><strong>Architecture Review:</strong> Team signs off on AD-1 through AD-11</li>
+                    <li><strong>Create Epics & Stories:</strong> Break spine into 4–5 sprints of work (Player placement, Asset placement, Trajectory drawing, Save/load, Polish)</li>
+                    <li><strong>Sprint 1:</strong> Framework choice + base layout (grid + canvas + overlay container)</li>
+                    <li><strong>Sprint 2:</strong> Player selection + placement logic</li>
+                    <li><strong>Sprint 3:</strong> Asset + Trajectory logic</li>
+                    <li><strong>Sprint 4:</strong> Save/load + localStorage + GitHub sync</li>
+                    <li><strong>Sprint 5+:</strong> Testing, polish, Undo/Redo (v1.1)</li>
+                </ol>
+            </section>
+
+            <!-- Status -->
+            <section style="text-align: center; margin-top: 50px;">
+                <p><span class="status-draft">DRAFT</span></p>
+                <p style="margin-top: 20px; color: #666;">Created: 2026-09-25 | Next: Epic breakdown (bmad-create-epics-and-stories)</p>
+            </section>
+        </div>
+
+        <div class="footer">
+            <p>Players, Assets & Trajectories — Exercise Builder Architecture</p>
+            <p>Board Tactique Feature</p>
+        </div>
+    </div>
+</body>
+</html>

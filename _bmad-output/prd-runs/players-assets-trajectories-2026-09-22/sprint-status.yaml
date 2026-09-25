@@ -1,0 +1,60 @@
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created, ready for development
+#   - in-progress: Developer actively working on implementation
+#   - review: Implementation complete, ready for review
+#   - done: Story completed
+
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+
+# Action Item Status:
+#   - open: Committed during a retrospective, not yet addressed
+#   - in-progress: Actively being worked on
+#   - done: Completed
+
+generated: 09-25-2026
+last_updated: 09-25-2026
+project: haweb
+project_key: PAT
+tracking_system: file-system
+story_location: _bmad-output/prd-runs/players-assets-trajectories-2026-09-22
+development_status:
+  epic-1: in-progress
+  1-1-ecran-de-demarrage-nouvelle-seance-ou-editer-un-exercice: done
+  1-2-mode-exercise-builder-layout-dock-sidebar-canvas: backlog
+  1-3-selection-de-la-vue-terrain: backlog
+  epic-1-retrospective: optional
+
+  epic-2: backlog
+  2-1-selection-equipe-poste: backlog
+  2-2-placement-dun-joueur-sur-le-terrain: backlog
+  2-3-deplacer-ou-supprimer-un-joueur-place: backlog
+  2-4-feedback-visuel-des-joueurs: backlog
+  epic-2-retrospective: optional
+
+  epic-3: backlog
+  3-1-selection-dun-type-dasset: backlog
+  3-2-placement-dun-asset-sur-le-terrain: backlog
+  3-3-feedback-visuel-des-assets: backlog
+  epic-3-retrospective: optional
+
+  epic-4: backlog
+  4-1-selection-type-de-trajectoire-joueur-lie: backlog
+  4-2-dessiner-une-trajectoire-sur-le-terrain: backlog
+  4-3-visualisation-codee-par-couleur-type: backlog
+  epic-4-retrospective: optional
+
+  epic-5: backlog
+  5-1-sauvegarder-un-exercice: backlog
+  5-2-modele-de-donnees-complet-de-lexercice: backlog
+  epic-5-retrospective: optional
+action_items: []
