@@ -75,8 +75,6 @@ const assets = [
   { id: 'zone-fix', label: 'Zone fix.', color: '#ce93d8', radius: 32, shape: 'zone-fix' },
 ];
 
-const PERSP_TOP_SCALE = 0.60; // top width = 60% of full width in perspective mode
-
 const state = {
   selectedAssetIndex: 1,
   selectedTeam: 'A',
@@ -114,58 +112,16 @@ function getScale() {
 }
 
 function fieldToCanvas(point) {
-  if (board.viewMode === 'perspective') return fieldToCanvasPerspective(point);
   const sc = getScale();
   return { x: sc.left + point.x * sc.s, y: sc.top + point.y * sc.s };
 }
 
 function canvasToField(point) {
-  if (board.viewMode === 'perspective') return canvasToFieldPerspective(point);
   const sc = getScale();
   return {
     x: Math.max(0, Math.min(sc.fw,      (point.x - sc.left) / sc.s)),
     y: Math.max(0, Math.min(sc.fh, (point.y - sc.top)  / sc.s)),
   };
-}
-
-// ─── Vue Perspective ──────────────────────────────────────────────────────────
-// field.x (0..40) → vertical axis on screen (0=top/far goal, 40=bottom/near goal)
-// field.y (0..20) → horizontal axis on screen
-
-function fieldToCanvasPerspective(point) {
-  const sc = getScale();
-  const tx = point.x / board.fieldWidth;   // 0=top, 1=bottom
-  const ty = point.y / board.fieldHeight;  // 0=left, 1=right
-  const wf = PERSP_TOP_SCALE + (1 - PERSP_TOP_SCALE) * tx;
-  const width = sc.drawW * wf;
-  const leftEdge = sc.left + (sc.drawW - width) / 2;
-  return {
-    x: leftEdge + ty * width,
-    y: sc.top + tx * sc.drawH,
-  };
-}
-
-function canvasToFieldPerspective(point) {
-  const sc = getScale();
-  const tx = (point.y - sc.top) / sc.drawH;
-  const wf = PERSP_TOP_SCALE + (1 - PERSP_TOP_SCALE) * tx;
-  const width = sc.drawW * wf;
-  const leftEdge = sc.left + (sc.drawW - width) / 2;
-  const ty = (point.x - leftEdge) / width;
-  return {
-    x: Math.max(0, Math.min(board.fieldWidth,  tx * board.fieldWidth)),
-    y: Math.max(0, Math.min(board.fieldHeight, ty * board.fieldHeight)),
-  };
-}
-
-/** Sample an arc in field coordinates and return canvas-projected points */
-function sampleArcPerspective(cx_f, cy_f, R, startAngle, endAngle, samples = 40) {
-  const pts = [];
-  for (let i = 0; i <= samples; i++) {
-    const a = startAngle + (endAngle - startAngle) * (i / samples);
-    pts.push(fieldToCanvas({ x: cx_f + R * Math.cos(a), y: cy_f + R * Math.sin(a) }));
-  }
-  return pts;
 }
 
 function updateModeButtons(container, selectedMode) {
@@ -176,7 +132,7 @@ function updateModeButtons(container, selectedMode) {
 }
 
 function selectViewMode(mode) {
-  if (mode !== 'full' && mode !== 'half' && mode !== 'perspective') mode = 'full';
+  if (mode !== 'full' && mode !== 'half') mode = 'full';
   board.viewMode = mode;
   updateModeButtons(viewModeButtons, mode);
   setStatus(`Vue : ${board.viewMode}`);
@@ -196,8 +152,6 @@ function selectDrawMode(mode) {
 function setStatus(text) { status.textContent = text; }
 
 function drawCourt() {
-  if (board.viewMode === 'perspective') { drawCourtPerspective(); return; }
-
   ctx.clearRect(0, 0, board.width, board.height);
   ctx.fillStyle = '#07111f';
   ctx.fillRect(0, 0, board.width, board.height);
@@ -424,190 +378,6 @@ function drawSubZone(sc, halfOnly) {
   ctx.beginPath(); ctx.moveTo(p1.x, p1.y + tick - 1); ctx.lineTo(p2.x, p2.y + tick - 1); ctx.stroke();
 }
 
-// ─── Vue Perspective — dessin terrain ────────────────────────────────────────
-
-function drawCourtPerspective() {
-  ctx.clearRect(0, 0, board.width, board.height);
-  ctx.fillStyle = '#07111f';
-  ctx.fillRect(0, 0, board.width, board.height);
-
-  // Trapézoid corners (field bounding box projected)
-  const c00 = fieldToCanvas({ x: 0,                   y: 0 });
-  const c01 = fieldToCanvas({ x: 0,                   y: board.fieldHeight });
-  const c10 = fieldToCanvas({ x: board.fieldWidth,     y: board.fieldHeight });
-  const c11 = fieldToCanvas({ x: board.fieldWidth,     y: 0 });
-
-  // Field fill
-  ctx.fillStyle = '#0e2f60';
-  ctx.beginPath();
-  ctx.moveTo(c00.x, c00.y); ctx.lineTo(c01.x, c01.y);
-  ctx.lineTo(c10.x, c10.y); ctx.lineTo(c11.x, c11.y);
-  ctx.closePath(); ctx.fill();
-
-  // Goal zone fills
-  drawGoalZonePerspective(0,                 true,  false);
-  drawGoalZonePerspective(board.fieldWidth,  true,  false);
-
-  // Field outline
-  ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 3; ctx.setLineDash([]);
-  ctx.beginPath();
-  ctx.moveTo(c00.x, c00.y); ctx.lineTo(c01.x, c01.y);
-  ctx.lineTo(c10.x, c10.y); ctx.lineTo(c11.x, c11.y);
-  ctx.closePath(); ctx.stroke();
-
-  // Goal zone contours + free throw lines
-  drawGoalZonePerspective(0,                false, false);
-  drawGoalZonePerspective(board.fieldWidth, false, false);
-  drawGoalZonePerspective(0,                false, true);
-  drawGoalZonePerspective(board.fieldWidth, false, true);
-
-  // Center line
-  const midA = fieldToCanvas({ x: board.fieldWidth / 2, y: 0 });
-  const midB = fieldToCanvas({ x: board.fieldWidth / 2, y: board.fieldHeight });
-  ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.setLineDash([]);
-  ctx.beginPath(); ctx.moveTo(midA.x, midA.y); ctx.lineTo(midB.x, midB.y); ctx.stroke();
-
-  // Center circle (sampled)
-  const ccx = board.fieldWidth / 2, ccy = board.fieldHeight / 2, ccR = 3;
-  const circPts = sampleArcPerspective(ccx, ccy, ccR, 0, Math.PI * 2, 60);
-  ctx.beginPath(); ctx.moveTo(circPts[0].x, circPts[0].y);
-  circPts.forEach(p => ctx.lineTo(p.x, p.y)); ctx.closePath(); ctx.stroke();
-  // Center dot
-  const cDot = fieldToCanvas({ x: ccx, y: ccy });
-  ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(cDot.x, cDot.y, 4, 0, Math.PI*2); ctx.fill();
-
-  // Penalty marks
-  drawPenaltyMarkPerspective(0);
-  drawPenaltyMarkPerspective(board.fieldWidth);
-
-  // Goals
-  drawGoalRectPerspective(0);
-  drawGoalRectPerspective(board.fieldWidth);
-
-  // Substitution zone ticks
-  const subCx = board.fieldWidth / 2;
-  const sub1  = fieldToCanvas({ x: subCx - 4.5, y: board.fieldHeight });
-  const sub2  = fieldToCanvas({ x: subCx + 4.5, y: board.fieldHeight });
-  ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5; ctx.setLineDash([]);
-  [sub1, sub2].forEach(p => {
-    // tick goes slightly outside the field (to the right in perspective)
-    const outside = fieldToCanvas({ x: p.x > sub1.x ? subCx - 4.5 : subCx + 4.5, y: board.fieldHeight + 0.8 });
-    // simpler: just draw 10px tick perpendicular to right edge
-    ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x + 10, p.y); ctx.stroke();
-  });
-  ctx.beginPath(); ctx.moveTo(sub1.x + 10, sub1.y); ctx.lineTo(sub2.x + 10, sub2.y); ctx.stroke();
-}
-
-function drawGoalZonePerspective(goalX, fillMode, freeThrow) {
-  const R      = freeThrow ? board.freeThrowDistance : board.goalAreaDistance;
-  const cy_f   = board.fieldHeight / 2;
-  const ht     = cy_f - board.goalWidth / 2;  // 8.5
-  const hb     = cy_f + board.goalWidth / 2;  // 11.5
-  const isLeft = goalX === 0;
-
-  const N = 45;
-  const topY = Math.max(0, ht - R);
-  const botY = Math.min(board.fieldHeight, hb + R);
-  const pts = [];
-  // Starting point: top of D on the goal line (clamped to field boundary)
-  pts.push(fieldToCanvas({ x: goalX, y: topY }));
-  // Top arc
-  if (isLeft) {
-    pts.push(...sampleArcPerspective(goalX, ht, R, -Math.PI / 2, 0, N));
-    pts.push(...sampleArcPerspective(goalX, hb, R, 0, Math.PI / 2, N));
-  } else {
-    pts.push(...sampleArcPerspective(goalX, ht, R, -Math.PI / 2, -Math.PI, N));
-    pts.push(...sampleArcPerspective(goalX, hb, R, Math.PI, Math.PI / 2, N));
-  }
-  // Back to goal line (clamped to field boundary)
-  pts.push(fieldToCanvas({ x: goalX, y: botY }));
-  pts.push(fieldToCanvas({ x: goalX, y: topY }));
-
-  // Clip to court trapezoid so arcs never exceed field boundaries
-  const c00 = fieldToCanvas({ x: 0,               y: 0 });
-  const c01 = fieldToCanvas({ x: 0,               y: board.fieldHeight });
-  const c10 = fieldToCanvas({ x: board.fieldWidth, y: board.fieldHeight });
-  const c11 = fieldToCanvas({ x: board.fieldWidth, y: 0 });
-  ctx.save();
-  ctx.beginPath();
-  ctx.moveTo(c00.x, c00.y); ctx.lineTo(c01.x, c01.y);
-  ctx.lineTo(c10.x, c10.y); ctx.lineTo(c11.x, c11.y);
-  ctx.closePath(); ctx.clip();
-
-  ctx.beginPath();
-  ctx.moveTo(pts[0].x, pts[0].y);
-  pts.slice(1).forEach(p => ctx.lineTo(p.x, p.y));
-  ctx.closePath();
-
-  if (fillMode) {
-    ctx.fillStyle = '#0a2550'; ctx.fill();
-  } else {
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth   = freeThrow ? 1.5 : 2;
-    ctx.setLineDash(freeThrow ? [10, 7] : []);
-    ctx.stroke(); ctx.setLineDash([]);
-  }
-  ctx.restore();
-}
-
-function drawPenaltyMarkPerspective(goalX) {
-  const dir = goalX === 0 ? 1 : -1;
-  const px  = goalX + dir * board.penaltyDistance;
-  const cy  = board.fieldHeight / 2;
-  const p1  = fieldToCanvas({ x: px, y: cy - 0.15 });
-  const p2  = fieldToCanvas({ x: px, y: cy + 0.15 });
-  ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 3; ctx.setLineDash([]);
-  ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
-}
-
-function drawGoalRectPerspective(goalX) {
-  const cy  = board.fieldHeight / 2;
-  const ht  = cy - board.goalWidth / 2;
-  const hb  = cy + board.goalWidth / 2;
-  const dir = goalX === 0 ? 1 : -1;
-  const back = goalX - dir * 1;
-
-  const tl = fieldToCanvas({ x: back,  y: ht });
-  const tr = fieldToCanvas({ x: goalX, y: ht });
-  const br = fieldToCanvas({ x: goalX, y: hb });
-  const bl = fieldToCanvas({ x: back,  y: hb });
-
-  ctx.fillStyle = '#05101e';
-  ctx.beginPath();
-  ctx.moveTo(tl.x, tl.y); ctx.lineTo(tr.x, tr.y);
-  ctx.lineTo(br.x, br.y); ctx.lineTo(bl.x, bl.y);
-  ctx.closePath(); ctx.fill();
-
-  // Net hatch lines
-  ctx.save();
-  ctx.beginPath();
-  ctx.moveTo(tl.x, tl.y); ctx.lineTo(tr.x, tr.y);
-  ctx.lineTo(br.x, br.y); ctx.lineTo(bl.x, bl.y);
-  ctx.closePath(); ctx.clip();
-  ctx.strokeStyle = 'rgba(255,255,255,0.22)'; ctx.lineWidth = 0.8;
-  const rows = 4;
-  for (let i = 0; i <= rows; i++) {
-    const t = i / rows;
-    const ax = tl.x + (bl.x - tl.x) * t, ay = tl.y + (bl.y - tl.y) * t;
-    const bx = tr.x + (br.x - tr.x) * t, by = tr.y + (br.y - tr.y) * t;
-    ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke();
-  }
-  const cols = 3;
-  for (let i = 0; i <= cols; i++) {
-    const t = i / cols;
-    const ax = tl.x + (tr.x - tl.x) * t, ay = tl.y + (tr.y - tl.y) * t;
-    const bx = bl.x + (br.x - bl.x) * t, by = bl.y + (br.y - bl.y) * t;
-    ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke();
-  }
-  ctx.restore();
-
-  ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 3; ctx.setLineDash([]);
-  ctx.beginPath();
-  ctx.moveTo(tl.x, tl.y); ctx.lineTo(tr.x, tr.y);
-  ctx.lineTo(br.x, br.y); ctx.lineTo(bl.x, bl.y);
-  ctx.closePath(); ctx.stroke();
-}
-
 // ─── Items / assets ───────────────────────────────────────────────────────────
 
 function drawItems() {
@@ -784,11 +554,6 @@ function drawArrowAtEnd(path, canvasPoints) {
 
 function getItemScale(item) {
   const sc = getScale();
-  if (board.viewMode === 'perspective') {
-    const tx = item.y / board.fieldHeight;
-    const wf = PERSP_TOP_SCALE + (1 - PERSP_TOP_SCALE) * tx;
-    return (sc.drawW * wf) / board.fieldWidth;
-  }
   return sc.s;
 }
 
