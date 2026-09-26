@@ -343,8 +343,11 @@
       setIconActive(null);
     });
 
+    // Back button is a child of the grid itself (not a dock sibling) so its
+    // position anchors to the grid's own box, not a fixed offset above .dock
+    // that would land inside the grid's bounds once the grid's height varies.
+    gridContainer.appendChild(backButton);
     dock.appendChild(gridContainer);
-    dock.appendChild(backButton);
   }
 
   /**

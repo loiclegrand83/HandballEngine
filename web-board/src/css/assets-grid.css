@@ -7,8 +7,14 @@
 /* ── Assets Grid Container (Shown when Dock is in Assets Mode) ─────────────────– */
 
 .assets-grid {
-  position: fixed;
-  bottom: var(--spacing-lg);
+  /* Positioned relative to .dock (its actual DOM parent), which is itself
+     a grid item (position: relative) since Story 1-2's AD-10 layout fix.
+     Was `position: fixed` (viewport-anchored) before that change, which
+     left it stacking under the canvas once .dock stopped being a fixed
+     overlay -- see deferred-work.md. */
+  position: absolute;
+  bottom: 100%;
+  margin-bottom: var(--spacing-lg);
   left: 50%;
   transform: translateX(-50%);
 
@@ -330,10 +336,14 @@
 /* ── Back Button (Navigate Back to Dock) ──────────────────────────────────────────– */
 
 .assets-back-button {
-  position: fixed;
-  bottom: calc(var(--dock-height) + var(--spacing-xl));
-  left: 50%;
-  transform: translateX(-50%);
+  /* Now a child of .assets-grid itself (not a .dock sibling) so it anchors
+     to the grid's own box -- top-left corner, inside the grid's padding.
+     A .dock-relative "bottom: 100% + offset" previously landed INSIDE the
+     grid's bounds once the grid's actual rendered height exceeded that
+     fixed offset, making the button unclickable under the grid. */
+  position: absolute;
+  top: var(--spacing-sm);
+  left: var(--spacing-sm);
 
   width: 40px;
   height: 40px;
@@ -344,8 +354,12 @@
   cursor: pointer;
   font-size: 20px;
   color: var(--color-text-secondary);
-  transition: all var(--duration-short) var(--ease-standard));
-  z-index: calc(var(--z-dock) - 1);
+  transition: all var(--duration-short) var(--ease-standard);
+  /* No explicit z-index needed: now a child of .assets-grid, it paints
+     above the grid's own children (asset-grid-item buttons) by default
+     since it's the last-appended absolutely-positioned element in the
+     same stacking context -- an explicit z-index here previously fought
+     the grid's own z-index in a way that hid it behind grid cells. */
 
   display: flex;
   align-items: center;
