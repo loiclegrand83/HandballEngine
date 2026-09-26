@@ -15,18 +15,28 @@ Le serveur démarre sur `http://localhost:3000` et ouvre automatiquement le navi
 | Page | URL | Description |
 |---|---|---|
 | Accueil | `/` | Menu principal |
+| Démarrage | `/pages/startup.html` | Nouvelle séance ou éditer un exercice existant |
 | Board Tactique | `/pages/board.html` | Création et animation d'exercices |
 | Séances | `/pages/seance.html` | Planification et impression de séances |
 | Explication | `/pages/explanation.html` | Fiche pédagogique d'un exercice (vue éditeur + vue document imprimable) |
+| Planning | `/pages/planning.html` | Calendrier et planification des séances |
 
 ## Board Tactique
 
-- Palette d'assets : joueurs, gardien, équipements (cônes, plots, mannequins, haies, haltères, cerceaux, échelles…)
+### Flux de démarrage
+
+`startup.html` est le point d'entrée : le coach choisit entre **Nouvelle séance** (board vierge, `?new=1`) ou **Éditer un exercice** (charge un exercice existant depuis la bibliothèque, `?exercise=<id>`).
+
+### Fonctionnalités
+
+- **Dock toolbar** (bas d'écran) : accès rapide aux outils via icônes
+- **Joueurs** : sélection équipe (A/B) + poste (AG, ARG, DC, PIV, ARD, AD, Gardien) dans le panel Dock ; placement sur terrain par clic ; cap automatique (6 joueurs de champ + 1 gardien par équipe) ; numérotation automatique des postes répétés (PIV 1, PIV 2…)
+- **Assets** : grille d'équipements (Ballon, Haie, Haltère, Cible, Swiss Ball, Coupelle, Cerceau, Mannequin, Mur, Plot) ; placement sur terrain par clic
+- **Trajectoires** : 5 types (Course, Passe, Tir, Croisé, Fixation) dans le panel Dock ; toujours liées à un joueur placé (clic sur le joueur pour démarrer) ; boutons désactivés si aucun joueur présent ; tracé multi-waypoints, double-clic pour terminer
+- **Visualisation** : trajectoires codées par couleur et style de ligne (pointillés/plein) ; flèches de direction ; badges numérotés d'étape
+- **Animation** des trajectoires
 - Vues : terrain complet, demi-terrain, perspective
-- Modes de tracé : course, tir, passe, croisé, fixation
-- Animation des trajectoires
-- Liaison de trajectoires (option "Lié à la trajectoire précédente")
-- Sauvegarde locale (bibliothèque JSON via le serveur)
+- Sauvegarde dans la bibliothèque (API locale JSON via le serveur)
 - Export / import JSON
 - Fiche d'exercice avec vue document imprimable (A4)
 
@@ -48,17 +58,29 @@ web-board/
 ├── index.html          # Page d'accueil (3 modules)
 ├── server.js           # Serveur HTTP local (port 3000)
 ├── pages/
-│   ├── board.html
-│   ├── seance.html
-│   └── explanation.html
+│   ├── startup.html        # Écran de démarrage (nouvelle séance / éditer)
+│   ├── board.html          # Board tactique
+│   ├── seance.html         # Séances
+│   ├── planning.html       # Planning
+│   └── explanation.html    # Fiche exercice
 ├── src/
 │   ├── css/
-│   │   ├── styles.css       # Board tactique
-│   │   ├── seance.css       # Séances
-│   │   └── explanation.css  # Fiche exercice
+│   │   ├── design-tokens.css   # Variables CSS globales
+│   │   ├── styles.css          # Board tactique (canvas + layout)
+│   │   ├── dock.css            # Dock toolbar
+│   │   ├── panel.css           # Panels slide-out
+│   │   ├── assets-grid.css     # Grille assets
+│   │   ├── sidebar.css         # Sidebar
+│   │   ├── seance.css          # Séances
+│   │   ├── planning.css        # Planning
+│   │   └── explanation.css     # Fiche exercice
 │   └── js/
-│       ├── app.js           # Logique du board
-│       └── seance.js        # Logique des séances
+│       ├── app.js              # Logique du board (canvas, state, placement)
+│       ├── dock.js             # Dock toolbar + panels (Joueurs, Assets, Trajectoires…)
+│       ├── canvas-reflow.js    # Redimensionnement canvas
+│       ├── keyboard-nav.js     # Navigation clavier
+│       ├── seance.js           # Logique des séances
+│       └── planning.js         # Logique du planning
 ├── assets/             # SVG joueurs et icônes
 └── data/
     ├── bibli/          # Exercices sauvegardés (JSON)
