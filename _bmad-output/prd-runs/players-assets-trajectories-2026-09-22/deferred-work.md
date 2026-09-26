@@ -1,0 +1,5 @@
+# Deferred Work — Players, Assets & Trajectories
+
+- source_spec: `_bmad-output/prd-runs/players-assets-trajectories-2026-09-22/stories/2-1-selection-equipe-poste.md`
+  summary: The 6+1 per-team player cap is enforced only in the new Dock panel UI, not in `addItem`/`selectPost` themselves, so the legacy `#postButtons`/`#teamButtons` sidebar (kept functional by this story's own scope decision) lets a coach bypass the cap entirely.
+  evidence: Verified via repo-wide symbol search — `addItem` (app.js) and `selectPost` (app.js) apply no cap check; only `dock.js`'s `renderPlayersPanel`/`getTeamCounts` disable buttons, and only within the Dock panel. This is real today, not hypothetical: clicking the old sidebar's poste buttons past the cap places the player with no rejection. Should close naturally once the legacy sidebar/bottom-controls player buttons are retired in a later cleanup story (anticipated in Story 2-1's Boundaries section), or be moved into a shared enforcement point if the legacy UI persists longer than expected.

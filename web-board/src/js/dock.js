@@ -9,6 +9,24 @@
   // ── Configuration ────────────────────────────────────────────────────────────
   const CLICK_DEBOUNCE_MS = 50;
   const PANEL_ANIMATION_MS = 200;
+
+  const TEAMS = [
+    { id: 'A', label: 'Équipe A' },
+    { id: 'B', label: 'Équipe B' },
+  ];
+
+  const POSTES = [
+    { id: 'AG', label: 'AG' },
+    { id: 'ARG', label: 'ARG' },
+    { id: 'DC', label: 'DC' },
+    { id: 'PIV', label: 'PIV' },
+    { id: 'ARD', label: 'ARD' },
+    { id: 'AD', label: 'AD' },
+    { id: 'Demi', label: 'Demi' },
+  ];
+
+  const OUTFIELD_CAP = 6;
+  const GOALKEEPER_CAP = 1;
   const DOCK_ICONS = [
     { tool: 'players', label: 'Joueurs', icon: '🎮' },
     { tool: 'assets', label: 'Assets', icon: '🎯' },
@@ -102,6 +120,11 @@
     const toolConfig = getToolConfig(toolName);
     if (!toolConfig) return;
 
+    if (toolName === 'players') {
+      renderPlayersPanel();
+      return;
+    }
+
     // Generic placeholder content
     panelContent.innerHTML = `
       <div class="panel-section">
@@ -113,6 +136,89 @@
         </div>
       </div>
     `;
+  }
+
+  // ── Players Panel (team + poste selection) ─────────────────────────────────
+
+  /**
+   * Count placed players for a team, split into outfield / goalkeeper counts.
+   * Live-filters state.items each call (no separate running counter).
+   */
+  function getTeamCounts(team) {
+    const api = window.PlayerSelectionAPI;
+    const state = api ? api.getState() : null;
+    const items = (state && Array.isArray(state.items)) ? state.items : [];
+    let outfield = 0;
+    let goalkeeper = 0;
+    items.forEach(item => {
+      if (item.team !== team) return;
+      if (item.isGoalkeeper) goalkeeper += 1;
+      else if (item.team) outfield += 1;
+    });
+    return { outfield, goalkeeper };
+  }
+
+  /**
+   * Render the players panel: team buttons + poste buttons, with caps applied.
+   */
+  function renderPlayersPanel() {
+    const toolConfig = getToolConfig('players');
+    const api = window.PlayerSelectionAPI;
+    const state = api ? api.getState() : null;
+    const selectedTeam = state ? state.selectedTeam : 'A';
+    const selectedPost = state ? state.selectedPost : null;
+
+    const teamButtonsHtml = TEAMS.map(team => `
+      <button type="button" class="panel-action-btn${team.id === selectedTeam ? ' selected' : ''}" data-players-team="${team.id}">${team.label}</button>
+    `).join('');
+
+    const postButtonsHtml = POSTES.map(poste => {
+      const counts = getTeamCounts(selectedTeam);
+      const isGoalkeeperPoste = poste.id === 'AG';
+      const atCap = isGoalkeeperPoste
+        ? counts.goalkeeper >= GOALKEEPER_CAP
+        : counts.outfield >= OUTFIELD_CAP;
+      const isSelected = poste.id === selectedPost;
+      return `<button type="button" class="panel-action-btn${isSelected ? ' selected' : ''}" data-players-post="${poste.id}"${atCap ? ' disabled' : ''}>${poste.label}</button>`;
+    }).join('');
+
+    panelContent.innerHTML = `
+      <div class="panel-section">
+        <h3>${toolConfig.label}</h3>
+        <h4>Équipe</h4>
+        <div class="button-group" id="dockTeamButtons">
+          ${teamButtonsHtml}
+        </div>
+        <h4>Poste</h4>
+        <div class="button-group" id="dockPostButtons">
+          ${postButtonsHtml}
+        </div>
+      </div>
+    `;
+  }
+
+  /**
+   * Handle clicks inside the players panel (team + poste buttons).
+   */
+  function handlePlayersPanelClick(e) {
+    const api = window.PlayerSelectionAPI;
+    if (!api) return;
+
+    const teamBtn = e.target.closest('[data-players-team]');
+    if (teamBtn) {
+      e.stopPropagation();
+      api.selectTeam(teamBtn.getAttribute('data-players-team'));
+      renderPlayersPanel();
+      return;
+    }
+
+    const postBtn = e.target.closest('[data-players-post]');
+    if (postBtn) {
+      if (postBtn.disabled) return;
+      e.stopPropagation();
+      api.selectPost(postBtn.getAttribute('data-players-post'));
+      renderPlayersPanel();
+    }
   }
 
   /**
@@ -337,6 +443,7 @@
   function handlePanelButtonClick(e) {
     const button = e.target.closest('.panel-action-btn');
     if (!button) return;
+    if (button.hasAttribute('data-players-team') || button.hasAttribute('data-players-post')) return;
 
     const action = button.getAttribute('data-action');
     console.log(`[Dock.js] Panel action: ${action}`);
@@ -371,8 +478,16 @@
     // Add global keyboard listener
     document.addEventListener('keydown', handleEscapeKey);
 
+    // Re-run players panel cap-check whenever a player is placed while the panel is open
+    window.addEventListener('itemPlaced', () => {
+      if (isPanelOpen && currentTool === 'players') {
+        renderPlayersPanel();
+      }
+    });
+
     // Add event listener for panel content buttons (delegated)
     panelContent.addEventListener('click', handlePanelButtonClick);
+    panelContent.addEventListener('click', handlePlayersPanelClick);
 
     // Initialize with panel hidden
     panel.classList.add('hidden');

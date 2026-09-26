@@ -1120,9 +1120,11 @@ function addItem(x, y) {
     color,
     displayLabel,
     post,
+    isGoalkeeper: isPlayer && post === 'AG',
     rotation: 0,
   });
   saveLocal(); render();
+  window.dispatchEvent(new CustomEvent('itemPlaced'));
 }
 
 function getItemIndexAt(cx, cy) {
@@ -1706,22 +1708,16 @@ drawModeButtons.addEventListener('click', e => {
   if (!button) return;
   selectDrawMode(button.dataset.mode);
 });
-teamButtons.addEventListener('click', e => {
-  const button = e.target.closest('button[data-team]');
-  if (!button) return;
-  state.selectedTeam = button.dataset.team;
+function selectTeam(team) {
+  state.selectedTeam = team;
   state.selectedAssetIndex = assets.findIndex(asset => asset.id === 'player');
   clearAssetSelection();
   selectDrawMode('asset');
   updateModeButtons(teamButtons, state.selectedTeam);
   setStatus(`Équipe : ${state.selectedTeam} (prêt à poser un joueur)`);
-});
+}
 
-const postButtonsEl = document.getElementById('postButtons');
-postButtonsEl.addEventListener('click', e => {
-  const button = e.target.closest('button[data-post]');
-  if (!button) return;
-  const post = button.dataset.post;
+function selectPost(post) {
   if (state.selectedPost === post) {
     // Désélectionner si on reclique sur le même
     state.selectedPost = null;
@@ -1735,7 +1731,27 @@ postButtonsEl.addEventListener('click', e => {
     updateModeButtons(postButtonsEl, post);
     setStatus(`Poste : ${post} — cliquer sur le terrain pour placer`);
   }
+}
+
+teamButtons.addEventListener('click', e => {
+  const button = e.target.closest('button[data-team]');
+  if (!button) return;
+  selectTeam(button.dataset.team);
 });
+
+const postButtonsEl = document.getElementById('postButtons');
+postButtonsEl.addEventListener('click', e => {
+  const button = e.target.closest('button[data-post]');
+  if (!button) return;
+  selectPost(button.dataset.post);
+});
+
+// Expose shared team/poste selection state + logic for the Dock panel (dock.js)
+window.PlayerSelectionAPI = {
+  selectTeam,
+  selectPost,
+  getState: () => state,
+};
 playAnimationButton.addEventListener('click', () => {
   if (!state.paths.length) { setStatus('Aucune trajectoire'); return; }
   if (state.animation.active) {

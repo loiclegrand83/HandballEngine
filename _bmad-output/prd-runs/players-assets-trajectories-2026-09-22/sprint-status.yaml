@@ -34,8 +34,8 @@ development_status:
   1-3-selection-de-la-vue-terrain: done
   epic-1-retrospective: optional
 
-  epic-2: backlog
-  2-1-selection-equipe-poste: backlog
+  epic-2: in-progress
+  2-1-selection-equipe-poste: done
   2-2-placement-dun-joueur-sur-le-terrain: backlog
   2-3-deplacer-ou-supprimer-un-joueur-place: backlog
   2-4-feedback-visuel-des-joueurs: backlog
