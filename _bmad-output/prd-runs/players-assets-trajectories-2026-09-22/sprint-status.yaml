@@ -47,14 +47,14 @@ development_status:
   3-3-feedback-visuel-des-assets: done
   epic-3-retrospective: optional
 
-  epic-4: backlog
-  4-1-selection-type-de-trajectoire-joueur-lie: backlog
-  4-2-dessiner-une-trajectoire-sur-le-terrain: backlog
-  4-3-visualisation-codee-par-couleur-type: backlog
+  epic-4: done
+  4-1-selection-type-de-trajectoire-joueur-lie: done
+  4-2-dessiner-une-trajectoire-sur-le-terrain: done
+  4-3-visualisation-codee-par-couleur-type: done
   epic-4-retrospective: optional
 
-  epic-5: backlog
-  5-1-sauvegarder-un-exercice: backlog
-  5-2-modele-de-donnees-complet-de-lexercice: backlog
+  epic-5: done
+  5-1-sauvegarder-un-exercice: done
+  5-2-modele-de-donnees-complet-de-lexercice: done
   epic-5-retrospective: optional
 action_items: []
