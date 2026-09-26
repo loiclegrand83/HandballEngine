@@ -1148,7 +1148,7 @@ function addItem(x, y) {
     ? (post
         ? (post === 'AG' ? post : getPosteLabel(state.selectedTeam, post))
         : String(getNextPlayerNumber(state.selectedTeam)))
-    : (selected.shape === 'circle' ? selected.label.charAt(0) : '');
+    : '';
   state.items.push({
     ...selected,
     x: field.x,

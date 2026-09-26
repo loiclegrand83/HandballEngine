@@ -41,10 +41,10 @@ development_status:
   2-4-feedback-visuel-des-joueurs: done
   epic-2-retrospective: optional
 
-  epic-3: in-progress
+  epic-3: done
   3-1-selection-dun-type-dasset: done
   3-2-placement-dun-asset-sur-le-terrain: done
-  3-3-feedback-visuel-des-assets: backlog
+  3-3-feedback-visuel-des-assets: done
   epic-3-retrospective: optional
 
   epic-4: backlog
