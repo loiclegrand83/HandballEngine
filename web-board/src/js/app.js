@@ -1045,6 +1045,34 @@ function selectAsset(index) {
   setStatus(`Asset sélectionné: ${assets[index].label}`);
 }
 
+// ─── Dock "Assets" grid bridge (Story 3-1) ─────────────────────────────────────
+// The Dock's asset grid (dock.js ASSET_ITEMS) uses its own id scheme that does
+// not correspond 1:1 with this file's `assets` catalog (e.g. `swiss-ball` vs
+// `swiss`, `cerceau` vs `hoop`). Match by normalized label instead.
+function normalizeAssetLabel(label) {
+  return (label || '')
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '') // strip accents
+    .trim()
+    .toLowerCase();
+}
+
+const assetLabelIndex = new Map();
+assets.forEach((asset, index) => {
+  assetLabelIndex.set(normalizeAssetLabel(asset.label), index);
+});
+
+window.addEventListener('assetSelected', event => {
+  const rawLabel = event.detail?.assetLabel;
+  const normalized = normalizeAssetLabel(rawLabel);
+  const index = assetLabelIndex.get(normalized);
+  if (index === undefined) {
+    console.warn(`[app.js] Dock asset "${rawLabel}" has no matching entry in the assets array (normalized: "${normalized}")`);
+    return;
+  }
+  selectAsset(index);
+});
+
 const teamColors = {
   A: '#1e88e5',
   B: '#ef5350',
