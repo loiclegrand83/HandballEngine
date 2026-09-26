@@ -1103,6 +1103,13 @@ function getNextPlayerNumber(team) {
   return next;
 }
 
+function getPosteLabel(team, post) {
+  const count = state.items
+    .filter(item => item.team === team && item.post === post)
+    .length;
+  return `${post} ${count + 1}`;
+}
+
 function addItem(x, y) {
   const selected = assets[state.selectedAssetIndex];
   const field = canvasToField({ x, y });
@@ -1110,7 +1117,9 @@ function addItem(x, y) {
   const color = isPlayer ? teamColors[state.selectedTeam] : selected.color;
   const post = isPlayer && state.selectedPost ? state.selectedPost : null;
   const displayLabel = isPlayer
-    ? (post || String(getNextPlayerNumber(state.selectedTeam)))
+    ? (post
+        ? (post === 'AG' ? post : getPosteLabel(state.selectedTeam, post))
+        : String(getNextPlayerNumber(state.selectedTeam)))
     : (selected.shape === 'circle' ? selected.label.charAt(0) : '');
   state.items.push({
     ...selected,
@@ -1342,6 +1351,7 @@ canvas.addEventListener('pointerleave', () => {
 });
 
 function deleteItemAt(index) {
+  const deleted = state.items[index];
   state.items.splice(index, 1);
   if (state.selectedItemIndex !== null) {
     if (state.selectedItemIndex === index) state.selectedItemIndex = null;
@@ -1350,6 +1360,11 @@ function deleteItemAt(index) {
   if (state.dragIndex !== null) {
     if (state.dragIndex === index) state.dragIndex = null;
     else if (state.dragIndex > index) state.dragIndex -= 1;
+  }
+  if (deleted && deleted.post && deleted.post !== 'AG') {
+    state.items
+      .filter(item => item.team === deleted.team && item.post === deleted.post)
+      .forEach((item, i) => { item.displayLabel = `${deleted.post} ${i + 1}`; });
   }
   saveLocal();
   render();
