@@ -125,6 +125,11 @@
       return;
     }
 
+    if (toolName === 'trajectories') {
+      renderTrajectoriesPanel();
+      return;
+    }
+
     // Generic placeholder content
     panelContent.innerHTML = `
       <div class="panel-section">
@@ -195,6 +200,46 @@
         </div>
       </div>
     `;
+  }
+
+  // ── Trajectories Panel ────────────────────────────────────────────────────
+
+  function renderTrajectoriesPanel() {
+    const api = window.PlayerSelectionAPI;
+    const anyPlayer = api ? api.hasAnyPlayerPlaced() : false;
+    const state = api ? api.getState() : null;
+    const currentMode = state ? state.drawMode : null;
+
+    const types = [
+      { id: 'course',   label: 'Course' },
+      { id: 'pass',     label: 'Passe' },
+      { id: 'shot',     label: 'Tir' },
+      { id: 'croise',   label: 'Croisé' },
+      { id: 'fixation', label: 'Fixation' },
+    ];
+
+    panelContent.innerHTML = `
+      <div class="panel-section">
+        ${!anyPlayer ? '<p class="panel-hint">Placez un joueur pour activer les trajectoires.</p>' : ''}
+        <div class="button-group">
+          ${types.map(t => `
+            <button class="panel-action-btn${currentMode === t.id ? ' active' : ''}" data-traj-type="${t.id}" ${anyPlayer ? '' : 'disabled'}>
+              ${t.label}
+            </button>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  function handleTrajectoriesPanelClick(e) {
+    const api = window.PlayerSelectionAPI;
+    if (!api) return;
+    const btn = e.target.closest('[data-traj-type]');
+    if (!btn || btn.disabled) return;
+    e.stopPropagation();
+    api.selectDrawMode(btn.getAttribute('data-traj-type'));
+    renderTrajectoriesPanel();
   }
 
   /**
@@ -446,7 +491,7 @@
   function handlePanelButtonClick(e) {
     const button = e.target.closest('.panel-action-btn');
     if (!button) return;
-    if (button.hasAttribute('data-players-team') || button.hasAttribute('data-players-post')) return;
+    if (button.hasAttribute('data-players-team') || button.hasAttribute('data-players-post') || button.hasAttribute('data-traj-type')) return;
 
     const action = button.getAttribute('data-action');
     console.log(`[Dock.js] Panel action: ${action}`);
@@ -481,16 +526,16 @@
     // Add global keyboard listener
     document.addEventListener('keydown', handleEscapeKey);
 
-    // Re-run players panel cap-check whenever a player is placed while the panel is open
+    // Re-run panel cap-check whenever a player/item is placed while the panel is open
     window.addEventListener('itemPlaced', () => {
-      if (isPanelOpen && currentTool === 'players') {
-        renderPlayersPanel();
-      }
+      if (isPanelOpen && currentTool === 'players') renderPlayersPanel();
+      if (isPanelOpen && currentTool === 'trajectories') renderTrajectoriesPanel();
     });
 
     // Add event listener for panel content buttons (delegated)
     panelContent.addEventListener('click', handlePanelButtonClick);
     panelContent.addEventListener('click', handlePlayersPanelClick);
+    panelContent.addEventListener('click', handleTrajectoriesPanelClick);
 
     // Initialize with panel hidden
     panel.classList.add('hidden');

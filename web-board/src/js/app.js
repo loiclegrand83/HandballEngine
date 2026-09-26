@@ -1294,6 +1294,11 @@ canvas.addEventListener('pointerdown', event => {
   if (mode === 'course' || mode === 'shot' || mode === 'pass' || mode === 'croise' || mode === 'fixation') {
     const newPoint = canvasToField(point);
     if (!state.currentPath || state.currentPath.kind !== mode) {
+      const playerHitIndex = getItemIndexAt(point.x, point.y);
+      if (playerHitIndex < 0 || !state.items[playerHitIndex].team) {
+        setStatus('Cliquez sur un joueur pour démarrer une trajectoire');
+        return;
+      }
       const pathColors = { shot: '#ff5252', course: '#90caf9', pass: '#ffd740', croise: '#ff9800', fixation: '#ce93d8' };
       let step = 0;
       const syncCheckbox = document.getElementById('syncCheckbox');
@@ -1301,7 +1306,7 @@ canvas.addEventListener('pointerdown', event => {
         const lastStep = Math.max(...state.paths.map(p => p.step || 0));
         step = (syncCheckbox && syncCheckbox.checked) ? lastStep : lastStep + 1;
       }
-      state.currentPath = { id: `path-${Date.now()}`, kind: mode, color: pathColors[mode], step: step, points: [newPoint] };
+      state.currentPath = { id: `path-${Date.now()}`, kind: mode, color: pathColors[mode], step: step, points: [newPoint], linkedItemId: state.items[playerHitIndex].id };
       state.paths.push(state.currentPath);
       setStatus(`Début trajectoire ${mode}`);
     } else {
@@ -1817,9 +1822,15 @@ postButtonsEl.addEventListener('click', e => {
 });
 
 // Expose shared team/poste selection state + logic for the Dock panel (dock.js)
+function hasAnyPlayerPlaced() {
+  return state.items.some(i => i.team);
+}
+
 window.PlayerSelectionAPI = {
   selectTeam,
   selectPost,
+  selectDrawMode,
+  hasAnyPlayerPlaced,
   getState: () => state,
 };
 playAnimationButton.addEventListener('click', () => {
