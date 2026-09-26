@@ -7,3 +7,7 @@
 - source_spec: `_bmad-output/prd-runs/players-assets-trajectories-2026-09-22/stories/2-2-placement-dun-joueur-sur-le-terrain.md`
   summary: A poste button that hits its team cap right after being used keeps its `.selected` CSS class while becoming `disabled`, so it visually still looks "chosen" even though it's no longer interactive — mildly confusing but not blocking (selecting a different poste works normally).
   evidence: Reproduced via Playwright — placed a goalkeeper (AG) for Équipe A, confirmed via DOM inspection that the AG button is `disabled: true` while still carrying the `selected` class. Selecting a different poste (DC) immediately after works correctly with no functional impact, so this is cosmetic only. Candidate fix: clear the `.selected` class when a button transitions to `disabled` in `renderPlayersPanel`'s re-render.
+
+- source_spec: `_bmad-output/prd-runs/players-assets-trajectories-2026-09-22/stories/2-3-deplacer-ou-supprimer-un-joueur-place.md`
+  summary: No automated test coverage exists for the move/delete feature (double-tap delete, keyboard delete, the focus guard) — the repo has zero test harness for app.js interaction logic.
+  evidence: Repo-wide grep for `selectedItemIndex`, `deleteItemAt`, `isDoubleTap`, keyboard-delete symbols returned no matches outside app.js itself; the only e2e spec (`tests/e2e/board.spec.js`) doesn't exercise any of this. This is a project-wide gap, not specific to this story, and adding a full interaction-test harness is a larger investment than any single story here.

@@ -86,6 +86,7 @@ const state = {
   currentPath: null,
   animation: { active: false, currentStep: 0, progress: 0, speed: 0.007 },
   selectedPathIndex: null,
+  selectedItemIndex: null,
   dragPathPointIndex: null,
   currentExerciseId: null,
   userSaved: false,
@@ -1225,7 +1226,12 @@ canvas.addEventListener('pointerdown', event => {
     }
 
     if (ai >= 0) {
+      if (isDoubleTap) {
+        deleteItemAt(ai);
+        return;
+      }
       state.selectedPathIndex = null;
+      state.selectedItemIndex = ai;
       state.dragIndex = ai;
       const pos = fieldToCanvas(state.items[ai]);
       state.pointerOffset.x = point.x - pos.x;
@@ -1335,15 +1341,36 @@ canvas.addEventListener('pointerleave', () => {
   if (state.dragPathPointIndex !== null) { state.dragPathPointIndex = null; saveLocal(); render(); }
 });
 
+function deleteItemAt(index) {
+  state.items.splice(index, 1);
+  if (state.selectedItemIndex !== null) {
+    if (state.selectedItemIndex === index) state.selectedItemIndex = null;
+    else if (state.selectedItemIndex > index) state.selectedItemIndex -= 1;
+  }
+  if (state.dragIndex !== null) {
+    if (state.dragIndex === index) state.dragIndex = null;
+    else if (state.dragIndex > index) state.dragIndex -= 1;
+  }
+  saveLocal();
+  render();
+  setStatus('Asset supprimé');
+}
+
+document.addEventListener('keydown', event => {
+  if (event.key !== 'Delete' && event.key !== 'Backspace') return;
+  const focusedTag = document.activeElement && document.activeElement.tagName;
+  if (focusedTag === 'INPUT' || focusedTag === 'TEXTAREA' || focusedTag === 'SELECT') return;
+  if (state.selectedItemIndex === null) return;
+  deleteItemAt(state.selectedItemIndex);
+  state.selectedItemIndex = null;
+});
+
 canvas.addEventListener('contextmenu', event => {
   event.preventDefault();
   const point = canvasPoint(event);
   const ai = getItemIndexAt(point.x, point.y);
   if (ai >= 0) {
-    state.items.splice(ai, 1);
-    saveLocal();
-    render();
-    setStatus('Asset supprimé');
+    deleteItemAt(ai);
     return;
   }
 
