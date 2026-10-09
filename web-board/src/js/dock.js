@@ -166,6 +166,11 @@
   }
 
   /**
+   * Panels re-render only on discrete events (click, itemPlaced, panel open).
+   * Never poll state on a timer or animation frame to simulate freshness.
+   */
+
+  /**
    * Render the players panel: team buttons + poste buttons, with caps applied.
    */
   function renderPlayersPanel() {
