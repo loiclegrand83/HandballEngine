@@ -22,7 +22,7 @@
     { id: 'PIV', label: 'PIV' },
     { id: 'ARD', label: 'ARD' },
     { id: 'AD', label: 'AD' },
-    { id: 'Demi', label: 'Demi' },
+    { id: 'G', label: 'Gardien' },
   ];
 
   const OUTFIELD_CAP = 6;
@@ -179,7 +179,7 @@
 
     const postButtonsHtml = POSTES.map(poste => {
       const counts = getTeamCounts(selectedTeam);
-      const isGoalkeeperPoste = poste.id === 'AG';
+      const isGoalkeeperPoste = poste.id === 'G';
       const atCap = isGoalkeeperPoste
         ? counts.goalkeeper >= GOALKEEPER_CAP
         : counts.outfield >= OUTFIELD_CAP;

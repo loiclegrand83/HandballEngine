@@ -62,7 +62,6 @@ const assets = [
   { id: 'player', label: 'Joueur', color: '#4682b4', radius: 18, shape: 'circle', hidden: true },
   { id: 'ball', label: 'Ballon', color: '#ffffff', radius: 13, shape: 'ball' },
   { id: 'H', label: 'Haie', color: '#fdd835', radius: 22, shape: 'hurdle' },
-  { id: 'G', label: 'Gardien', color: '#fdd835', radius: 18, shape: 'circle' },
   { id: 'C', label: 'Cible', color: '#66bb6a', radius: 12, shape: 'ring' },
   { id: 'dumbbell', label: 'Haltère', color: '#ffca28', radius: 24, shape: 'dumbbell' },
   { id: 'swiss', label: 'Swiss ball', color: '#26c6da', radius: 18, shape: 'circle' },
@@ -1083,7 +1082,7 @@ const teamColors = {
 const VALID_SHAPES = ['circle', 'ring', 'rect', 'wall', 'bar', 'hurdle', 'dumbbell', 'ladder', 'cup', 'cone', 'arrow', 'ball', 'zone-fix'];
 const VALID_TEAMS  = ['A', 'B', null];
 const VALID_PATH_KINDS = ['course', 'shot', 'pass', 'croise', 'fixation'];
-const HANDBALL_POSTS = ['AG', 'ARG', 'DC', 'PIV', 'ARD', 'AD'];
+const HANDBALL_POSTS = ['AG', 'ARG', 'DC', 'PIV', 'ARD', 'AD', 'G'];
 const MOVING_KINDS   = ['course', 'croise', 'fixation'];
 
 function sanitizeItem(raw) {
@@ -1100,6 +1099,7 @@ function sanitizeItem(raw) {
     y:            Number(raw.y) || 0,
     team:         VALID_TEAMS.includes(raw.team) ? raw.team : null,
     post:         HANDBALL_POSTS.includes(raw.post) ? raw.post : null,
+    isGoalkeeper: Boolean(raw.isGoalkeeper) || raw.post === 'G',
     hidden:       Boolean(raw.hidden),
   };
 }
@@ -1146,7 +1146,7 @@ function addItem(x, y) {
   const post = isPlayer && state.selectedPost ? state.selectedPost : null;
   const displayLabel = isPlayer
     ? (post
-        ? (post === 'AG' ? post : getPosteLabel(state.selectedTeam, post))
+        ? (post === 'G' ? post : getPosteLabel(state.selectedTeam, post))
         : String(getNextPlayerNumber(state.selectedTeam)))
     : '';
   state.items.push({
@@ -1158,7 +1158,7 @@ function addItem(x, y) {
     color,
     displayLabel,
     post,
-    isGoalkeeper: isPlayer && post === 'AG',
+    isGoalkeeper: isPlayer && post === 'G',
     rotation: 0,
   });
   saveLocal(); render();
@@ -1394,7 +1394,7 @@ function deleteItemAt(index) {
     if (state.dragIndex === index) state.dragIndex = null;
     else if (state.dragIndex > index) state.dragIndex -= 1;
   }
-  if (deleted && deleted.post && deleted.post !== 'AG') {
+  if (deleted && deleted.post && deleted.post !== 'G') {
     state.items
       .filter(item => item.team === deleted.team && item.post === deleted.post)
       .forEach((item, i) => { item.displayLabel = `${deleted.post} ${i + 1}`; });
@@ -2004,6 +2004,7 @@ const POST_LABELS = {
   ARD: 'Arrière D',
   DC:  'Demi-centre',
   PIV: 'Pivot',
+  G:   'Gardien',
 };
 
 function detectPoste(item) {
