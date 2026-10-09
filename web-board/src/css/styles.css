@@ -334,8 +334,7 @@ body::before {
 /* ── Keyboard focus ring ─────────────────────────────────────────────────────── */
 
 .button-group button:focus-visible,
-.sidebar button:focus-visible,
-.asset-button:focus-visible {
+.sidebar button:focus-visible {
   outline: 2px solid var(--yellow);
   outline-offset: 2px;
 }
@@ -347,48 +346,6 @@ body::before {
   opacity: 0.28;
   cursor: not-allowed;
   pointer-events: none;
-}
-
-/* ── Asset palette ───────────────────────────────────────────────────────────── */
-
-.palette {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 4px;
-}
-
-.asset-button {
-  display: grid;
-  grid-template-rows: auto auto;
-  gap: 4px;
-  align-items: center;
-  justify-items: center;
-  min-height: 42px;
-  padding: 5px 3px;
-  border-radius: var(--r-sm);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: all 0.15s var(--ease);
-  font-family: 'Barlow Condensed', sans-serif;
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  text-align: center;
-}
-
-.asset-button:hover {
-  background: var(--surface-hover);
-  color: var(--text);
-  border-color: rgba(240, 236, 224, 0.15);
-}
-
-.asset-button.selected {
-  background: var(--yellow-soft);
-  border-color: var(--border-accent);
-  color: var(--yellow);
 }
 
 .asset-label {
@@ -572,32 +529,6 @@ canvas {
   border-radius: 4px;
   box-shadow: 0 24px 64px rgba(0, 0, 0, 0.7);
   background: #071428;
-}
-
-/* ── Bottom controls ─────────────────────────────────────────────────────────── */
-
-.bottom-controls {
-  display: grid;
-  grid-template-columns: 160px 1fr;
-  gap: 12px;
-  margin-top: 16px;
-}
-
-.control-block {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: var(--r-md);
-  padding: 12px 14px;
-}
-
-.control-block h2 {
-  margin: 0 0 8px;
-  font-family: 'DM Mono', monospace;
-  font-size: 0.6rem;
-  font-weight: 500;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--text-muted);
 }
 
 /* ── Status footer ───────────────────────────────────────────────────────────── */

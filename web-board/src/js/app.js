@@ -18,14 +18,11 @@ if (!CanvasRenderingContext2D.prototype.roundRect) {
     this.closePath();
   };
 }
-const assetPalette = document.getElementById('assetPalette');
 const exerciseName = document.getElementById('exerciseName');
 const exerciseNotes = document.getElementById('exerciseNotes');
 const status = document.getElementById('status');
 const importJson = document.getElementById('importJson');
 const viewModeButtons = document.getElementById('viewModeButtons');
-const drawModeButtons = document.getElementById('drawModeButtons');
-const teamButtons = document.getElementById('teamButtons');
 const playAnimationButton = document.getElementById('playAnimation');
 const exerciseCategory = document.getElementById('exerciseCategory');
 const exerciseThematique = document.getElementById('exerciseThematique');
@@ -143,7 +140,6 @@ function selectDrawMode(mode) {
   state.drawMode = mode;
   state.currentPath = null;
   lastPointerDown = null; // évite qu'un clic dans l'ancien mode soit lu comme un double-clic dans le nouveau
-  updateModeButtons(drawModeButtons, mode);
   setStatus(`Mode : ${state.drawMode}`);
 }
 
@@ -1014,33 +1010,8 @@ function renumberSteps() {
 
 // ─── Palette ──────────────────────────────────────────────────────────────────
 
-function createAssetButtons() {
-  assets.forEach((asset, index) => {
-    if (asset.hidden) return;
-    const button = document.createElement('button');
-    button.className = 'asset-button';
-    button.dataset.assetIndex = index;
-    button.dataset.shape = asset.shape;
-    button.style.setProperty('--asset-color', asset.color);
-    button.innerHTML = `
-      <span class="asset-icon ${asset.shape}" aria-hidden="true"></span>
-      <span class="asset-label">${asset.label}</span>
-    `;
-    button.addEventListener('click', () => selectAsset(index));
-    assetPalette.appendChild(button);
-  });
-  selectAsset(assets.findIndex(asset => !asset.hidden));
-}
-
-function clearAssetSelection() {
-  Array.from(assetPalette.children).forEach(b => b.classList.remove('selected'));
-}
-
 function selectAsset(index) {
   state.selectedAssetIndex = index;
-  Array.from(assetPalette.children).forEach(b => {
-    b.classList.toggle('selected', Number(b.dataset.assetIndex) === index);
-  });
   setStatus(`Asset sélectionné: ${assets[index].label}`);
 }
 
@@ -1778,41 +1749,19 @@ viewModeButtons.addEventListener('click', e => {
   if (!button) return;
   selectViewMode(button.dataset.mode);
 });
-drawModeButtons.addEventListener('click', e => {
-  const button = e.target.closest('button[data-mode]');
-  if (!button) return;
-  selectDrawMode(button.dataset.mode);
-});
 function selectTeam(team) {
   state.selectedTeam = team;
   state.selectedAssetIndex = assets.findIndex(asset => asset.id === 'player');
-  clearAssetSelection();
   selectDrawMode('asset');
-  updateModeButtons(teamButtons, state.selectedTeam);
   setStatus(`Équipe : ${state.selectedTeam} (prêt à poser un joueur)`);
 }
 
 function selectPost(post) {
   state.selectedPost = post;
   state.selectedAssetIndex = assets.findIndex(asset => asset.id === 'player');
-  clearAssetSelection();
   selectDrawMode('asset');
-  updateModeButtons(postButtonsEl, post);
   setStatus(`Poste : ${post} — cliquer sur le terrain pour placer`);
 }
-
-teamButtons.addEventListener('click', e => {
-  const button = e.target.closest('button[data-team]');
-  if (!button) return;
-  selectTeam(button.dataset.team);
-});
-
-const postButtonsEl = document.getElementById('postButtons');
-postButtonsEl.addEventListener('click', e => {
-  const button = e.target.closest('button[data-post]');
-  if (!button) return;
-  selectPost(button.dataset.post);
-});
 
 // Expose shared team/poste selection state + logic for the Dock panel (dock.js)
 function hasAnyPlayerPlaced() {
@@ -2467,10 +2416,9 @@ async function loadFromQueryParamOrDefault() {
 }
 
 window.addEventListener('load', () => {
-  createAssetButtons(); loadFromQueryParamOrDefault();
+  loadFromQueryParamOrDefault();
   selectViewMode(board.viewMode);
   selectDrawMode(state.drawMode);
-  updateModeButtons(teamButtons, state.selectedTeam);
   render();
 
   document.getElementById('openExplanation')?.addEventListener('click', openExplanationPage);

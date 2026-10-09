@@ -40,3 +40,6 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-5-2-sticky-poste-selection.md`
   summary: `updateModeButtons` on legacy `#postButtons` (board.html:126) is dead code — it reads `dataset.mode`/`dataset.team` but poste buttons use `data-post`, so the `.selected` class never toggles on this element
   evidence: Pre-existing bug, not caused by this story's diff. `#postButtons` is the legacy Sidebar control set that Story 5.5 (Legacy Sidebar selection controls are removed) deletes entirely — fixing dead highlighting logic on code about to be removed wholesale is wasted work. Confirmed via code read: app.js:127-131 (`updateModeButtons`) only checks `dataset.mode ?? dataset.team`; board.html:126-132 poste buttons only set `data-post`.
+- source_spec: `_bmad-output/implementation-artifacts/spec-5-5-remove-legacy-sidebar.md`
+  summary: Split into 5.5a (remove 4 legacy Sidebar DOM blocks + dead JS refs) and 5.5b (remove window.PlayerSelectionAPI global, migrate dock.js to direct function calls)
+  evidence: Spec exceeded 1600-token target (~1700-1800 estimated). The two halves are independently shippable — PlayerSelectionAPI can stay in place while the Sidebar DOM/JS is removed (it still works, just keeps the bypass-surface risk AD-1 also flags), and vice versa.

@@ -49,16 +49,6 @@
           <h2>Mode</h2>
           <span class="summary-icon">▼</span>
         </summary>
-        <div class="button-group" id="drawModeButtons">
-          <button type="button" data-mode="asset">Asset</button>
-          <button type="button" data-mode="select">Sélect</button>
-          <button type="button" data-mode="course">Course</button>
-          <button type="button" data-mode="shot">Tir</button>
-          <button type="button" data-mode="pass">Passe</button>
-          <button type="button" data-mode="croise">Croisé</button>
-          <button type="button" data-mode="fixation" style="grid-column: span 2;">Fixation</button>
-        </div>
-
         <label class="toggle-btn" style="margin-bottom: 6px;">
           <input type="checkbox" id="syncCheckbox" />
           <span class="toggle-label">Lié à la trajectoire précédente</span>
@@ -117,23 +107,6 @@
         </label>
       </details>
 
-      <!-- Postes Section (Collapsible) -->
-      <details class="sidebar-section" data-section="postes" open>
-        <summary>
-          <h2>Postes</h2>
-          <span class="summary-icon">▼</span>
-        </summary>
-        <div class="button-group small" id="postButtons">
-          <button type="button" data-post="AG">AG</button>
-          <button type="button" data-post="ARG">ARG</button>
-          <button type="button" data-post="DC">DC</button>
-          <button type="button" data-post="PIV">PIV</button>
-          <button type="button" data-post="ARD">ARD</button>
-          <button type="button" data-post="AD">AD</button>
-        </div>
-        <p style="font-size:0.72rem;opacity:0.55;margin-top:4px;">Sélectionner un poste avant de placer un joueur</p>
-      </details>
-
       <!-- Aide Section (Collapsible) -->
       <details class="sidebar-section" data-section="aide" open>
         <summary>
@@ -149,19 +122,6 @@
     <main class="main-panel">
       <div class="canvas-container">
         <canvas id="boardCanvas" width="1000" height="600"></canvas>
-      </div>
-      <div class="bottom-controls">
-        <section class="control-block">
-          <h2>Équipe</h2>
-          <div class="button-group small" id="teamButtons">
-            <button type="button" data-team="A">Équipe A</button>
-            <button type="button" data-team="B">Équipe B</button>
-          </div>
-        </section>
-        <section class="control-block">
-          <h2>Haies</h2>
-          <div id="assetPalette" class="palette"></div>
-        </section>
       </div>
       <div class="footer">
         <span id="status">Prêt</span>
