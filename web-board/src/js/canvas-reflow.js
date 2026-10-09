@@ -11,6 +11,8 @@
   const canvas = document.getElementById('boardCanvas');
   const sidebar = document.querySelector('.sidebar');
   const dock = document.querySelector('.dock');
+  const appShell = document.querySelector('.app-shell');
+  const panel = document.getElementById('panel');
 
   if (!canvas) {
     console.warn('[CanvasReflow] Canvas element not found, skipping initialization');
@@ -36,6 +38,21 @@
   }
 
   /**
+   * Get current Dock panel width when open (grid-flow layout, see AD-4),
+   * so the canvas shrinks to match its container instead of being
+   * physically overlapped by the panel.
+   * @returns {number} Panel width in pixels, 0 when closed/on tablet overlay
+   */
+  function getPanelWidth() {
+    if (!panel || !appShell || !appShell.classList.contains('panel-open')) return 0;
+    // Push-layout only applies ≥1024px (matches styles.css's .panel-open
+    // media query and panel.css's tablet position:fixed breakpoint) — below
+    // that the panel overlays instead, so it occupies no grid column.
+    if (window.innerWidth < 1024) return 0;
+    return parseInt(getComputedStyle(panel).width, 10) || 0;
+  }
+
+  /**
    * Calculate canvas dimensions based on viewport and sidebar width
    * Formula:
    *   - Canvas width = viewport width - sidebar width
@@ -47,6 +64,7 @@
     const viewportHeight = window.innerHeight;
 
     const sidebarWidth = getSidebarWidth();
+    const panelWidth = getPanelWidth();
     const dockHeight = getDockHeight();
 
     // Add padding/margin buffer for dock (dock has margin-bottom: 16px)
@@ -54,7 +72,7 @@
 
     const width = Math.max(
       300, // Minimum canvas width to prevent squishing
-      viewportWidth - sidebarWidth
+      viewportWidth - sidebarWidth - panelWidth
     );
 
     const height = Math.max(

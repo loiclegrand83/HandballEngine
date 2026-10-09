@@ -62,6 +62,7 @@
   let isPanelOpen = false;
 
   // ── DOM References ──────────────────────────────────────────────────────────
+  const appShell = document.querySelector('.app-shell');
   const dock = document.getElementById('dock');
   const panel = document.getElementById('panel');
   const panelTitle = document.getElementById('panelTitle');
@@ -279,6 +280,8 @@
     setPanelContent(toolName);
 
     panel.classList.remove('hidden');
+    if (appShell) appShell.classList.add('panel-open');
+    if (window.reflowCanvas) window.reflowCanvas();
     isPanelOpen = true;
 
     console.log(`[Dock.js] Panel opened for: ${toolName}`);
@@ -291,6 +294,8 @@
     if (!isPanelOpen) return;
 
     panel.classList.add('hidden');
+    if (appShell) appShell.classList.remove('panel-open');
+    if (window.reflowCanvas) window.reflowCanvas();
     isPanelOpen = false;
     currentTool = null;
 
