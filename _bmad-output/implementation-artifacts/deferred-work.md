@@ -37,3 +37,6 @@
 - source_spec: `_bmad-output/implementation-artifacts/spec-3-1-construire-seance-blocs-ateliers.md`
   summary: The old per-Bloc-type default duration (échauffement=15, retour au calme=10, other=20 min) was dropped when duration moved from Bloc-level to per-Atelier; new Ateliers default to a flat 15 min with no type-based nudge.
   evidence: Review observation; consistent with the new per-Atelier model (a Bloc no longer has one type), but loses a small piece of the old UI's guidance. Not required by any AC.
+- source_spec: `_bmad-output/implementation-artifacts/spec-5-2-sticky-poste-selection.md`
+  summary: `updateModeButtons` on legacy `#postButtons` (board.html:126) is dead code — it reads `dataset.mode`/`dataset.team` but poste buttons use `data-post`, so the `.selected` class never toggles on this element
+  evidence: Pre-existing bug, not caused by this story's diff. `#postButtons` is the legacy Sidebar control set that Story 5.5 (Legacy Sidebar selection controls are removed) deletes entirely — fixing dead highlighting logic on code about to be removed wholesale is wasted work. Confirmed via code read: app.js:127-131 (`updateModeButtons`) only checks `dataset.mode ?? dataset.team`; board.html:126-132 poste buttons only set `data-post`.

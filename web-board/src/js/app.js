@@ -1793,19 +1793,12 @@ function selectTeam(team) {
 }
 
 function selectPost(post) {
-  if (state.selectedPost === post) {
-    // Désélectionner si on reclique sur le même
-    state.selectedPost = null;
-    updateModeButtons(postButtonsEl, null);
-    setStatus('Poste désélectionné — numérotation automatique');
-  } else {
-    state.selectedPost = post;
-    state.selectedAssetIndex = assets.findIndex(asset => asset.id === 'player');
-    clearAssetSelection();
-    selectDrawMode('asset');
-    updateModeButtons(postButtonsEl, post);
-    setStatus(`Poste : ${post} — cliquer sur le terrain pour placer`);
-  }
+  state.selectedPost = post;
+  state.selectedAssetIndex = assets.findIndex(asset => asset.id === 'player');
+  clearAssetSelection();
+  selectDrawMode('asset');
+  updateModeButtons(postButtonsEl, post);
+  setStatus(`Poste : ${post} — cliquer sur le terrain pour placer`);
 }
 
 teamButtons.addEventListener('click', e => {
