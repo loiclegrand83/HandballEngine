@@ -1,6 +1,9 @@
 /* ── DOCK.JS — Icon Click Handlers & Panel System ────────────────────────────────────
    Manages dock icon interactions, panel opens/closes, and assets mode toggle.
    No-breaking-change: uses existing canvas element, only manages UI interactions.
+   Depends on app.js globals (state, selectTeam, selectPost, selectDrawMode,
+   hasAnyPlayerPlaced) -- classic <script> tags sharing one scope, app.js must
+   load first (see board.html script order).
 */
 
 (function() {
@@ -151,9 +154,7 @@
    * Live-filters state.items each call (no separate running counter).
    */
   function getTeamCounts(team) {
-    const api = window.PlayerSelectionAPI;
-    const state = api ? api.getState() : null;
-    const items = (state && Array.isArray(state.items)) ? state.items : [];
+    const items = Array.isArray(state.items) ? state.items : [];
     let outfield = 0;
     let goalkeeper = 0;
     items.forEach(item => {
@@ -169,10 +170,8 @@
    */
   function renderPlayersPanel() {
     const toolConfig = getToolConfig('players');
-    const api = window.PlayerSelectionAPI;
-    const state = api ? api.getState() : null;
-    const selectedTeam = state ? state.selectedTeam : 'A';
-    const selectedPost = state ? state.selectedPost : null;
+    const selectedTeam = state.selectedTeam;
+    const selectedPost = state.selectedPost;
 
     const teamButtonsHtml = TEAMS.map(team => `
       <button type="button" class="panel-action-btn${team.id === selectedTeam ? ' selected' : ''}" data-players-team="${team.id}">${team.label}</button>
@@ -206,10 +205,8 @@
   // ── Trajectories Panel ────────────────────────────────────────────────────
 
   function renderTrajectoriesPanel() {
-    const api = window.PlayerSelectionAPI;
-    const anyPlayer = api ? api.hasAnyPlayerPlaced() : false;
-    const state = api ? api.getState() : null;
-    const currentMode = state ? state.drawMode : null;
+    const anyPlayer = hasAnyPlayerPlaced();
+    const currentMode = state.drawMode;
 
     const types = [
       { id: 'course',   label: 'Course' },
@@ -234,12 +231,10 @@
   }
 
   function handleTrajectoriesPanelClick(e) {
-    const api = window.PlayerSelectionAPI;
-    if (!api) return;
     const btn = e.target.closest('[data-traj-type]');
     if (!btn || btn.disabled) return;
     e.stopPropagation();
-    api.selectDrawMode(btn.getAttribute('data-traj-type'));
+    selectDrawMode(btn.getAttribute('data-traj-type'));
     renderTrajectoriesPanel();
   }
 
@@ -247,13 +242,10 @@
    * Handle clicks inside the players panel (team + poste buttons).
    */
   function handlePlayersPanelClick(e) {
-    const api = window.PlayerSelectionAPI;
-    if (!api) return;
-
     const teamBtn = e.target.closest('[data-players-team]');
     if (teamBtn) {
       e.stopPropagation();
-      api.selectTeam(teamBtn.getAttribute('data-players-team'));
+      selectTeam(teamBtn.getAttribute('data-players-team'));
       renderPlayersPanel();
       return;
     }
@@ -262,7 +254,7 @@
     if (postBtn) {
       if (postBtn.disabled) return;
       e.stopPropagation();
-      api.selectPost(postBtn.getAttribute('data-players-post'));
+      selectPost(postBtn.getAttribute('data-players-post'));
       renderPlayersPanel();
     }
   }

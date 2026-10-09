@@ -1763,18 +1763,15 @@ function selectPost(post) {
   setStatus(`Poste : ${post} — cliquer sur le terrain pour placer`);
 }
 
-// Expose shared team/poste selection state + logic for the Dock panel (dock.js)
+// selectTeam/selectPost/selectDrawMode/hasAnyPlayerPlaced (above) and `state`
+// (top-level const) are consumed by dock.js as implicit globals -- both files
+// are classic <script> tags sharing one global scope, loaded in document
+// order (app.js before dock.js). Do not wrap this file in a module or IIFE
+// without updating dock.js's call sites to match.
 function hasAnyPlayerPlaced() {
   return state.items.some(i => i.team);
 }
 
-window.PlayerSelectionAPI = {
-  selectTeam,
-  selectPost,
-  selectDrawMode,
-  hasAnyPlayerPlaced,
-  getState: () => state,
-};
 playAnimationButton.addEventListener('click', () => {
   if (!state.paths.length) { setStatus('Aucune trajectoire'); return; }
   if (state.animation.active) {
