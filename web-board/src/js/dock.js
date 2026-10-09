@@ -28,16 +28,16 @@
   const OUTFIELD_CAP = 6;
   const GOALKEEPER_CAP = 1;
   const DOCK_ICONS = [
-    { tool: 'players', label: 'Joueurs', icon: '🎮' },
-    { tool: 'assets', label: 'Assets', icon: '🎯' },
-    { tool: 'trajectories', label: 'Trajectoires', icon: '📍' },
-    { tool: 'animation', label: 'Animation', icon: '▶️' },
-    { tool: 'bibliothèque', label: 'Bibliothèque', icon: '📚' },
-    { tool: 'séance', label: 'Séance', icon: '📋' },
-    { tool: 'planning', label: 'Planning', icon: '📅' },
-    { tool: 'postes', label: 'Postes', icon: '🏢' },
-    { tool: 'vue', label: 'Vue', icon: '👁️' },
-    { tool: 'undo', label: 'Annuler', icon: '↶' }
+    { tool: 'players', label: 'Joueurs', icon: 'users.svg' },
+    { tool: 'assets', label: 'Assets', icon: 'cone.svg' },
+    { tool: 'trajectories', label: 'Trajectoires', icon: 'route.svg' },
+    { tool: 'animation', label: 'Animation', icon: 'play.svg' },
+    { tool: 'bibliothèque', label: 'Bibliothèque', icon: 'library.svg' },
+    { tool: 'séance', label: 'Séance', icon: 'clipboard-list.svg' },
+    { tool: 'planning', label: 'Planning', icon: 'calendar.svg' },
+    { tool: 'postes', label: 'Postes', icon: 'tag.svg' },
+    { tool: 'vue', label: 'Vue', icon: 'layout-grid.svg' },
+    { tool: 'undo', label: 'Annuler', icon: 'undo-2.svg' }
   ];
 
   const ASSET_ITEMS = [
@@ -111,7 +111,7 @@
     if (!toolConfig) return;
 
     panelTitle.textContent = toolConfig.label;
-    panelIcon.textContent = toolConfig.icon;
+    panelIcon.innerHTML = '<img src="../assets/icons/' + toolConfig.icon + '" alt="" width="24" height="24">';
   }
 
   /**

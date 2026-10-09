@@ -181,12 +181,20 @@
   transition-delay: 200ms;
 }
 
-/* ── Dock Icon: Large Icon (emoji or SVG) ───────────────────────────────────── */
+/* ── Dock Icon: Large Icon (Lucide SVG, masked for currentColor theming) ────── */
 
 .dock-icon::before {
-  /* Placeholder for icon (emoji or SVG) */
-  font-size: 24px;
-  line-height: 1;
+  content: "";
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: contain;
+  background-color: currentColor;
 }
 
 /* ── Dock Icon Positioning for Tooltips ─────────────────────────────────────– */
@@ -199,34 +207,58 @@
 /* ── Specific Icon Labels (via data attribute or aria-label) ─────────────────– */
 
 /* Players icon */
-.dock-icon[data-tool="players"]::before { content: "🎮"; }
+.dock-icon[data-tool="players"]::before { mask-image: url('../../assets/icons/users.svg'); -webkit-mask-image: url('../../assets/icons/users.svg'); }
 
 /* Assets icon */
-.dock-icon[data-tool="assets"]::before { content: "🎯"; }
+.dock-icon[data-tool="assets"]::before { mask-image: url('../../assets/icons/cone.svg'); -webkit-mask-image: url('../../assets/icons/cone.svg'); }
 
 /* Trajectories icon */
-.dock-icon[data-tool="trajectories"]::before { content: "📍"; }
+.dock-icon[data-tool="trajectories"]::before { mask-image: url('../../assets/icons/route.svg'); -webkit-mask-image: url('../../assets/icons/route.svg'); }
 
 /* Animation icon */
-.dock-icon[data-tool="animation"]::before { content: "▶️"; }
+.dock-icon[data-tool="animation"]::before { mask-image: url('../../assets/icons/play.svg'); -webkit-mask-image: url('../../assets/icons/play.svg'); }
 
 /* Bibliothèque icon */
-.dock-icon[data-tool="bibliothèque"]::before { content: "📚"; }
+.dock-icon[data-tool="bibliothèque"]::before { mask-image: url('../../assets/icons/library.svg'); -webkit-mask-image: url('../../assets/icons/library.svg'); }
 
 /* Séance icon */
-.dock-icon[data-tool="séance"]::before { content: "📋"; }
+.dock-icon[data-tool="séance"]::before { mask-image: url('../../assets/icons/clipboard-list.svg'); -webkit-mask-image: url('../../assets/icons/clipboard-list.svg'); }
 
 /* Planning icon */
-.dock-icon[data-tool="planning"]::before { content: "📅"; }
+.dock-icon[data-tool="planning"]::before { mask-image: url('../../assets/icons/calendar.svg'); -webkit-mask-image: url('../../assets/icons/calendar.svg'); }
 
 /* Postes icon */
-.dock-icon[data-tool="postes"]::before { content: "🏢"; }
+.dock-icon[data-tool="postes"]::before { mask-image: url('../../assets/icons/tag.svg'); -webkit-mask-image: url('../../assets/icons/tag.svg'); }
 
 /* Vue icon */
-.dock-icon[data-tool="vue"]::before { content: "👁️"; }
+.dock-icon[data-tool="vue"]::before { mask-image: url('../../assets/icons/layout-grid.svg'); -webkit-mask-image: url('../../assets/icons/layout-grid.svg'); }
 
 /* Undo icon */
-.dock-icon[data-tool="undo"]::before { content: "↶"; }
+.dock-icon[data-tool="undo"]::before { mask-image: url('../../assets/icons/undo-2.svg'); -webkit-mask-image: url('../../assets/icons/undo-2.svg'); }
+
+/* ── Fallback for browsers without CSS mask support ──────────────────────────── */
+/* Without this, an unsupported browser renders an empty 24x24 box instead of
+   any glyph at all — worse than the emoji this story replaces. Re-show the
+   original emoji as text content in that case only. */
+@supports not (mask-image: url('a.svg')) {
+  .dock-icon::before {
+    background-color: transparent;
+    font-size: 24px;
+    line-height: 1;
+    width: auto;
+    height: auto;
+  }
+  .dock-icon[data-tool="players"]::before { content: "🎮"; }
+  .dock-icon[data-tool="assets"]::before { content: "🎯"; }
+  .dock-icon[data-tool="trajectories"]::before { content: "📍"; }
+  .dock-icon[data-tool="animation"]::before { content: "▶️"; }
+  .dock-icon[data-tool="bibliothèque"]::before { content: "📚"; }
+  .dock-icon[data-tool="séance"]::before { content: "📋"; }
+  .dock-icon[data-tool="planning"]::before { content: "📅"; }
+  .dock-icon[data-tool="postes"]::before { content: "🏢"; }
+  .dock-icon[data-tool="vue"]::before { content: "👁️"; }
+  .dock-icon[data-tool="undo"]::before { content: "↶"; }
+}
 
 /* ── Back Button (for Assets Mode Exit) ─────────────────────────────────────── */
 
