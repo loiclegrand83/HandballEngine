@@ -121,6 +121,15 @@ function canvasToField(point) {
   };
 }
 
+// Un joueur qui court se retrouve à l'extrémité de sa course : ses trajectoires
+// suivantes (passe, nouvelle course) doivent partir de là où il est dessiné.
+function syncLinkedPlayer(path) {
+  if (!path || !MOVING_KINDS.includes(path.kind) || !path.linkedItemId) return;
+  const item = state.items.find(i => i.id === path.linkedItemId);
+  const last = path.points[path.points.length - 1];
+  if (item && last) { item.x = last.x; item.y = last.y; }
+}
+
 function updateModeButtons(container, selectedMode) {
   container.querySelectorAll('button').forEach(button => {
     const value = button.dataset.mode ?? button.dataset.team;
@@ -997,6 +1006,53 @@ function drawAnimationFrame() {
 
 function render() { drawCourt(); drawItems(); }
 
+// Resizing the canvas (canvas-reflow.js) clears its bitmap and the layout
+// dimensions cached in `board`. Sync both, then redraw, or the pitch vanishes.
+window.addEventListener('canvasReflowed', event => {
+  board.width = event.detail.width;
+  board.height = event.detail.height;
+  render();
+});
+
+// ─── Annuler (dock "undo") ────────────────────────────────────────────────────
+// Snapshot of items + paths. Taken before each canvas pointerdown, so the state
+// before the previous edit is kept. Undo restores the last snapshot.
+const UNDO_LIMIT = 100;
+const undoStack = [];
+let lastSnapshot = JSON.stringify({ items: state.items, paths: state.paths });
+
+function rememberState() {
+  const current = JSON.stringify({ items: state.items, paths: state.paths });
+  if (current === lastSnapshot) return;
+  undoStack.push(lastSnapshot);
+  if (undoStack.length > UNDO_LIMIT) undoStack.shift();
+  lastSnapshot = current;
+}
+
+function undoLast() {
+  rememberState();
+  const previous = undoStack.pop();
+  if (!previous) { setStatus('Rien à annuler'); return; }
+  const data = JSON.parse(previous);
+  state.items = data.items;
+  state.paths = data.paths;
+  lastSnapshot = previous;
+  state.currentPath = null;
+  state.selectedPathIndex = null;
+  state.selectedItemIndex = null;
+  state.dragIndex = null;
+  state.dragPathPointIndex = null;
+  saveLocal();
+  render();
+  setStatus('Action annulée');
+}
+
+// Capture phase: the snapshot runs before the pointerdown handler mutates state.
+canvas.addEventListener('pointerdown', rememberState, true);
+window.addEventListener('toolTriggered', event => {
+  if (event.detail?.tool === 'undo') undoLast();
+});
+
 // Renumérotation des étapes après suppression d'une trajectoire :
 // compacte les valeurs step sans laisser de trous (0,1,2,3... sans saut)
 function renumberSteps() {
@@ -1282,6 +1338,7 @@ canvas.addEventListener('pointerdown', event => {
       setStatus(`Début trajectoire ${mode}`);
     } else {
       state.currentPath.points.push(newPoint);
+      syncLinkedPlayer(state.currentPath);
       setStatus(`Point ajouté`);
     }
 
@@ -1316,6 +1373,7 @@ canvas.addEventListener('pointermove', event => {
     const point = canvasPoint(event);
     const field = canvasToField(point);
     state.paths[state.selectedPathIndex].points[state.dragPathPointIndex] = field;
+    syncLinkedPlayer(state.paths[state.selectedPathIndex]);
     render();
     return;
   }

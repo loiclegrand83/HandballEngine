@@ -134,6 +134,21 @@
       return;
     }
 
+    if (toolName === 'animation') {
+      renderAnimationPanel();
+      return;
+    }
+
+    if (toolName === 'vue') {
+      renderVuePanel();
+      return;
+    }
+
+    if (toolName === 'postes') {
+      renderPostesPanel();
+      return;
+    }
+
     // Generic placeholder content
     panelContent.innerHTML = `
       <div class="panel-section">
@@ -421,6 +436,20 @@
 
     console.log(`[Dock.js] Dock icon clicked: ${toolName}`);
 
+    // Library opens the existing modal, Séance/Planning open their own pages
+    if (toolName === 'bibliothèque') {
+      document.getElementById('openLibrary').click();
+      return;
+    }
+    if (toolName === 'séance') {
+      window.open('seance.html', '_blank');
+      return;
+    }
+    if (toolName === 'planning') {
+      window.open('planning.html', '_blank');
+      return;
+    }
+
     // Special handling for Assets icon
     if (toolName === 'assets') {
       if (isAssetsMode) {
@@ -494,6 +523,7 @@
     const button = e.target.closest('.panel-action-btn');
     if (!button) return;
     if (button.hasAttribute('data-players-team') || button.hasAttribute('data-players-post') || button.hasAttribute('data-traj-type')) return;
+    if (button.hasAttribute('data-anim-toggle') || button.hasAttribute('data-view-mode') || button.hasAttribute('data-post-pick')) return;
 
     const action = button.getAttribute('data-action');
     console.log(`[Dock.js] Panel action: ${action}`);
@@ -507,6 +537,67 @@
     window.dispatchEvent(new CustomEvent('panelAction', {
       detail: { action, tool: currentTool }
     }));
+  }
+
+  // ── Animation / Vue / Postes panels ────────────────────────────────────────
+
+  function renderAnimationPanel() {
+    const label = document.getElementById('playAnimation').textContent;
+    panelContent.innerHTML = `
+      <div class="panel-section">
+        <h3>Animation</h3>
+        <div class="button-group">
+          <button class="panel-action-btn" data-anim-toggle>${label}</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderVuePanel() {
+    const current = board.viewMode;
+    panelContent.innerHTML = `
+      <div class="panel-section">
+        <h3>Vue</h3>
+        <div class="button-group">
+          <button class="panel-action-btn${current === 'full' ? ' active' : ''}" data-view-mode="full">Terrain complet</button>
+          <button class="panel-action-btn${current === 'half' ? ' active' : ''}" data-view-mode="half">Demi-terrain</button>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderPostesPanel() {
+    const current = state.selectedPost;
+    panelContent.innerHTML = `
+      <div class="panel-section">
+        <h3>Postes</h3>
+        <div class="button-group">
+          ${POSTES.map(post => `<button class="panel-action-btn${current === post.id ? ' active' : ''}" data-post-pick="${post.id}">${post.label}</button>`).join('')}
+        </div>
+      </div>
+    `;
+  }
+
+  function handleToolPanelClick(e) {
+    const animBtn = e.target.closest('[data-anim-toggle]');
+    if (animBtn) {
+      document.getElementById('playAnimation').click();
+      renderAnimationPanel();
+      return;
+    }
+
+    const viewBtn = e.target.closest('[data-view-mode]');
+    if (viewBtn) {
+      selectViewMode(viewBtn.getAttribute('data-view-mode'));
+      renderVuePanel();
+      return;
+    }
+
+    const postBtn = e.target.closest('[data-post-pick]');
+    if (postBtn) {
+      selectPost(postBtn.getAttribute('data-post-pick'));
+      renderPostesPanel();
+    }
   }
 
   // ── Initialization ──────────────────────────────────────────────────────────
@@ -538,6 +629,7 @@
     panelContent.addEventListener('click', handlePanelButtonClick);
     panelContent.addEventListener('click', handlePlayersPanelClick);
     panelContent.addEventListener('click', handleTrajectoriesPanelClick);
+    panelContent.addEventListener('click', handleToolPanelClick);
 
     // Initialize with panel hidden
     panel.classList.add('hidden');
