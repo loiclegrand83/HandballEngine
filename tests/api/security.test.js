@@ -49,3 +49,52 @@ test('no permissive CORS header is set (same-origin-only app, regression check)'
   assert.equal(res.headers.get('access-control-allow-origin'), null);
 });
 
+
+// Contrôles d'origine : Host, Origin et Content-Type (revue de code, corrections de sécurité).
+// fetch (undici) ne permet pas de forcer l'en-tête Host : on passe par http.request.
+function rawGet(pathname, headers) {
+  const http = require('http');
+  const { hostname, port } = new URL(BASE_URL);
+  return new Promise((resolve, reject) => {
+    const req = http.request({ hostname, port, path: pathname, method: 'GET', headers }, res => {
+      res.resume(); res.on('end', () => resolve(res.statusCode));
+    });
+    req.on('error', reject); req.end();
+  });
+}
+
+test('Host étranger refusé (403) : protection contre le DNS rebinding', async () => {
+  assert.equal(await rawGet('/api/exercises', { Host: 'evil.example' }), 403);
+  assert.equal(await rawGet('/api/exercises', { Host: `127.0.0.1:${new URL(BASE_URL).port}` }), 200);
+});
+
+test('Origin étrangère refusée (403) sur une écriture', async () => {
+  const res = await fetch(`${BASE_URL}/api/exercises`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json', Origin: 'http://evil.example' },
+    body: JSON.stringify({ id: 'sec_origin', name: 'x', thematique: 'attaque' }),
+  });
+  assert.equal(res.status, 403);
+});
+
+test('écriture en text/plain refusée (415) : pas de POST cross-site sans préflight', async () => {
+  const res = await fetch(`${BASE_URL}/api/exercises`, {
+    method: 'POST', headers: { 'Content-Type': 'text/plain' },
+    body: JSON.stringify({ id: 'sec_plain', name: 'x', thematique: 'attaque' }),
+  });
+  assert.equal(res.status, 415);
+});
+
+test('Origin locale acceptée : écriture JSON depuis localhost autorisée', async () => {
+  const res = await fetch(`${BASE_URL}/api/exercises`, {
+    method: 'POST', headers: { 'Content-Type': 'application/json', Origin: BASE_URL },
+    body: JSON.stringify({ id: 'sec_ok', name: 'OK', thematique: 'attaque', notes: '' }),
+  });
+  assert.equal(res.status, 200);
+});
+
+test('chemin statique hors liste blanche refusé (404) : code du serveur non servi', async () => {
+  const res = await fetch(`${BASE_URL}/server.js`);
+  assert.equal(res.status, 404);
+  const res2 = await fetch(`${BASE_URL}/pages/../server.js`);
+  assert.equal(res2.status, 404);
+});
