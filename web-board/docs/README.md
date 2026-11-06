@@ -39,7 +39,7 @@ Pour l'entraîneur qui prépare ses séances sur un ordinateur, sans compte, san
 
 - L'application tourne sur l'ordinateur de l'entraîneur. On la lance, puis on l'ouvre dans Chrome ou Edge à l'adresse `http://localhost:3000`.
 - Elle peut être installée comme une application (icône et fenêtre dédiées).
-- Les données restent sur l'ordinateur. Vos données restent sur l'ordinateur, et les autres appareils du réseau ne peuvent pas s'y connecter.
+- Vos données restent sur l'ordinateur, et les autres appareils du réseau ne peuvent pas s'y connecter.
 - Si l'application est arrêtée en cours de travail, la consultation reste possible ; l'enregistrement reprend dès qu'elle est relancée.
 
 ### Les pages
