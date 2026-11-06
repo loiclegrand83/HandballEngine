@@ -1,0 +1,47 @@
+{
+  "id": "fx_espagnole",
+  "name": "Espagnole",
+  "category": "offensif",
+  "thematique": "attaque",
+  "duree": 10,
+  "notes": "Circulation de balle en espagnole.",
+  "items": [
+    {
+      "id": "player-1",
+      "label": "Joueur",
+      "displayLabel": "1",
+      "color": "#4682b4",
+      "radius": 18,
+      "shape": "circle",
+      "rotation": 0,
+      "x": 20,
+      "y": 6,
+      "team": "A",
+      "post": null,
+      "isGoalkeeper": false,
+      "hidden": false
+    },
+    {
+      "id": "player-2",
+      "label": "Joueur",
+      "displayLabel": "2",
+      "color": "#4682b4",
+      "radius": 18,
+      "shape": "circle",
+      "rotation": 0,
+      "x": 22,
+      "y": 12,
+      "team": "A",
+      "post": null,
+      "isGoalkeeper": false,
+      "hidden": false
+    }
+  ],
+  "paths": [],
+  "viewMode": "full",
+  "explanation": {
+    "material": "",
+    "steps": []
+  },
+  "updatedAt": "2026-10-02T10:00:00.000Z"
+}

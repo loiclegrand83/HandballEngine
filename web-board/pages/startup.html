@@ -4,8 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Board Tactique — Démarrer</title>
-  <link rel="manifest" href="../manifest.json" />
-  <meta name="theme-color" content="#080b0f" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -19,7 +17,7 @@
       --surface:   #111419;
       --border:    #1e2228;
       --text:      #f0ece0;
-      --muted:     #5a6070;
+      --muted:     #8b91a0;
       --yellow:    #f5c400;
       --green:     #00e676;
       --danger:    #ff3b30;
@@ -63,7 +61,7 @@
 
     .startup-eyebrow {
       font-family: 'DM Mono', monospace;
-      font-size: 0.72rem;
+      font-size: 0.8125rem;
       letter-spacing: 0.22em;
       text-transform: uppercase;
       color: var(--yellow);
@@ -138,7 +136,7 @@
 
     .back-link {
       font-family: 'DM Mono', monospace;
-      font-size: 0.72rem;
+      font-size: 0.8125rem;
       letter-spacing: 0.1em;
       text-transform: uppercase;
       color: var(--muted);
@@ -199,7 +197,7 @@
 
     .exercise-item-meta {
       font-family: 'DM Mono', monospace;
-      font-size: 0.68rem;
+      font-size: 0.8125rem;
       color: var(--muted);
       text-transform: uppercase;
     }
@@ -218,6 +216,10 @@
       .choice-btn { width: 92vw; }
     }
   </style>
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#080b0f" />
+  <link rel="apple-touch-icon" href="/assets/icons/pwa-192.png" />
+  <script src="/src/js/pwa.js"></script>
 </head>
 <body>
   <div class="startup-wrapper">

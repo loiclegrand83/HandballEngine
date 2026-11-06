@@ -7,9 +7,15 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/css/components.css" />
   <link rel="stylesheet" href="../src/css/explanation.css" />
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#080b0f" />
+  <link rel="apple-touch-icon" href="/assets/icons/pwa-192.png" />
+  <script src="/src/js/pwa.js"></script>
 </head>
 <body>
+  <nav id="appNav"></nav>
 
   <!-- ══════════════════════════════════════════════════════════
        VUE ÉDITEUR
@@ -248,6 +254,8 @@
   <!-- Toast -->
   <div class="toast" id="toast"></div>
 
+  <script src="/src/js/ui.js"></script>
+  <script>window.HawebUI.renderNav('');</script>
   <script>
   'use strict';
 
@@ -567,11 +575,13 @@
       const lib = await res.json();
       const existing = lib.find(ex => ex.id === data.exerciseId);
       if (!existing) { showToast('⚠ Exercice introuvable', 'warn'); return; }
-      await fetch('/api/exercises', {
+      const saveRes = await fetch('/api/exercises', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...existing, notes: data.notes, explanation: data.explanation, updatedAt: new Date().toISOString() }),
       });
-      showToast('✓ Sauvegardé', 'ok');
+      const result = await saveRes.json().catch(() => ({}));
+      if (!saveRes.ok) { showToast('⚠ ' + (result.error || 'Enregistrement refusé'), 'warn'); return; }
+      showToast(`✓ Version n°${result.versionNo}`, 'ok');
     } catch(e) { console.error(e); showToast('Erreur réseau', 'error'); }
   }
 

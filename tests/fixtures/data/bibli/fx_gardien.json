@@ -1,0 +1,114 @@
+{
+  "id": "fx_gardien",
+  "name": "Echauffement gardien croisé",
+  "category": "none",
+  "thematique": "gardien",
+  "duree": 15,
+  "nbJoueurs": 2,
+  "niveau": "",
+  "notes": "Tirs croisés alternés sur le gardien.",
+  "items": [
+    {
+      "id": "player-1",
+      "label": "Joueur",
+      "displayLabel": "1",
+      "color": "#4682b4",
+      "radius": 18,
+      "shape": "circle",
+      "rotation": 0,
+      "x": 12,
+      "y": 8,
+      "team": "A",
+      "post": null,
+      "isGoalkeeper": false,
+      "hidden": false
+    },
+    {
+      "id": "player-2",
+      "label": "Joueur",
+      "displayLabel": "2",
+      "color": "#4682b4",
+      "radius": 18,
+      "shape": "circle",
+      "rotation": 0,
+      "x": 14,
+      "y": 13,
+      "team": "A",
+      "post": null,
+      "isGoalkeeper": false,
+      "hidden": false
+    },
+    {
+      "id": "ball-1",
+      "label": "Ballon",
+      "displayLabel": "",
+      "color": "#ffffff",
+      "radius": 12,
+      "shape": "ball",
+      "rotation": 0,
+      "x": 12.5,
+      "y": 8.5,
+      "team": null
+    },
+    {
+      "id": "cone-1",
+      "label": "Plot",
+      "displayLabel": "",
+      "color": "#ff8f00",
+      "radius": 12,
+      "shape": "cone",
+      "rotation": 0,
+      "x": 10,
+      "y": 6,
+      "team": null
+    },
+    {
+      "id": "cone-2",
+      "label": "Plot",
+      "displayLabel": "",
+      "color": "#ff8f00",
+      "radius": 12,
+      "shape": "cone",
+      "rotation": 0,
+      "x": 10,
+      "y": 14,
+      "team": null
+    },
+    {
+      "id": "cup-1",
+      "label": "Coupelle",
+      "displayLabel": "",
+      "color": "#f48fb1",
+      "radius": 12,
+      "shape": "cup",
+      "rotation": 0,
+      "x": 16,
+      "y": 10,
+      "team": null
+    }
+  ],
+  "paths": [
+    {
+      "id": "path-1",
+      "kind": "pass",
+      "color": "#ffd54f",
+      "step": 0,
+      "points": [
+        {
+          "x": 12,
+          "y": 8
+        },
+        {
+          "x": 14,
+          "y": 13
+        }
+      ]
+    }
+  ],
+  "viewMode": "full",
+  "explanation": {
+    "material": "6 ballons, 2 plots",
+    "steps": []
+  },
+  "updatedAt": "2026-10-01T10:00:00.000Z"
+}

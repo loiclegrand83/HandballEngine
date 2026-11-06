@@ -13,7 +13,8 @@ test('security headers are present on a normal response', async () => {
   const res = await fetch(`${BASE_URL}/pages/board.html`);
   assert.equal(res.status, 200);
   assert.ok(res.headers.get('content-security-policy'), 'CSP header missing');
-  assert.equal(res.headers.get('x-frame-options'), 'DENY');
+  assert.equal(res.headers.get('x-frame-options'), 'SAMEORIGIN');
+  assert.match(res.headers.get('content-security-policy'), /frame-ancestors 'self'/);
   assert.equal(res.headers.get('x-content-type-options'), 'nosniff');
 });
 

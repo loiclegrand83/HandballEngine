@@ -4,25 +4,24 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Planning — Handball Engine</title>
-  <link rel="manifest" href="../manifest.json" />
-  <meta name="theme-color" content="#080b0f" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="/src/css/components.css" />
   <link rel="stylesheet" href="../src/css/planning.css" />
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#080b0f" />
+  <link rel="apple-touch-icon" href="/assets/icons/pwa-192.png" />
+  <script src="/src/js/pwa.js"></script>
 </head>
 <body>
+  <nav id="appNav"></nav>
 
   <!-- ══════════════════════════════════════════════════════════
        TOOLBAR
   ══════════════════════════════════════════════════════════════ -->
   <header class="toolbar">
-    <span class="toolbar-brand">Handball Engine</span>
-    <div class="toolbar-sep"></div>
-
-    <button class="btn btn--home" id="btnHome">← Accueil</button>
-
     <div class="toolbar-spacer"></div>
 
     <button class="btn" id="btnPrevMonth">‹</button>
@@ -78,11 +77,11 @@
             <input class="field-input" id="fHeure" type="time" />
           </div>
           <div class="field-group">
-            <label class="field-label" for="fSeanceLink">Séance liée (optionnel)</label>
+            <label class="field-label" for="fSeanceLink">Trame liée (optionnel)</label>
             <select class="field-select" id="fSeanceLink">
               <option value="">— Aucune —</option>
             </select>
-            <button class="btn" id="btnOpenSeance" type="button" style="margin-top:8px;display:none;">Ouvrir la séance →</button>
+            <button class="btn" id="btnOpenSeance" type="button" style="margin-top:8px;display:none;">Ouvrir la trame →</button>
           </div>
           <div class="field-group">
             <label class="field-label" for="fNotesEnt">Notes</label>
@@ -136,6 +135,8 @@
   <!-- Toast -->
   <div class="toast" id="toast"></div>
 
+  <script src="/src/js/ui.js"></script>
+  <script>window.HawebUI.renderNav('planning');</script>
   <script src="../src/js/planning.js"></script>
 </body>
 </html>

@@ -1,0 +1,36 @@
+{
+  "id": "fx_defense",
+  "name": "Repli défensif",
+  "category": "defensif",
+  "thematique": "defense",
+  "duree": 20,
+  "notes": "Repli rapide après perte de balle.",
+  "items": [
+    {
+      "id": "player-1",
+      "label": "Joueur",
+      "displayLabel": "1",
+      "color": "#e53935",
+      "radius": 18,
+      "shape": "circle",
+      "rotation": 0,
+      "x": 30,
+      "y": 10,
+      "team": "B",
+      "post": null,
+      "isGoalkeeper": false,
+      "hidden": false
+    }
+  ],
+  "paths": [],
+  "viewMode": "full",
+  "explanation": {
+    "material": "5 plots, 2 ballons",
+    "steps": [
+      {
+        "description": "Repli au signal."
+      }
+    ]
+  },
+  "updatedAt": "2026-10-04T10:00:00.000Z"
+}

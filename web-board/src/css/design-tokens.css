@@ -21,7 +21,7 @@
   /* Text & Foreground */
   --color-text-primary:         #f0ece0;  /* Main text (high contrast) */
   --color-text-secondary:       #a0a5b0;  /* Secondary text (muted) */
-  --color-text-muted:           #5a6070;  /* Muted text (hints, disabled) */
+  --color-text-muted:           #8b91a0;  /* Muted text (hints) — ≈6,2:1 sur #080b0f (CA21) */
 
   /* Semantic Colors */
   --color-success:              #00e676;  /* Green (success state) */
@@ -55,7 +55,7 @@
   --font-family-mono:           'DM Mono', monospace;
 
   /* Font Sizes */
-  --font-size-xs:               0.75rem;   /* 12px */
+  --font-size-xs:               0.8125rem; /* 13px : taille minimale (CA21) */
   --font-size-sm:               0.875rem;  /* 14px */
   --font-size-base:             1rem;      /* 16px */
   --font-size-lg:               1.125rem;  /* 18px */
@@ -167,7 +167,7 @@
     --spacing-xs:               2px;
     --spacing-sm:               4px;
     --spacing-md:               8px;
-    --font-size-xs:             0.65rem;
-    --font-size-sm:             0.75rem;
+    --font-size-xs:             0.8125rem;
+    --font-size-sm:             0.8125rem;
   }
 }

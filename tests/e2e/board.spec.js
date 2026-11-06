@@ -16,11 +16,16 @@ test.describe('Board — double-click/tap to end a trajectory', () => {
     await page.locator('#newExercise').click();
     await expect(page.locator('#exerciseName')).toHaveValue('Nouveau exercice');
 
-    await page.locator('[data-mode="shot"]').click();
-
     const canvas = page.locator('#boardCanvas');
     const box = await canvas.boundingBox();
     if (!box) throw new Error('canvas not found');
+
+    // Une trajectoire part toujours d'un joueur : en poser un au point de départ.
+    await page.locator('[data-quick="player"]').click();
+    await page.mouse.click(box.x + 200, box.y + 150);
+
+    // Le bouton « Tir » de l'ancienne sidebar a été retiré : la barre rapide le remplace (S7)
+    await page.locator('[data-quick="shot"]').click();
 
     // Deux points distincts d'abord (comportement normal, pas de double-clic) : si le
     // double-clic final réutilisait la position du dernier clic simple, le 1er des deux

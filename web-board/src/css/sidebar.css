@@ -282,6 +282,9 @@
   font-weight: var(--font-weight-semibold);
   color: var(--color-text-primary);
   cursor: pointer;
+  white-space: normal;      /* libellés longs : retour à la ligne plutôt que troncature (CA21) */
+  overflow-wrap: anywhere;
+  line-height: 1.25;
 
   transition: all var(--duration-short) var(--ease-standard);
 }

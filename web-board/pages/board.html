@@ -3,20 +3,24 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Handball Tactical Board</title>
-  <link rel="manifest" href="../manifest.json" />
-  <meta name="theme-color" content="#080b0f" />
+  <title>Board — Handball Engine</title>
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="Handball Board" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="/src/css/components.css" />
   <link rel="stylesheet" href="../src/css/styles.css" />
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#080b0f" />
+  <link rel="apple-touch-icon" href="/assets/icons/pwa-192.png" />
+  <script src="/src/js/pwa.js"></script>
 </head>
 <body>
   <div class="app-shell">
     <!-- ─── SIDEBAR ─────────────────────────────────────────────────────────── -->
     <aside class="sidebar">
+      <nav id="appNav"></nav>
       <h1>Board</h1>
 
       <!-- Quick Actions -->
@@ -32,7 +36,7 @@
       <hr />
 
       <!-- Vue Section (Collapsible) -->
-      <details class="sidebar-section" data-section="vue" open>
+      <details class="sidebar-section" data-section="vue">
         <summary>
           <h2>Vue</h2>
           <span class="summary-icon">▼</span>
@@ -44,7 +48,7 @@
       </details>
 
       <!-- Mode Section (Collapsible) -->
-      <details class="sidebar-section" data-section="mode" open>
+      <details class="sidebar-section" data-section="mode">
         <summary>
           <h2>Mode</h2>
           <span class="summary-icon">▼</span>
@@ -60,7 +64,7 @@
       </details>
 
       <!-- Exercice Section (Collapsible) -->
-      <details class="sidebar-section" data-section="exercice" open>
+      <details class="sidebar-section" data-section="exercice">
         <summary>
           <h2>Exercice</h2>
           <span class="summary-icon">▼</span>
@@ -108,7 +112,7 @@
       </details>
 
       <!-- Aide Section (Collapsible) -->
-      <details class="sidebar-section" data-section="aide" open>
+      <details class="sidebar-section" data-section="aide">
         <summary>
           <h2>Aide</h2>
           <span class="summary-icon">▼</span>
@@ -120,6 +124,16 @@
 
     <!-- ─── MAIN CONTENT (CANVAS) ────────────────────────────────────────────── -->
     <main class="main-panel">
+      <div id="quickBar" class="quick-bar" role="toolbar" aria-label="Actions rapides">
+        <button type="button" class="quick-btn" data-quick="player" aria-pressed="false" title="Poser un joueur (J)"><span class="quick-ico" aria-hidden="true">●</span>Joueur<kbd>J</kbd></button>
+        <button type="button" class="quick-btn" data-quick="pass" aria-pressed="false" title="Passe (P)"><span class="quick-ico" aria-hidden="true">⤳</span>Passe<kbd>P</kbd></button>
+        <button type="button" class="quick-btn" data-quick="course" aria-pressed="false" title="Course (C)"><span class="quick-ico" aria-hidden="true">➝</span>Course<kbd>C</kbd></button>
+        <button type="button" class="quick-btn" data-quick="shot" aria-pressed="false" title="Tir (T)"><span class="quick-ico" aria-hidden="true">➹</span>Tir<kbd>T</kbd></button>
+        <button type="button" class="quick-btn" data-quick="undo" title="Annuler (Ctrl+Z)"><span class="quick-ico" aria-hidden="true">↶</span>Annuler<kbd>Ctrl+Z</kbd></button>
+        <label class="quick-field">Nom <input id="quickName" type="text" maxlength="100" autocomplete="off" /></label>
+        <label class="quick-field quick-field--duree">Durée <input id="quickDuree" type="number" min="1" max="180" step="1" inputmode="numeric" /> min</label>
+        <button type="button" class="quick-btn quick-btn--save" id="quickSave" data-quick="save" title="Enregistrer (Ctrl+S)">Enregistrer<kbd>Ctrl+S</kbd></button>
+      </div>
       <div class="canvas-container">
         <canvas id="boardCanvas" width="1000" height="600"></canvas>
       </div>
@@ -145,8 +159,8 @@
     <!-- Bibliothèque -->
     <button class="dock-icon" data-tool="bibliothèque" aria-label="Bibliothèque" title="Bibliothèque"></button>
 
-    <!-- Séance -->
-    <button class="dock-icon" data-tool="séance" aria-label="Séance" title="Séance"></button>
+    <!-- Trame -->
+    <button class="dock-icon" data-tool="séance" aria-label="Trame" title="Trame"></button>
 
     <!-- Planning -->
     <button class="dock-icon" data-tool="planning" aria-label="Planning" title="Planning"></button>
@@ -208,5 +222,7 @@
   <script src="../src/js/canvas-reflow.js"></script>
   <script src="../src/js/dock.js"></script>
   <script src="../src/js/keyboard-nav.js"></script>
+  <script src="/src/js/ui.js"></script>
+  <script src="/src/js/board-quickbar.js"></script>
 </body>
 </html>

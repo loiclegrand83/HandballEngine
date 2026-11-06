@@ -36,7 +36,7 @@
     { tool: 'trajectories', label: 'Trajectoires', icon: 'route.svg' },
     { tool: 'animation', label: 'Animation', icon: 'play.svg' },
     { tool: 'bibliothèque', label: 'Bibliothèque', icon: 'library.svg' },
-    { tool: 'séance', label: 'Séance', icon: 'clipboard-list.svg' },
+    { tool: 'séance', label: 'Trame', icon: 'clipboard-list.svg' },
     { tool: 'planning', label: 'Planning', icon: 'calendar.svg' },
     { tool: 'postes', label: 'Postes', icon: 'tag.svg' },
     { tool: 'vue', label: 'Vue', icon: 'layout-grid.svg' },

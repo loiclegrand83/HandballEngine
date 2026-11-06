@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guide — Handball Engine</title>
+  <meta name="mobile-web-app-capable" content="yes" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/css/components.css" />
+  <link rel="stylesheet" href="/src/css/guide.css" />
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#080b0f" />
+  <link rel="apple-touch-icon" href="/assets/icons/pwa-192.png" />
+  <script src="/src/js/pwa.js"></script>
+</head>
+<body class="guide-page">
+  <nav id="appNav"></nav>
+
+  <main class="guide">
+    <h1 class="guide-title">Guide en une page</h1>
+    <p class="guide-intro">Préparer un entraînement en quatre gestes : ranger ses exercices, composer une trame, l'imprimer, la mettre à l'abri.</p>
+
+    <div class="guide-grid">
+      <section class="guide-card">
+        <h2>Bibliothèques</h2>
+        <p>Une bibliothèque est un classeur d'exercices : « Défense », « Gardien », « U15 »… Un même exercice peut être rangé dans plusieurs bibliothèques à la fois, sans être copié. Cochez ou décochez une bibliothèque dans la fiche de l'exercice. Retirer un exercice d'une bibliothèque, ou supprimer toute une bibliothèque, ne supprime jamais l'exercice : il reste dans « Tous les exercices ». Chaque enregistrement garde une version ; l'historique permet de revenir à une version précédente.</p>
+      </section>
+
+      <section class="guide-card">
+        <h2>Trame</h2>
+        <p>La trame est le déroulé de l'entraînement. Créez des blocs (échauffement, exercice, opposition…), cliquez sur un bloc, puis ajoutez des exercices avec le bouton « + » du panneau de droite. Les flèches changent l'ordre. La durée totale se calcule seule à partir des durées des exercices ; vous pouvez ajuster la durée d'une ligne. La trame garde la version exacte de chaque exercice : le modifier plus tard ne change pas la trame.</p>
+      </section>
+
+      <section class="guide-card">
+        <h2>Export PDF</h2>
+        <p>Dans la trame, cliquez sur « Exporter en PDF ». La trame est enregistrée, puis la fenêtre d'impression s'ouvre : choisissez « Enregistrer au format PDF ». Le document contient, pour chaque exercice, le schéma, la description, le matériel et la durée, ainsi qu'un cadre « Notes du coach ». Chaque export est archivé avec sa date et son numéro de version : retrouvez-le dans « Mes trames », bouton « Exports ».</p>
+      </section>
+
+      <section class="guide-card">
+        <h2>Sauvegarde</h2>
+        <p>Depuis l'accueil, cliquez sur « Télécharger une sauvegarde complète » : un seul fichier contient bibliothèques, exercices, versions, trames et exports. Rangez-le sur une clé USB ou un autre disque. « Restaurer » remplace toutes les données par celles du fichier choisi ; une copie de l'état actuel est gardée avant. Sans connexion, vous pouvez consulter et préparer. Handball Engine doit être lancé sur cet ordinateur pour enregistrer.</p>
+      </section>
+    </div>
+  </main>
+
+  <script src="/src/js/ui.js"></script>
+  <script>window.HawebUI.renderNav('guide');</script>
+</body>
+</html>

@@ -86,6 +86,7 @@ const state = {
   dragPathPointIndex: null,
   currentExerciseId: null,
   userSaved: false,
+  renderOnly: false, // ?render=<versionId> : rendu du schéma seulement, aucune sauvegarde
   selectedPost: null, // poste handball sélectionné (AG, ARG, DC, PIV, ARD, AD)
   explanation: { material: '', steps: [] },
 };
@@ -443,6 +444,7 @@ function drawItems() {
 
 function drawPaths() {
   state.paths.forEach((path, index) => {
+    ctx.globalAlpha = state.flashPath && state.flashPath.id === path.id ? state.flashPath.alpha : 1;
     ctx.strokeStyle = path.color;
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
@@ -541,6 +543,7 @@ function drawPaths() {
       });
     }
   });
+  ctx.globalAlpha = 1;
 }
 
 function drawArrowAtEnd(path, canvasPoints) {
@@ -1019,10 +1022,21 @@ window.addEventListener('canvasReflowed', event => {
 // before the previous edit is kept. Undo restores the last snapshot.
 const UNDO_LIMIT = 100;
 const undoStack = [];
-let lastSnapshot = JSON.stringify({ items: state.items, paths: state.paths });
+// Ce qui est annulable : joueurs, trajectoires et textes des étapes (sans les images, trop lourdes).
+function undoableJson() {
+  const steps = (state.explanation?.steps || []).map(st => ({ description: st?.description || '', attention: st?.attention || '' }));
+  return JSON.stringify({ items: state.items, paths: state.paths, steps });
+}
+let lastSnapshot = undoableJson();
+function resetUndoHistory() {
+  undoStack.length = 0;
+  lastSnapshot = undoableJson();
+}
+
+
 
 function rememberState() {
-  const current = JSON.stringify({ items: state.items, paths: state.paths });
+  const current = undoableJson();
   if (current === lastSnapshot) return;
   undoStack.push(lastSnapshot);
   if (undoStack.length > UNDO_LIMIT) undoStack.shift();
@@ -1036,6 +1050,10 @@ function undoLast() {
   const data = JSON.parse(previous);
   state.items = data.items;
   state.paths = data.paths;
+  if (Array.isArray(data.steps) && state.explanation) {
+    const current = state.explanation.steps || [];
+    state.explanation.steps = data.steps.map((st, i) => ({ ...(current[i] || {}), ...st }));
+  }
   lastSnapshot = previous;
   state.currentPath = null;
   state.selectedPathIndex = null;
@@ -1138,8 +1156,9 @@ function sanitizePath(raw) {
     kind:   VALID_PATH_KINDS.includes(raw.kind) ? raw.kind : 'course',
     color:  /^#[0-9a-fA-F]{3,8}$/.test(raw.color) ? raw.color : '#90caf9',
     step:   Number(raw.step) || 0,
+  linkedItemId: typeof raw.linkedItemId === 'string' ? raw.linkedItemId.slice(0, 64) : null,
     points: Array.isArray(raw.points)
-      ? raw.points.map(p => ({ x: Number(p.x) || 0, y: Number(p.y) || 0 }))
+      ? raw.points.filter(p => p && typeof p === 'object').map(p => ({ x: Number(p.x) || 0, y: Number(p.y) || 0 }))
       : [],
   };
 }
@@ -1189,7 +1208,50 @@ function addItem(x, y) {
     rotation: 0,
   });
   saveLocal(); render();
+  flashPlacement(state.items[state.items.length - 1]);
   window.dispatchEvent(new CustomEvent('itemPlaced'));
+}
+
+// ─── Retour visuel (CA26) : animations courtes, sans changer les données ─────────
+const REDUCED_MOTION = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+function animateFrames(duration, frame, done) {
+  if (REDUCED_MOTION) { if (done) done(); return; }
+  const start = performance.now();
+  const step = now => {
+    const t = Math.min(1, (now - start) / duration);
+    frame(t);
+    if (t < 1) requestAnimationFrame(step);
+    else { if (done) done(); render(); }
+  };
+  requestAnimationFrame(step);
+}
+
+// Anneau qui s'agrandit pendant 180 ms autour de l'élément posé.
+function flashPlacement(item) {
+  if (!item) return;
+  animateFrames(180, t => {
+    render();
+    const pos = fieldToCanvas(item);
+    ctx.save();
+    ctx.globalAlpha = 1 - t;
+    ctx.strokeStyle = '#f5c400';
+    ctx.lineWidth = 3;
+    ctx.setLineDash([]);
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, item.radius * (0.8 + 1.2 * t), 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+  });
+}
+
+// La trajectoire terminée clignote une fois (opacité 1 → 0,5 → 1 en 200 ms).
+function flashPath(path) {
+  if (!path) return;
+  animateFrames(200, t => {
+    state.flashPath = { id: path.id, alpha: 1 - 0.5 * (1 - Math.abs(2 * t - 1)) };
+    render();
+  }, () => { state.flashPath = null; });
 }
 
 function getItemIndexAt(cx, cy) {
@@ -1358,6 +1420,7 @@ canvas.addEventListener('pointerdown', event => {
         setStatus('Trajectoire annulée (un seul point)');
       } else {
         setStatus('Trajectoire terminée');
+        flashPath(state.currentPath);
       }
       state.currentPath = null;
       lastPointerDown = null;
@@ -1488,24 +1551,77 @@ canvas.addEventListener('dblclick', event => {
 
 // ─── Bibliothèque & Persistance (Backend) ───────────────────────────────────────
 
-async function saveLocal() {
+// Sauvegarde auto = brouillon non versionné (Q8) ; seule « Enregistrer » crée une version.
+let draftTimer = null;
+function saveLocal() {
   // N'autosauvegarde que si l'utilisateur a déjà fait un "Enregistrer" explicite
-  if (!state.userSaved) return;
-  await _persistExercise();
+  if (!state.userSaved || state.renderOnly || !state.currentExerciseId) return;
+  clearTimeout(draftTimer);
+  draftTimer = setTimeout(async () => {
+    try {
+      await fetch('/api/exercises/' + encodeURIComponent(state.currentExerciseId) + '/draft', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(buildExerciseData(false)),
+      });
+    } catch (e) {
+      console.error('Erreur lors de la sauvegarde du brouillon', e);
+    }
+  }, 1500);
 }
 
+const FIELD_INPUTS = { name: 'exerciseName', thematique: 'exerciseThematique', duree: 'exerciseDuree' };
+
 async function saveToBibli() {
+  if (state.renderOnly) return;
   // Sauvegarde explicite : génère un ID si besoin, active l'autosave pour la suite
   if (!state.currentExerciseId) {
     state.currentExerciseId = 'ex_' + Date.now();
   }
-  state.userSaved = true;
-  await _persistExercise();
-  setStatus('Exercice enregistré dans la bibliothèque');
+  clearTimeout(draftTimer);
+  const result = await _persistExercise();
+  if (!result) return null;
+  if (result.ok) {
+    state.userSaved = true;
+    const message = result.created
+      ? `Version n°${result.versionNo} enregistrée`
+      : `Aucun changement depuis la version n°${result.versionNo}`;
+    setStatus(message);
+    if (window.HawebUI) {
+      window.HawebUI.toast(message, 'ok');
+      window.HawebUI.pulse(document.getElementById('quickSave'));
+    }
+  } else {
+    setStatus(result.message || 'Erreur lors de l\'enregistrement');
+    if (window.HawebUI) window.HawebUI.toast(result.message || 'Erreur lors de l\'enregistrement', 'err');
+    const input = document.getElementById(FIELD_INPUTS[result.field]);
+    if (input) {
+      input.classList.add('field-error');
+      setTimeout(() => input.classList.remove('field-error'), 3000);
+    }
+  }
+  return result;
 }
 
-async function _persistExercise() {
-  const exerciseData = {
+// Schéma de l'exercice pour la séance et les PDF : vue complète, sans atténuation,
+// à résolution suffisante pour l'impression (la séance l'affiche en grand).
+function captureSchema() {
+  // Le schéma montre toujours le terrain complet, quelle que soit la vue affichée.
+  const savedView = board.viewMode;
+  board.viewMode = 'full';
+  render();
+  const off = document.createElement('canvas');
+  off.width  = Math.round(canvas.width  * 0.8);
+  off.height = Math.round(canvas.height * 0.8);
+  off.getContext('2d').drawImage(canvas, 0, 0, off.width, off.height);
+  const dataUrl = off.toDataURL('image/jpeg', 0.9);
+  board.viewMode = savedView;
+  render();
+  return dataUrl;
+}
+
+function buildExerciseData(withSnapshot) {
+  const data = {
     id: state.currentExerciseId,
     name: exerciseName.value || 'Sans nom',
     category: exerciseCategory.value,
@@ -1520,14 +1636,25 @@ async function _persistExercise() {
     explanation: state.explanation,
     updatedAt: new Date().toISOString(),
   };
+  if (withSnapshot) data.snapshot = captureSchema();
+  return data;
+}
+
+// Renvoie {ok, created, versionNo} ou {ok:false, message, field} ; null si le serveur est injoignable.
+async function _persistExercise() {
   try {
-    await fetch('/api/exercises', {
+    const res = await fetch('/api/exercises', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(exerciseData)
+      body: JSON.stringify(buildExerciseData(true))
     });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) return { ok: false, message: body.error, field: body.field };
+    return { ok: true, created: body.created, versionId: body.versionId, versionNo: body.versionNo };
   } catch (e) {
     console.error("Erreur lors de la sauvegarde backend", e);
+    setStatus("Le serveur local est arrêté : la modification n'est pas enregistrée. Relancez Handball Engine.");
+    return null;
   }
 }
 
@@ -1562,7 +1689,7 @@ async function loadLocal() {
   }
 }
 
-function loadExerciseFromData(d) {
+function loadExerciseFromData(d, opts = {}) {
   state.currentExerciseId = d.id || ('ex_' + Date.now());
   state.userSaved = true; // Déjà dans la bibliothèque, l'autosave peut fonctionner
   exerciseName.value = String(d.name || '').slice(0, 100);
@@ -1578,9 +1705,30 @@ function loadExerciseFromData(d) {
   state.explanation = (d.explanation && typeof d.explanation === 'object')
     ? d.explanation
     : { material: '', steps: [] };
+  resetUndoHistory(); // après l'explication : l'historique part de l'exercice chargé
   selectViewMode(board.viewMode);
   render();
   setStatus('Exercice chargé');
+  window.dispatchEvent(new CustomEvent('exerciseLoaded'));
+  if (!opts.skipDraft && !state.renderOnly) restoreDraftIfNewer(d);
+}
+
+// Un brouillon (sauvegarde auto) plus récent que la version chargée est restauré.
+async function restoreDraftIfNewer(d) {
+  const id = state.currentExerciseId;
+  try {
+    const res = await fetch('/api/exercises/' + encodeURIComponent(id) + '/draft');
+    if (!res.ok) return;
+    const draft = await res.json();
+    const loadedAt = new Date(d.updatedAt || d.exportedAt || 0).getTime();
+    if (state.currentExerciseId !== id || !draft || !draft.data) return;
+    if (new Date(draft.savedAt).getTime() > loadedAt) {
+      loadExerciseFromData({ ...draft.data, id }, { skipDraft: true });
+      setStatus('Brouillon non enregistré restauré — cliquez Enregistrer pour créer une version');
+    }
+  } catch (e) {
+    // hors ligne : on garde la version chargée
+  }
 }
 
 function exportJson() {
@@ -1765,7 +1913,9 @@ document.getElementById('newExercise').addEventListener('click', () => {
   exerciseNiveau.value = '';
   exerciseNotes.value = '';
   state.items = []; state.paths = [];
+  resetUndoHistory();
   render(); setStatus('Nouvel exercice (non sauvegardé)');
+  window.dispatchEvent(new CustomEvent('exerciseLoaded'));
 });
 
 document.getElementById('saveLocal').addEventListener('click', async () => {
@@ -1901,6 +2051,9 @@ function prepareAnimationStep() {
     const path = item.path;
     let actorIndex = null;
     if (MOVING_KINDS.includes(path.kind) && path.points.length > 0) {
+      // Acteur = joueur lié à la trajectoire ; repli sur le joueur le plus proche du départ si le lien est absent.
+      const linked = state.items.findIndex(it => it.id === path.linkedItemId && it.team);
+      if (linked >= 0) { anim.actors.push(linked); return; }
       const start = path.points[0];
       let minDist = Infinity;
       state.items.forEach((it, i) => {
@@ -2441,10 +2594,52 @@ function openExplanationPage() {
   window.open('../pages/explanation.html', '_blank');
 }
 
+// ─── Actions publiques pour la barre rapide (board-quickbar.js) ─────────────────
+function selectPlayerTool() {
+  selectAsset(0);
+  selectDrawMode('asset');
+}
+window.HawebBoard = { selectPlayerTool, selectDrawMode, save: saveToBibli, undo: undoLast };
+
 // ─── Init ─────────────────────────────────────────────────────────────────────
+
+// Mode rendu (?render=<versionId>) : dessine une version, envoie son schéma, prévient la page parente.
+async function renderSnapshotMode(versionId) {
+  state.renderOnly = true;
+  let ok = false;
+  try {
+    const res = await fetch('/api/exercises/versions/' + encodeURIComponent(versionId));
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const v = await res.json();
+    loadExerciseFromData(v.data, { skipDraft: true });
+    if (!playerImage.complete) {
+      await new Promise(resolve => {
+        playerImage.addEventListener('load', resolve, { once: true });
+        playerImage.addEventListener('error', resolve, { once: true });
+        setTimeout(resolve, 2000);
+      });
+    }
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    render();
+    const image = captureSchema();
+    const put = await fetch('/api/versions/' + encodeURIComponent(versionId) + '/snapshot', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image }),
+    });
+    ok = put.ok || put.status === 409; // 409 : une image existe déjà pour cette version
+  } catch (e) {
+    console.error('Rendu du schéma impossible', e);
+  }
+  if (window.parent && window.parent !== window) {
+    window.parent.postMessage({ type: 'haweb-snapshot', versionId: Number(versionId), ok }, location.origin);
+  }
+}
 
 async function loadFromQueryParamOrDefault() {
   const params = new URLSearchParams(window.location.search);
+  const renderVersion = params.get('render');
+  if (renderVersion) return renderSnapshotMode(renderVersion);
   const exerciseId = params.get('exercise');
   if (exerciseId) {
     try {

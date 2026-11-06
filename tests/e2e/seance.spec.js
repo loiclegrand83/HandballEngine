@@ -2,36 +2,37 @@
 const { test, expect } = require('@playwright/test');
 
 test.describe('Séance — Blocs nommés, Ateliers, durée auto, sauvegarde', () => {
-  test('build a Bloc with two Ateliers, watch the total auto-update, save, and reopen', async ({ page, request }) => {
+  test('build a Bloc with two Ateliers from #picker, watch the total auto-update, save, and reopen', async ({ page, request }) => {
     const titre = `test_e2e_seance_${Date.now()}`;
     await page.goto('/pages/seance.html');
 
     await page.locator('#fTitre').fill(titre);
     await page.getByRole('button', { name: '+ Échauffement' }).click();
 
-    // Ajouter un premier atelier
-    await page.locator('[data-action="pick"]').first().click();
-    await expect(page.locator('#exGrid .ex-card')).not.toHaveCount(0);
-    await page.locator('#exGrid .ex-card').first().click();
+    // Ajouter un premier exercice depuis le panneau de droite
+    await page.locator('#pSearch').fill('Espagnole');
+    await page.locator('#picker .pick-card', { hasText: 'Espagnole' }).locator('.pick-add').click();
+    await expect(page.locator('#totalDuree')).not.toHaveText('0 min');
+    const totalAfterOne = parseInt(await page.locator('#totalDuree').innerText(), 10);
 
-    await expect(page.locator('#fDureeTotal')).not.toHaveValue('0');
-    const totalAfterOne = await page.locator('#fDureeTotal').inputValue();
+    // Ajouter un deuxième exercice au même Bloc
+    await page.locator('#pSearch').fill('Repli');
+    await page.locator('#picker .pick-card', { hasText: 'Repli défensif' }).locator('.pick-add').click();
+    const totalAfterTwo = parseInt(await page.locator('#totalDuree').innerText(), 10);
+    expect(totalAfterTwo).toBeGreaterThan(totalAfterOne);
 
-    // Ajouter un deuxième atelier au même Bloc
-    await page.locator('[data-action="pick"]').first().click();
-    await page.locator('#exGrid .ex-card').nth(1).click();
-
-    const totalAfterTwo = await page.locator('#fDureeTotal').inputValue();
-    expect(Number(totalAfterTwo)).toBeGreaterThan(Number(totalAfterOne));
-
-    // Sauvegarder
+    // Enregistrer
     await page.locator('#btnSave').click();
-    await expect(page.locator('#toast')).toContainText(/sauvegardée/i);
+    await expect(page.locator('#hawebToast')).toContainText(/enregistrée/i);
 
-    // Nettoyage : retrouver la séance sauvegardée par son titre unique et la supprimer.
+    // Rouvrir : la trame est relue depuis le serveur
+    await page.reload();
+    await expect(page.locator('#fTitre')).toHaveValue(titre);
+    await expect(page.locator('.entry')).toHaveCount(2);
+
     const saved = await (await request.get('/api/seances')).json();
     const match = saved.find(s => s.titre === titre);
-    expect(match, 'saved séance should be findable via the API for cleanup').toBeTruthy();
+    expect(match, 'saved trame should be findable via the API for cleanup').toBeTruthy();
     await request.delete(`/api/seances/${match.id}`);
   });
 
@@ -84,8 +85,8 @@ test.describe('Séance — free-text fields are HTML-escaped (regression: securi
     });
 
     try {
-      await page.goto(`/pages/seance.html?id=${id}`);
-      await page.locator('#btnDocView').click();
+      await page.goto(`/pages/seance.html?id=${id}&view=document`);
+      await expect(page.locator('#documentView')).toBeVisible();
       const pwned = await page.evaluate(() => window.__pwned2 || false);
       expect(pwned).toBe(false);
       await expect(page.locator('.doc-seance-title')).toContainText('<script>');

@@ -1,0 +1,88 @@
+/* Document de trame : écran (aperçu), impression et archive HTML autonome (CA11–CA15).
+   Ce fichier est recopié tel quel dans l'archive : aucune variable externe. */
+
+@page { size: A4 portrait; margin: 12mm; }
+
+.doc-page {
+  box-sizing: content-box;
+  width: 186mm;            /* largeur utile A4 : 210 mm - 2 × 12 mm */
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0;
+  background: #fff;
+  color: #111;
+  font-family: 'Barlow', 'Helvetica Neue', Arial, sans-serif;
+  font-size: 10.5pt;
+  line-height: 1.35;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+.doc-page * { box-sizing: border-box; }
+
+.doc-header { padding: 4mm 0 3mm; border-bottom: 2px solid #111; margin-bottom: 4mm; }
+.doc-brand { margin: 0; font-size: 9pt; letter-spacing: 0.08em; text-transform: uppercase; color: #444; }
+.doc-seance-title { margin: 1mm 0; font-size: 22pt; line-height: 1.1; }
+.doc-meta, .doc-version-line, .doc-objectif, .doc-material, .doc-summary { margin: 1mm 0; }
+.doc-total { margin: 1mm 0; font-size: 14pt; font-weight: 700; }
+.doc-version-line { color: #333; }
+.doc-summary { font-weight: 600; }
+.doc-label { font-weight: 700; margin-right: 1.5mm; }
+
+.doc-bloc {
+  break-inside: avoid;
+  page-break-inside: avoid;
+  margin: 0 0 5mm;
+  border-left: 3mm solid #f5c400;
+  padding-left: 3mm;
+}
+.doc-bloc-header {
+  break-after: avoid;
+  page-break-after: avoid;
+  padding: 1.5mm 0;
+  font-size: 12pt;
+  font-weight: 700;
+  border-bottom: 1px solid #999;
+  margin-bottom: 2mm;
+}
+.doc-bloc-num { letter-spacing: 0.05em; }
+.doc-bloc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3mm; }
+.doc-atelier { break-inside: avoid; page-break-inside: avoid; border: 1px solid #ccc; border-radius: 2mm; padding: 2mm; }
+.doc-schema { display: block; width: 100%; aspect-ratio: 5 / 3; object-fit: contain; background: #0e1a2e; border-radius: 1mm; }
+.doc-schema--none { display: grid; place-items: center; color: #fff; }
+.doc-atelier-name { margin: 1.5mm 0 1mm; font-size: 11pt; }
+.doc-version { font-weight: 400; color: #555; font-size: 9pt; }
+.doc-line { margin: 0.5mm 0; }
+.doc-text { white-space: pre-line; }
+.doc-consignes { margin: 2mm 0 0; }
+.doc-empty { color: #555; }
+
+.doc-notes { break-inside: avoid; page-break-inside: avoid; margin-top: 4mm; }
+.doc-notes-title { margin: 0 0 2mm; font-size: 12pt; }
+.doc-notes-lines {
+  height: calc(8 * 9mm);
+  border: 1px solid #999;
+  border-radius: 2mm;
+  background: repeating-linear-gradient(to bottom, transparent 0, transparent calc(9mm - 1px), #bbb calc(9mm - 1px), #bbb 9mm);
+}
+.doc-footer { margin-top: 4mm; padding-top: 2mm; border-top: 1px solid #999; font-size: 9pt; color: #444; }
+
+.archive-banner {
+  max-width: 186mm;
+  margin: 0 auto 4mm;
+  padding: 3mm 4mm;
+  background: #fff6cc;
+  color: #111;
+  font-family: Arial, sans-serif;
+  border: 1px solid #e0c200;
+}
+
+@media screen {
+  .doc-page { padding: 12mm; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4); }
+}
+
+@media print {
+  html, body { height: auto !important; overflow: visible !important; background: #fff !important; }
+  body > *:not(#documentView), #appNav, .app-nav, .toolbar, .no-print, button, .toast, dialog, #offlineBanner { display: none !important; }
+  #documentView { display: block !important; padding: 0 !important; overflow: visible !important; background: #fff !important; }
+  .doc-page { width: 186mm; max-width: 100%; box-shadow: none; padding: 0; }
+}

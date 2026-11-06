@@ -1,0 +1,44 @@
+{
+  "id": "fx_sans_duree",
+  "name": "Fixation sans durée",
+  "category": "offensif",
+  "thematique": "attaque",
+  "notes": "Fixer le défenseur extérieur.",
+  "items": [
+    {
+      "id": "player-1",
+      "label": "Joueur",
+      "displayLabel": "1",
+      "color": "#4682b4",
+      "radius": 18,
+      "shape": "circle",
+      "rotation": 0,
+      "x": 25,
+      "y": 8,
+      "team": "A",
+      "post": null,
+      "isGoalkeeper": false,
+      "hidden": false
+    }
+  ],
+  "paths": [
+    {
+      "id": "path-1",
+      "kind": "course",
+      "color": "#90caf9",
+      "step": 0,
+      "points": [
+        {
+          "x": 25,
+          "y": 8
+        },
+        {
+          "x": 28,
+          "y": 10
+        }
+      ]
+    }
+  ],
+  "viewMode": "full",
+  "exportedAt": "2026-10-03T10:00:00.000Z"
+}

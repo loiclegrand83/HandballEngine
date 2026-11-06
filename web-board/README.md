@@ -10,6 +10,10 @@ node server.js
 
 Le serveur démarre sur `http://localhost:3000` et ouvre automatiquement le navigateur.
 
+**Guide utilisateur (une page)** : [`pages/guide.html`](pages/guide.html), accessible depuis le lien « Guide » de chaque page. Il explique bibliothèques, trame, export PDF et sauvegarde.
+
+Les données sont stockées dans `data/haweb.db` (SQLite). Variables utiles : `HAWEB_DATA_DIR` (autre dossier de données, utilisé par les tests) et `HAWEB_PORT` (autre port).
+
 ## Pages
 
 | Page | URL | Description |

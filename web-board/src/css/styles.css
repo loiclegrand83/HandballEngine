@@ -18,7 +18,7 @@
   --border:         #1e2228;
   --border-accent:  rgba(245, 196, 0, 0.4);
   --text:           #f0ece0;
-  --text-muted:     #5a6070;
+  --text-muted:     var(--color-text-muted);
   --yellow:         #f5c400;
   --yellow-soft:    rgba(245, 196, 0, 0.1);
   --yellow-glow:    rgba(245, 196, 0, 0.2);
@@ -123,7 +123,7 @@ body::before {
 .sidebar h2 {
   margin: 0 0 6px;
   font-family: 'DM Mono', monospace;
-  font-size: 0.62rem;
+  font-size: 0.8125rem;
   font-weight: 500;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -141,7 +141,7 @@ body::before {
 }
 
 .sidebar p {
-  font-size: 0.78rem;
+  font-size: 0.8125rem;
   color: var(--text-muted);
   margin: 0 0 5px;
   line-height: 1.55;
@@ -187,7 +187,7 @@ body::before {
   width: 100%;
   margin-bottom: 5px;
   font-family: 'Barlow', sans-serif;
-  font-size: 0.78rem;
+  font-size: 0.8125rem;
   color: var(--text-muted);
   cursor: pointer;
 }
@@ -196,7 +196,7 @@ body::before {
   padding: 7px 10px;
   margin-right: 10px;
   font-family: 'Barlow Condensed', sans-serif;
-  font-size: 0.78rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -241,7 +241,7 @@ body::before {
   display: block;
   margin-bottom: 7px;
   font-family: 'Barlow', sans-serif;
-  font-size: 0.8rem;
+  font-size: 0.8125rem;
   color: var(--text-muted);
 }
 
@@ -263,7 +263,7 @@ body::before {
   border-radius: var(--r-sm);
   cursor: pointer;
   font-family: 'Barlow Condensed', sans-serif;
-  font-size: 0.78rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -284,7 +284,7 @@ body::before {
 
 .button-group.small button {
   padding: 8px 10px;
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
 }
 
 /* ── Toggle Button ───────────────────────────────────────────────────────────── */
@@ -301,7 +301,7 @@ body::before {
   border-radius: var(--r-sm);
   cursor: pointer;
   font-family: 'Barlow Condensed', sans-serif;
-  font-size: 0.78rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -349,7 +349,7 @@ body::before {
 }
 
 .asset-label {
-  font-size: 0.6rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   line-height: 1.1;
   white-space: normal;
@@ -509,7 +509,7 @@ body::before {
   min-height: 0;
   overflow-x: hidden;
   overflow-y: auto;
-  padding: 20px;
+  padding: 12px 20px;
   display: flex;
   flex-direction: column;
 }
@@ -521,7 +521,7 @@ body::before {
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: var(--r-lg);
-  padding: 20px;
+  padding: 12px;
   flex: 1;
 }
 
@@ -536,7 +536,7 @@ canvas {
 .footer {
   margin-top: 12px;
   font-family: 'DM Mono', monospace;
-  font-size: 0.72rem;
+  font-size: 0.8125rem;
   color: var(--text-muted);
   display: flex;
   align-items: center;
@@ -665,7 +665,7 @@ canvas {
 .library-filters label {
   color: var(--text-muted);
   font-family: 'DM Mono', monospace;
-  font-size: 0.7rem;
+  font-size: 0.8125rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
 }
@@ -724,7 +724,7 @@ canvas {
 
 .library-card-date {
   font-family: 'DM Mono', monospace;
-  font-size: 0.68rem;
+  font-size: 0.8125rem;
   color: var(--text-muted);
   letter-spacing: 0.06em;
 }
@@ -734,7 +734,7 @@ canvas {
   padding: 3px 8px;
   border-radius: 2px;
   font-family: 'DM Mono', monospace;
-  font-size: 0.65rem;
+  font-size: 0.8125rem;
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -761,7 +761,7 @@ canvas {
   border: none;
   color: var(--yellow);
   font-family: 'Barlow Condensed', sans-serif;
-  font-size: 0.78rem;
+  font-size: 0.8125rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -779,3 +779,61 @@ canvas {
 .library-card-btn.danger:hover {
   background: var(--danger-soft);
 }
+
+/* Champ refusé par la validation (CA18) */
+.field-error {
+  outline: 2px solid #ff6b6b !important;
+  outline-offset: 1px;
+}
+
+/* ── Barre rapide (CA27) ─────────────────────────────────────────────────────── */
+.quick-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 52px;
+  margin-bottom: 8px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+}
+.quick-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--color-surface-variant);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-text-primary);
+  font: 600 15px var(--font-family-sans);
+  cursor: pointer;
+  white-space: nowrap;
+  touch-action: manipulation;
+  transition: background-color 150ms var(--ease-standard), border-color 150ms var(--ease-standard);
+}
+.quick-btn:hover { background: var(--color-surface-hover); }
+.quick-btn[aria-pressed="true"] { border-color: var(--color-primary); background: rgba(245, 196, 0, 0.16); color: #fff2b3; }
+.quick-btn--save { background: var(--color-primary); border-color: var(--color-primary); color: #080b0f; margin-left: auto; }
+.quick-btn--save:hover { background: var(--color-primary-dark); }
+.quick-ico { font-size: 17px; line-height: 1; }
+.quick-btn kbd {
+  padding: 1px 5px;
+  border: 1px solid currentColor;
+  border-radius: 3px;
+  font: 600 13px var(--font-family-mono);
+  opacity: 0.85;
+}
+.quick-field { display: inline-flex; align-items: center; gap: 6px; color: var(--color-text-secondary); font: 600 14px var(--font-family-sans); white-space: nowrap; }
+.quick-field input {
+  min-height: 40px;
+  padding: 0 8px;
+  border: 1px solid var(--color-surface-variant);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-darkest);
+  color: var(--color-text-primary);
+  font: 15px var(--font-family-sans);
+}
+.quick-field #quickName { width: 170px; }
+.quick-field #quickDuree { width: 4.5em; }

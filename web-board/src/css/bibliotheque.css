@@ -1,0 +1,149 @@
+/* Page Bibliothèques : trois colonnes, aucune page qui défile (CA20) */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; overflow: hidden; }
+
+.bibli-page {
+  height: 100dvh;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-columns: 240px minmax(0, 1fr) 360px;
+  background: var(--color-bg-darkest);
+  color: var(--color-text-primary);
+  font-family: var(--font-family-sans);
+  font-size: 15px;
+}
+#appNav { grid-column: 1 / -1; }
+
+.col-title {
+  margin: 0 0 var(--spacing-sm);
+  font-family: var(--font-family-display);
+  font-size: 24px;
+  font-weight: 400;
+  letter-spacing: 0.05em;
+  color: var(--color-text-primary);
+}
+
+/* ── Colonne gauche ─────────────────────────────────────── */
+.bibli-libs {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: var(--spacing-lg);
+  border-right: 1px solid var(--color-surface-variant);
+  background: var(--color-bg-dark);
+}
+.lib-list { list-style: none; margin: 0; padding: 0; flex: 1; }
+.lib-row { display: flex; align-items: center; gap: 2px; border-radius: var(--radius-sm); }
+.lib-row.active { background: var(--color-overlay-strong); box-shadow: inset 3px 0 0 var(--color-primary); }
+.lib-item {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0 var(--spacing-sm);
+  border: 0;
+  background: transparent;
+  color: var(--color-text-primary);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lib-count { color: var(--color-text-secondary); }
+.lib-row .btn--icon { min-width: 36px; min-height: 44px; border: 0; background: transparent; font-size: 16px; }
+.lib-row .btn--icon:hover { background: var(--color-overlay-medium); }
+.lib-rename-input { flex: 1; min-width: 0; }
+.new-lib { padding-top: var(--spacing-md); border-top: 1px solid var(--color-surface-variant); }
+.new-lib-row { display: flex; gap: var(--spacing-xs); }
+
+/* ── Colonne centrale ───────────────────────────────────── */
+.bibli-main {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: var(--spacing-lg);
+  gap: var(--spacing-md);
+}
+.filters { display: flex; flex-wrap: wrap; align-items: center; gap: var(--spacing-sm); }
+.filters #fSearch { flex: 1 1 220px; width: auto; }
+.filters #fThematique { width: 170px; }
+.active-lib { color: var(--color-text-secondary); font-weight: 600; }
+.ex-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  grid-auto-rows: max-content;
+  gap: var(--spacing-md);
+  align-content: start;
+  padding-right: var(--spacing-xs);
+}
+.ex-card {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  transition: border-color 150ms var(--ease-standard), transform 150ms var(--ease-standard);
+}
+.ex-card:hover { border-color: var(--color-primary); }
+.ex-card.selected { border-color: var(--color-primary); box-shadow: 0 0 0 1px var(--color-primary); }
+.ex-thumb {
+  width: 100%;
+  aspect-ratio: 5 / 3;
+  object-fit: cover;
+  background: #12301c;
+  display: block;
+}
+.ex-thumb--placeholder { display: grid; place-items: center; color: #9fd8b0; font-size: 28px; }
+.ex-card-body { padding: var(--spacing-sm) var(--spacing-md) var(--spacing-md); display: flex; flex-direction: column; gap: 6px; }
+.ex-card-title { font-weight: 700; font-size: 15px; color: var(--color-text-primary); }
+.ex-card-meta { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; color: var(--color-text-secondary); font-size: 14px; }
+.empty-state { grid-column: 1 / -1; padding: var(--spacing-xl); text-align: center; color: var(--color-text-secondary); }
+.empty-state .btn { margin-top: var(--spacing-md); }
+
+/* ── Colonne droite ─────────────────────────────────────── */
+.bibli-detail {
+  padding: var(--spacing-lg);
+  border-left: 1px solid var(--color-surface-variant);
+  background: var(--color-bg-dark);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+.detail-empty { color: var(--color-text-secondary); }
+.detail-title { margin: 0; font-size: 20px; font-weight: 700; }
+.schema { width: 100%; aspect-ratio: 5 / 3; object-fit: contain; background: #12301c; border-radius: var(--radius-sm); }
+.schema-wait { padding: var(--spacing-lg); text-align: center; color: var(--color-text-secondary); background: var(--color-surface); border-radius: var(--radius-sm); }
+.detail-fields { display: grid; grid-template-columns: auto 1fr; gap: 4px var(--spacing-md); margin: 0; }
+.detail-fields dt { color: var(--color-text-secondary); font-size: 14px; }
+.detail-fields dd { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+.detail-section-title { margin: var(--spacing-sm) 0 0; font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text-secondary); }
+.lib-checks { display: flex; flex-direction: column; gap: 2px; }
+.lib-checks label { display: flex; align-items: center; gap: var(--spacing-sm); min-height: 32px; cursor: pointer; }
+.lib-checks input { width: 18px; height: 18px; accent-color: var(--color-primary); }
+.detail-actions { display: flex; flex-wrap: wrap; gap: var(--spacing-sm); }
+.version-banner { padding: var(--spacing-sm) var(--spacing-md); border-radius: var(--radius-sm); background: #3a3000; color: #fff2b3; font-weight: 600; }
+.history { list-style: none; margin: 0; padding: 0; max-height: calc(6 * 40px); }
+.history li button {
+  width: 100%;
+  min-height: 40px;
+  padding: 0 var(--spacing-sm);
+  border: 0;
+  border-bottom: 1px solid var(--color-surface-variant);
+  background: transparent;
+  color: var(--color-text-primary);
+  font: inherit;
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+.history li button:hover, .history li button.active { background: var(--color-overlay-medium); }
+
+/* ── Dialogue d'ajout ───────────────────────────────────── */
+.add-dialog { width: min(520px, 92vw); }
+.dialog-title { margin: 0 0 var(--spacing-md); font-size: 18px; }
+.add-list { max-height: 50vh; display: flex; flex-direction: column; gap: 4px; }
+.add-item { justify-content: flex-start; width: 100%; }

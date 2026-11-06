@@ -5,3 +5,4 @@ web-board/bibli/
 web-board/data/
 playwright-report/
 test-results/
+tests/.tmp/

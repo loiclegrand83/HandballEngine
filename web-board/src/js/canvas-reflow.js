@@ -68,16 +68,20 @@
     const dockHeight = getDockHeight();
 
     // Add padding/margin buffer for dock (dock has margin-bottom: 16px)
-    const dockPadding = 20;
+    const dockPadding = 80; // dock + status footer + main-panel and canvas-container padding
 
     const width = Math.max(
       300, // Minimum canvas width to prevent squishing
       viewportWidth - sidebarWidth - panelWidth
     );
 
+    // Barre rapide au-dessus du canvas (hauteur + marge basse)
+    const quickBar = document.getElementById('quickBar');
+    const quickBarHeight = quickBar ? quickBar.offsetHeight + 8 : 0;
+
     const height = Math.max(
       200, // Minimum canvas height
-      viewportHeight - dockHeight - dockPadding
+      viewportHeight - dockHeight - dockPadding - quickBarHeight
     );
 
     return { width, height };
@@ -88,13 +92,11 @@
    * @param {Object} dimensions { width, height }
    */
   function applyCanvasDimensions(dimensions) {
-    if (canvas.width === dimensions.width && canvas.height === dimensions.height) {
-      return; // No change, skip
+    // Unchanged size: keep the bitmap (no resize), but still signal the reflow
+    if (canvas.width !== dimensions.width || canvas.height !== dimensions.height) {
+      canvas.width = dimensions.width;
+      canvas.height = dimensions.height;
     }
-
-    // Update canvas resolution
-    canvas.width = dimensions.width;
-    canvas.height = dimensions.height;
 
     // Dispatch custom event so terrain drawing code can re-render
     window.dispatchEvent(new CustomEvent('canvasReflowed', {

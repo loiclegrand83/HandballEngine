@@ -14,7 +14,7 @@
 6. [Planning](#6-planning)
 7. [Page d'explication & Fiche document](#7-page-dexplication--fiche-document)
 8. [Bibliothèque d'exercices](#8-bibliothèque-dexercices)
-9. [Accès tablette (Android)](#9-accès-tablette-android)
+9. [Utilisation locale uniquement](#9-utilisation-locale-uniquement)
 10. [Architecture technique](#10-architecture-technique)
 
 ---
@@ -270,12 +270,13 @@ Cliquer sur **Bibliothèque** dans le Board Tactique.
 
 ---
 
-## 9. Accès tablette (Android)
+## 9. Utilisation locale uniquement
 
-1. Le PC et la tablette doivent être sur le même réseau Wi-Fi
-2. Lancer le serveur sur le PC — l'URL réseau s'affiche dans le terminal (ex: `http://192.168.1.125:3000`)
-3. Sur la tablette : ouvrir Chrome et naviguer vers cette URL
-4. Menu Chrome (⋮) → **"Ajouter à l'écran d'accueil"** pour installer comme application PWA
+L'application fonctionne **sur cet ordinateur uniquement** : le serveur n'écoute que sur `127.0.0.1` et refuse les requêtes qui ne viennent pas de cette machine. Les exercices et les séances ne sont accessibles depuis aucun autre appareil, tablette comprise.
+
+1. Lancer le serveur (`launcher.sh` ou `node server.js`)
+2. Ouvrir `http://localhost:3000` dans Chrome ou Edge
+3. Installer l'application : menu (⋮) → **« Installer Handball Engine »**
 
 ---
 

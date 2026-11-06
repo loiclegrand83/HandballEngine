@@ -281,7 +281,7 @@
   }
 
   .asset-grid-item::after {
-    font-size: 0.65rem;
+    font-size: 0.8125rem;
   }
 }
 
@@ -308,7 +308,7 @@
   }
 
   .asset-grid-item::after {
-    font-size: 0.6rem;
+    font-size: 0.8125rem;
     white-space: normal;
     text-align: center;
   }

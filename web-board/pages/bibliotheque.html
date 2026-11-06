@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bibliothèques — Handball Engine</title>
+  <meta name="mobile-web-app-capable" content="yes" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/src/css/components.css" />
+  <link rel="stylesheet" href="/src/css/bibliotheque.css" />
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#080b0f" />
+  <link rel="apple-touch-icon" href="/assets/icons/pwa-192.png" />
+  <script src="/src/js/pwa.js"></script>
+</head>
+<body class="bibli-page">
+  <nav id="appNav"></nav>
+
+  <aside class="bibli-libs" aria-label="Bibliothèques">
+    <h2 class="col-title">Bibliothèques</h2>
+    <ul id="libList" class="lib-list panel-scroll"></ul>
+    <form id="newLibForm" class="new-lib" autocomplete="off">
+      <label class="field-label" for="newLibName">Nouvelle bibliothèque</label>
+      <div class="new-lib-row">
+        <input id="newLibName" class="field-input" maxlength="60" placeholder="Nouvelle bibliothèque" />
+        <button type="submit" class="btn btn--primary" data-write>Ajouter</button>
+      </div>
+    </form>
+  </aside>
+
+  <main class="bibli-main">
+    <div class="filters">
+      <input id="fSearch" class="field-input" type="search" placeholder="Rechercher un exercice…" aria-label="Rechercher" />
+      <select id="fThematique" class="field-input" aria-label="Thématique">
+        <option value="">Toutes</option>
+        <option value="attaque">Attaque</option>
+        <option value="defense">Défense</option>
+        <option value="gardien">Gardien</option>
+        <option value="enclenchement">Enclenchement</option>
+      </select>
+      <span id="activeLib" class="active-lib"></span>
+      <button type="button" id="btnAddToLib" class="btn btn--primary" data-write hidden>+ Ajouter un exercice</button>
+    </div>
+    <div id="exGrid" class="ex-grid panel-scroll" aria-live="polite"></div>
+  </main>
+
+  <aside id="detail" class="bibli-detail panel-scroll" aria-label="Exercice sélectionné">
+    <p class="detail-empty">Sélectionnez un exercice pour voir son schéma, ses bibliothèques et son historique.</p>
+  </aside>
+
+  <dialog id="addDialog" class="haweb-dialog add-dialog">
+    <h2 class="dialog-title">Ajouter un exercice à <span id="addDialogLib"></span></h2>
+    <div id="addDialogList" class="add-list panel-scroll"></div>
+    <div class="haweb-dialog-actions">
+      <button type="button" class="btn" id="addDialogClose">Fermer</button>
+    </div>
+  </dialog>
+
+  <script src="/src/js/ui.js"></script>
+  <script src="/src/js/api.js"></script>
+  <script src="/src/js/snapshots.js"></script>
+  <script src="/src/js/bibliotheque.js"></script>
+</body>
+</html>
