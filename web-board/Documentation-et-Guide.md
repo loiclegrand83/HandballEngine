@@ -14,7 +14,7 @@
 6. [Planning](#6-planning)
 7. [Page d'explication & Fiche document](#7-page-dexplication--fiche-document)
 8. [Bibliothèque d'exercices](#8-bibliothèque-dexercices)
-9. [Accès tablette (Android)](#9-accès-tablette-android)
+9. [Utilisation locale uniquement](#9-utilisation-locale-uniquement)
 10. [Architecture technique](#10-architecture-technique)
 
 ---
@@ -34,18 +34,29 @@ Handball Engine est un outil local (aucune connexion internet requise) conçu po
 
 ## 2. Lancement
 
-### Linux — raccourci bureau
-Double-cliquer sur `Handball-Board.desktop` dans le dossier `web-board/`.
+### Raccourci bureau (Linux/macOS)
+
+**Linux :** Double-cliquer sur `handball-engine.desktop` (ou copier dans `~/.local/share/applications/`)
+
+**macOS :** Double-cliquer sur `Handball-Engine.command`
 
 ### Ligne de commande
+
 ```bash
 cd web-board
-bash Lancer-Board.sh
+./launcher.sh
 ```
 
 Le serveur démarre sur `http://localhost:3000` et ouvre le navigateur automatiquement.
 
-> **Arrêt :** `Ctrl+C` dans le terminal ou fermeture de la fenêtre du bureau.
+#### Gestion des processus
+
+Le launcher vérifie automatiquement les **PIDs orphelins** avant lancement :
+- Détecte tout serveur déjà actif sur le port 3000
+- Tue proprement les processus zombie
+- Garantit un démarrage sans conflit
+
+> **Arrêt :** `Ctrl+C` dans le terminal — arrêt graceful avec cleanup
 
 ---
 
@@ -259,12 +270,13 @@ Cliquer sur **Bibliothèque** dans le Board Tactique.
 
 ---
 
-## 9. Accès tablette (Android)
+## 9. Utilisation locale uniquement
 
-1. Le PC et la tablette doivent être sur le même réseau Wi-Fi
-2. Lancer le serveur sur le PC — l'URL réseau s'affiche dans le terminal (ex: `http://192.168.1.125:3000`)
-3. Sur la tablette : ouvrir Chrome et naviguer vers cette URL
-4. Menu Chrome (⋮) → **"Ajouter à l'écran d'accueil"** pour installer comme application PWA
+L'application fonctionne **sur cet ordinateur uniquement** : le serveur n'écoute que sur `127.0.0.1` et refuse les requêtes qui ne viennent pas de cette machine. Les exercices et les séances ne sont accessibles depuis aucun autre appareil, tablette comprise.
+
+1. Lancer le serveur (`launcher.sh` ou `node server.js`)
+2. Ouvrir `http://localhost:3000` dans Chrome ou Edge
+3. Installer l'application : menu (⋮) → **« Installer Handball Engine »**
 
 ---
 
@@ -298,8 +310,9 @@ Cliquer sur **Bibliothèque** dans le Board Tactique.
 | `src/css/explanation.css` | Styles de la fiche (A4 + print) |
 | `server.js` | Serveur Node.js local sécurisé |
 | `manifest.json` | PWA (installation tablette, orientation paysage) |
-| `Lancer-Board.sh` | Script de lancement Linux |
-| `Handball-Board.desktop` | Raccourci bureau Linux |
+| `launcher.sh` | Script de lancement bash (gestion PIDs orphelins) |
+| `handball-engine.desktop` | Raccourci bureau Linux |
+| `Handball-Engine.command` | Lanceur macOS |
 | `data/bibli/` | Dossier des exercices sauvegardés (non versionné) |
 | `data/seances/` | Dossier des séances sauvegardées (non versionné) |
 | `data/planning/` | Dossier des événements du planning (non versionné) |

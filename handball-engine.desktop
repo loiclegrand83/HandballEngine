@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Handball Engine
+Comment=Plateforme d'entraînement et d'analyse
+Exec=/bin/bash /home/loic/Software/haweb/web-board/launcher.sh
+Icon=sports-symbolic
+Terminal=false
+Categories=Education;Sports;Utility;
+Keywords=handball;training;analysis;

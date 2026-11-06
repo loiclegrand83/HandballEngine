@@ -1,270 +1,220 @@
 ---
 stepsCompleted: [1, 2, 3]
-inputDocuments: ['_bmad-output/planning-artifacts/prds/prd-haweb-2026-09-06/prd.md', '_bmad-output/planning-artifacts/architecture/architecture-haweb-2026-09-06/ARCHITECTURE-SPINE.md']
+inputDocuments: ['_bmad-output/prd-runs/players-assets-trajectories-2026-09-22/prd.md', '_bmad-output/planning-artifacts/architecture/architecture-haweb-2026-10-02/ARCHITECTURE-SPINE.md']
 ---
 
-# HaWeb - Epic Breakdown
+# haweb - Epic Breakdown
 
 ## Overview
 
-This document provides the complete epic and story breakdown for HaWeb, decomposing the requirements from the PRD and Architecture Spine into implementable stories.
+This document provides the complete epic and story breakdown for haweb, decomposing the requirements from the PRD, UX Design if it exists, and Architecture requirements into implementable stories.
+
+Scope note: this breakdown covers only the Dock-UI selection regressions the architecture spine governs (spine `binds: [FR1.2, FR2.1, FR2.3, FR3.1, FR4.1, FR5.2]`). FR1.1, FR2.2, FR3.2, FR4.2, FR6, FR5.1, and all NFRs are pre-existing, already-implemented, and explicitly out of scope per the spine's Deferred section.
 
 ## Requirements Inventory
 
 ### Functional Requirements
 
-FR1: Le coach peut terminer le tracé d'une trajectoire (course, tir, passe, croisé, fixation) par un double-clic (souris) ou un double-tap (tablette), sans clic sur un bouton dédié.
-FR2: Le module Temps mort (tableau tactique de mi-temps) est retiré de l'écran d'accueil, de la navigation, et supprimé du dépôt (pas seulement masqué).
-FR3: Le coach peut assigner une Thématique à chaque Exercice parmi Attaque, Défense, Gardien, Enclenchement, et filtrer la Bibliothèque par Thématique.
-FR4: Le coach peut rechercher un Exercice par mot-clé, portant au minimum sur le nom, le(s) poste(s) impliqué(s) et le matériel requis, combinable avec le filtre Thématique.
-FR5: La fiche d'exercice gagne trois champs éditables optionnels: durée estimée, nombre de joueurs requis, niveau/catégorie d'âge — en plus des champs existants (description, points d'attention, matériel, système offensif/défensif, secteur de jeu).
-FR6: Le coach peut créer une Séance composée de Blocs nommés (échauffement, thème principal, retour au calme...), chaque Bloc contenant un ou plusieurs Ateliers choisis depuis la Bibliothèque, réordonnables avant export.
-FR7: Le coach peut ajuster la durée de chaque Atelier dans une Séance; le total de la Séance est calculé automatiquement et recalculé à chaque modification.
-FR8: Le coach peut générer un export imprimable (PDF via impression navigateur) de la Séance, en grille compacte multi-ateliers (3 à 5 schémas par page selon la complexité), chaque Atelier affichant schéma, description courte, matériel et durée.
-FR9: Le coach peut sauvegarder une Séance en cours de construction et la rouvrir plus tard pour la modifier avant export ou avant planification au Calendrier; une Séance non sauvegardée n'apparaît pas dans le Calendrier.
-FR10: Le coach peut basculer entre une vue mensuelle et une vue hebdomadaire du Calendrier, les deux vues affichant les mêmes événements sur la période concernée.
-FR11: Le coach peut associer une Séance existante à une date du Calendrier, et créer un événement Match à une date (date + adversaire au minimum); cliquer sur une Séance planifiée l'ouvre pour consultation/réédition.
-FR12: Le coach peut naviguer vers des dates passées du Calendrier pour revoir les Séances et Matchs qui y avaient été placés, sans limite de profondeur dans l'historique de la saison en cours.
+FR1.2: Dock is the single source of truth for player/asset/trajectory selection; Sidebar shows exercise metadata only, never duplicates Dock selection controls
+FR2.1: Coach selects players via Dock "Joueurs" panel — équipe A/B toggle, 7 postes (6 outfield: AG/ARG/DC/PIV/ARD/AD + 1 Gardien: G), sticky selection (reclicking same poste stays selected), 6+1 cap per team
+FR2.3: Player visual feedback — poste label, équipe color, poste instance number for repeated outfield postes, distinct Gardien marker (not numbered)
+FR3.1: Coach selects assets via Dock "Assets" panel — fixed 10-item list (Plot, Cône, Haie, Cible, Swiss Ball, Coupelle, Cerceau, Mannequin, Mur, Zone), sole selection surface
+FR4.1: Coach selects trajectory type via Dock "Trajectoires" panel — 5 types (Course, Passe, Tir, Croisé, Fixation), sole selection surface
+FR5.2: Terrain stays centered + maximized; no Sidebar/Dock/panel obscures the terrain or swallows clicks
 
 ### NonFunctional Requirements
 
-NFR1: L'application fonctionne 100% en local, sans dépendance internet — aucune page ne charge de ressource (script, style, fetch) depuis une origine non-localhost. (PRD §1/§5, Spine AD-11)
-NFR2: Toute nouvelle route serveur suit le pattern CRUD/sécurité existant: whitelist d'id (`^[a-zA-Z0-9_-]+$`), vérification que le chemin résolu reste dans le répertoire cible, limite de 1 Mo sur le corps de requête, en-têtes de sécurité (CSP, X-Frame-Options, nosniff) appliqués. (Spine AD-7, `[ADOPTED]`)
-NFR3: Les champs enrichis de la fiche exercice (FR5) restent optionnels à la sauvegarde — la richesse des champs ne doit jamais ralentir une sauvegarde rapide. (PRD SM-C1, Spine Consistency Conventions)
-NFR4: Node.js ≥22 (plancher runtime, corrige le ≥18 obsolète du README). (Spine Stack)
-NFR5: Thématique est un enum fixe (`attaque | defense | gardien | enclenchement`) validé côté serveur, pas seulement côté client. (Spine AD-10)
+No new NFRs introduced by this scope. Existing NFRs (touch targets ≥44px, no network dependency) remain governed by the existing app and the inherited AD-11 (no network dependency anywhere in the app) — not re-specified here.
 
 ### Additional Requirements
 
-- Extraire la logique client Bibliothèque (fetch/filtre/recherche/rendu) dans un module JS partagé `src/js/bibliotheque.js`, chargé via `<script>` par toute page en ayant besoin (board, seance, planning). (Spine AD-1)
-- Extraire le moteur de rendu canvas de `explanation.html` en fonction réutilisable `src/js/schema-render.js`, prenant `items`/`paths` bruts en entrée; aucune image PNG snapshot n'est persistée avec un exercice. (Spine AD-4)
-- Récap Séance: grille CSS à template de cellule fixe (schéma + description + matériel + durée), remplissage auto en ordre de Bloc, sauts de page via `break-inside`/`break-after` CSS — pas de comptage fixe par page, pas de réorganisation manuelle en v1. (Spine AD-3)
-- Pas de librairie PDF ajoutée: export via `window.print()` sur le CSS d'impression existant de `seance.css`. (Spine AD-2)
-- Atelier: champs texte (nom, description, matériel, durée) snapshottés dans la Séance au moment de l'ajout — pas de lien live vers l'Exercice source; seul l'id Exercice reste référencé, uniquement pour re-rendre le schéma. Si l'Exercice source est supprimé, l'Atelier garde son texte snapshotté mais affiche un placeholder à la place du schéma. (Spine AD-8)
-- La durée totale d'une Séance n'est jamais persistée — toujours recalculée à l'affichage (builder, tuile Calendrier, export). (Spine AD-9)
-- Calendrier: événements légers dans `data/planning/` via la route `/api/planning` existante — `{date, type: 'seance'|'match', seanceId}` ou `{date, type: 'match', adversaire, ...}`; la Séance n'est jamais dupliquée, seulement référencée par id. Détection des références orphelines (séance supprimée) au rendu de la grille calendrier, pas seulement au clic — affichage inline "séance introuvable". (Spine AD-5)
-- Migration requise avant implémentation Bibliothèque: les données existantes dans `data/bibli/*.json` utilisent une taxonomie `category` différente (echauffement/physique/offensif/defensif/montee_balle) de l'enum Thématique du PRD — une passe de mapping unique est nécessaire. (Spine Deferred)
-- Réconciliation requise: `explanation.html` écrit aujourd'hui ses champs sous `explanation.doc.*` (nested), alors que FR5 doit vivre en champs top-level de l'Exercice — décider migration vs fusion à la lecture. (Spine Deferred)
-- `pages/timeout.html` et ses JS/CSS dédiés, ainsi que sa carte sur `index.html`, sont supprimés du dépôt, pas commentés/désactivés. (Spine AD-6, `[ADOPTED]`)
+- Brownfield codebase, no starter template — architecture ratifies existing vanilla JS / multi-page app conventions
+- AD-1: `#postButtons`, `#teamButtons`, `#drawModeButtons`, `#assetPalette` and their click handlers deleted from `board.html`/`app.js`, not hidden. `window.PlayerSelectionAPI` global deleted — `dock.js` calls mutator functions directly.
+- AD-2: Each Dock panel's `render<Tool>Panel()` reads state fresh only on discrete DOM events (open, click, `itemPlaced`) — no `setInterval`/polling.
+- AD-3: `selectPost(post)`/`selectTeam(team)` always set the selection, never toggle off on reclick. No deselect-by-reclick affordance anywhere.
+- AD-4: `.panel`'s `position: fixed` removed — panel becomes a flow/grid sibling of canvas, pushes/reflows it. Shared grid-template owned by one file (`panel.css`) only.
+- AD-5: Dock icons vendored as local Lucide SVG files (v1.53.0, ISC license) under `web-board/assets/icons/`, fixed mapping: Joueurs=users, Assets=cone, Trajectoires=route, Animation=play, Bibliothèque=library, Séance=clipboard-list, Planning=calendar, Postes=tag, Vue=layout-grid, Annuler=undo-2.
+- AD-6: Gardien entry moves from `assets[]` into `HANDBALL_POSTS` as 7th poste. `isGoalkeeper` field computation corrected from `post === 'AG'` to `post === 'G'` (bug fix — cap never fired on real Gardien before).
+- Inherited AD-7: new/modified server routes follow existing CRUD/security pattern (id validation, path containment, body cap, security headers) — not expected to apply to this scope (no new routes), noted for completeness.
+- Inherited AD-11: no network dependency anywhere in the app — vendored Lucide icons must never be CDN-fetched at runtime.
 
 ### UX Design Requirements
 
-Aucun document UX dédié (bmad-ux non exécuté sur ce projet). Les éléments d'expérience utilisateur pertinents sont capturés directement dans les FR ci-dessus (FR1 ergonomie board, FR6-FR8 flux séance, FR10-FR12 calendrier).
+No UX design document found for this scope. Proceeding without one.
 
 ### FR Coverage Map
 
-FR1: Epic 1 - Double-clic/tap pour terminer un tracé
-FR2: Epic 1 - Suppression du module Temps mort
-FR3: Epic 2 - Thématique + filtre Bibliothèque
-FR4: Epic 2 - Recherche par mot-clé
-FR5: Epic 2 - Champs enrichis fiche exercice
-FR6: Epic 3 - Construction Séance (Blocs/Ateliers)
-FR7: Epic 3 - Durées ajustables + total auto
-FR8: Epic 3 - Export imprimable multi-ateliers
-FR9: Epic 3 - Sauvegarde/reprise Séance
-FR10: Epic 4 - Vue mensuelle/hebdomadaire
-FR11: Epic 4 - Association Séance/Match au Calendrier
-FR12: Epic 4 - Navigation historique
+FR1.2: Epic 5 - Dock is single source of truth for selection, Sidebar removed
+FR2.1: Epic 5 - Joueurs panel, sticky poste selection, 6+1 cap including Gardien
+FR2.3: Epic 5 - Player visual feedback (poste label, team color, instance number, Gardien marker)
+FR3.1: Epic 5 - Assets panel, 10-item fixed list
+FR4.1: Epic 5 - Trajectoires panel, 5 types
+FR5.2: Epic 5 - Panel pushes/reflows canvas, never obscures
 
 ## Epic List
 
-### Epic 1: Board — Ergonomie & Nettoyage
-Le coach peut terminer un tracé rapidement (double-clic/tap) et l'écran d'accueil ne présente plus le module Temps mort (supprimé du dépôt).
-**FRs covered:** FR1, FR2
+### Epic 5: Dock-Only Selection, Fixed
+Coach selects players, assets, and trajectory types entirely through the Dock — no desync, no dead clicks, no vanished Gardien, icons that make sense at a glance.
+**FRs covered:** FR1.2, FR2.1, FR2.3, FR3.1, FR4.1, FR5.2
 
-### Epic 2: Bibliothèque — Enrichissement & Recherche
-Le coach peut classer ses exercices par Thématique, les retrouver par mot-clé, et enrichir chaque fiche (durée, joueurs, niveau).
-**FRs covered:** FR3, FR4, FR5
-
-### Epic 3: Séance — Construction & Export
-Le coach peut composer une Séance en Blocs/Ateliers, ajuster les durées (total auto), la sauvegarder/rouvrir, et l'exporter en PDF imprimable.
-**FRs covered:** FR6, FR7, FR8, FR9
-
-### Epic 4: Calendrier — Planification & Historique
-Le coach peut visualiser mois/semaine, planifier Séances et Matchs sur le Calendrier, et consulter l'historique de la saison.
-**FRs covered:** FR10, FR11, FR12
-
-## Epic 1: Board — Ergonomie & Nettoyage
-
-Le coach peut terminer un tracé rapidement (double-clic/tap) et l'écran d'accueil ne présente plus le module Temps mort (supprimé du dépôt).
-**FRs covered:** FR1, FR2
-
-### Story 1.1: Terminer un tracé par double-clic/double-tap
+### Story 5.1: Gardien is a real poste, correctly capped
 
 As a coach,
-I want terminer le tracé d'une trajectoire (course, tir, passe, croisé, fixation) par un double-clic (souris) ou double-tap (tablette),
-So that je peux dessiner rapidement sans chercher un bouton dédié.
+I want Gardien to appear as a 7th poste in the Joueurs panel with a working 1-per-team cap,
+So that I can place a goalkeeper without hunting for it under Assets, and never accidentally place two.
 
 **Acceptance Criteria:**
 
-**Given** je suis en train de tracer une trajectoire sur le Board
-**When** je double-clique (souris) ou double-tape (tablette) sur le canvas
-**Then** le tracé en cours se termine à ce point, sans validation par bouton
-**And** ce comportement s'applique aux 5 types de trajectoire (course, tir, passe, croisé, fixation)
-**And** l'ancien mécanisme (bouton dédié, si présent) est retiré ou reste cohérent sans dupliquer l'action
+**Given** the Joueurs panel is open
+**When** I look at the poste list
+**Then** I see 7 postes: AG, ARG, DC, PIV, ARD, AD, and Gardien (G) — Gardien is no longer under the Assets panel
 
-### Story 1.2: Suppression du module Temps mort
+**Given** the Gardien entry currently lives in `assets[]` (`app.js:65`)
+**When** this story is implemented
+**Then** it is moved into `HANDBALL_POSTS`, following the same placement/cap code path as the 6 outfield postes
+
+**Given** `isGoalkeeper` is currently computed as `post === 'AG'` (`app.js:1161`)
+**When** this story is implemented
+**Then** the computation is corrected to `post === 'G'` — AG is Ailier Gauche (Left Wing), not Gardien
+
+**Given** a team already has 1 Gardien placed
+**When** I try to place a 2nd Gardien for that team
+**Then** the G button is disabled — the cap now actually fires (it never did before, since it was keyed to the wrong poste)
+
+**Given** a team has 0 Gardien and 6 outfield players placed
+**When** I check the poste buttons
+**Then** outfield buttons are disabled but G remains selectable — outfield and Gardien caps are tracked independently
+
+---
+
+### Story 5.2: Poste selection stays active on reclick
 
 As a coach,
-I want que le module Temps mort (tableau tactique de mi-temps) disparaisse complètement de l'application,
-So that l'accueil et la navigation ne présentent que les modules pertinents.
+I want clicking the same poste button twice to keep it selected instead of deselecting it,
+So that I can place two players of the same poste (e.g. 2 pivots) back-to-back without extra clicks.
 
 **Acceptance Criteria:**
 
-**Given** l'application est à jour
-**When** j'ouvre l'écran d'accueil
-**Then** aucune carte/lien vers le module Temps mort n'est visible
-**And** aucune entrée de navigation ne pointe vers `pages/timeout.html`
-**And** `pages/timeout.html` et ses JS/CSS dédiés sont supprimés du dépôt (pas commentés/désactivés)
+**Given** I have selected "PIV" in the Joueurs panel
+**When** I click "PIV" again
+**Then** it stays selected — no deselection, no visual change indicating a toggle-off
 
-## Epic 2: Bibliothèque — Enrichissement & Recherche
+**Given** "PIV" is selected and I have just placed a pivot on the terrain
+**When** I click the terrain again without touching any button
+**Then** a 2nd pivot is placed immediately — no need to reselect the poste
 
-Le coach peut classer ses exercices par Thématique, les retrouver par mot-clé, et enrichir chaque fiche (durée, joueurs, niveau).
-**FRs covered:** FR3, FR4, FR5
+**Given** I have selected "PIV"
+**When** I click "DC" instead
+**Then** selection moves to DC — switching to a different poste is still the only way to change selection
 
-### Story 2.1: Migration de la taxonomie vers Thématique
+**Given** the same reclick-stays-selected rule
+**When** I select "Équipe A" and click "Équipe A" again
+**Then** team selection behaves identically — stays active, no toggle-off
+
+**Given** no button in the Joueurs panel is checked for a deselect-by-reclick affordance
+**When** this story is implemented
+**Then** `selectPost(post)` and `selectTeam(team)` always set the selection unconditionally — no "already selected → clear" branch remains in the code
+
+---
+
+### Story 5.3: Dock panel pushes the canvas, never covers it
 
 As a coach,
-I want que mes exercices existants soient reclassés selon la nouvelle Thématique (Attaque, Défense, Gardien, Enclenchement),
-So that la Bibliothèque reste cohérente après la mise à jour.
+I want an open Dock panel to resize the terrain view instead of floating over it,
+So that I can always see the full terrain and reach every Dock icon, even with a panel open.
 
 **Acceptance Criteria:**
 
-**Given** des exercices existants en base utilisant l'ancienne taxonomie `category` (echauffement/physique/offensif/defensif/montee_balle)
-**When** la migration s'exécute
-**Then** chaque exercice reçoit une valeur de `thematique` parmi l'enum fixe (`attaque|defense|gardien|enclenchement`)
-**And** la valeur est validée côté serveur, pas seulement côté client
-**And** aucun exercice n'est perdu ou corrompu pendant la migration
+**Given** `.panel` currently uses `position: fixed` (`panel.css:9`)
+**When** this story is implemented
+**Then** that is removed — the panel becomes a normal flow/grid sibling of the canvas container
 
-### Story 2.2: Assigner une Thématique et filtrer la Bibliothèque
+**Given** I open the Joueurs panel
+**When** I look at the terrain
+**Then** the canvas container has shrunk and reflowed to make room — the panel does not float over any part of the terrain
+
+**Given** a panel is open
+**When** I look at the Dock bar
+**Then** all 10 Dock icons remain visible and clickable — the panel never stacks above the Dock
+
+**Given** the shared grid-template that allocates space between Dock, panel, and canvas
+**When** this story is implemented
+**Then** that layout lives in exactly one file (`panel.css`, extended) — no duplicate grid declaration is added to `dock.css` or any per-panel style
+
+**Given** I click near the left/bottom edge of the terrain while a panel is open
+**When** my click lands on the terrain (not the panel)
+**Then** it registers on the canvas as expected — no silent click-swallowing at the boundary
+
+---
+
+### Story 5.4: Dock icons are real, recognizable symbols
 
 As a coach,
-I want assigner une Thématique à chaque Exercice et filtrer la Bibliothèque par Thématique,
-So that je retrouve rapidement les exercices pertinents pour ma séance.
+I want each Dock icon to visually match what it does,
+So that I can click the right tool without reading a tooltip first.
 
 **Acceptance Criteria:**
 
-**Given** je suis sur la fiche d'un Exercice
-**When** je sélectionne une Thématique parmi Attaque/Défense/Gardien/Enclenchement
-**Then** la valeur est sauvegardée et validée côté serveur
-**And** sur la Bibliothèque, un filtre par Thématique n'affiche que les exercices correspondants
+**Given** the fixed Lucide icon mapping (v1.53.0, ISC license)
+**When** this story is implemented
+**Then** each of the 10 Dock icons is replaced: Joueurs=users, Assets=cone, Trajectoires=route, Animation=play, Bibliothèque=library, Séance=clipboard-list, Planning=calendar, Postes=tag, Vue=layout-grid, Annuler=undo-2
 
-### Story 2.3: Recherche par mot-clé + champs enrichis de la fiche
+**Given** the icons must stay fully local (inherited AD-11, no network dependency)
+**When** this story is implemented
+**Then** each icon is a vendored static SVG file under `web-board/assets/icons/<lucide-name>.svg` — never a CDN reference
+
+**Given** Séance (clipboard-list) and Planning (calendar) sit side by side in the Dock
+**When** I glance at both icons
+**Then** they are visually distinct — no shared calendar-family glyph that could cause the confusion QA flagged previously
+
+**Given** the vendored SVG files
+**When** I inspect the filenames
+**Then** each filename matches its Lucide slug exactly (e.g. `users.svg`, `clipboard-list.svg`) — no renaming
+
+---
+
+### Story 5.5: Legacy Sidebar selection controls are removed
 
 As a coach,
-I want rechercher un Exercice par mot-clé (nom, poste, matériel) et enrichir sa fiche (durée, joueurs, niveau),
-So that je trouve et documente mes exercices plus précisément.
+I want only one place to select team, poste, asset, and trajectory type,
+So that what I see in the Dock panel is always accurate — never stale because I changed something somewhere else.
 
 **Acceptance Criteria:**
 
-**Given** je suis sur la Bibliothèque
-**When** je tape un mot-clé dans la recherche
-**Then** les résultats filtrent sur le nom, le(s) poste(s) impliqué(s) et le matériel requis
-**And** la recherche se combine avec le filtre Thématique (Story 2.2)
-**Given** je suis sur la fiche d'un Exercice
-**When** je renseigne durée estimée, nombre de joueurs requis et/ou niveau/catégorie d'âge
-**Then** ces trois champs sont optionnels et n'empêchent jamais une sauvegarde rapide sans eux (NFR3)
+**Given** `#postButtons`, `#teamButtons`, `#drawModeButtons`, and `#assetPalette` currently exist in `board.html`/`app.js` as a second selection UI
+**When** this story is implemented
+**Then** all four are deleted from the DOM entirely, along with their click handlers — not hidden via CSS, not feature-flagged
 
-## Epic 3: Séance — Construction & Export
+**Given** `window.PlayerSelectionAPI` currently exposes `selectTeam`/`selectPost`/etc. as a global
+**When** this story is implemented
+**Then** that global is deleted — `dock.js` calls the mutator functions directly as same-bundle function references
 
-Le coach peut composer une Séance en Blocs/Ateliers, ajuster les durées (total auto), la sauvegarder/rouvrir, et l'exporter en PDF imprimable.
-**FRs covered:** FR6, FR7, FR8, FR9
+**Given** the Sidebar is gone
+**When** I open any Dock panel and change a selection
+**Then** the Dock panel reflects it correctly every time — there is no second live mutator left that could cause a stale read
 
-### Story 3.1: Construire une Séance en Blocs/Ateliers
+**Given** `selectTeam`/`selectPost`/`selectDrawMode`/`selectAsset` in `app.js`
+**When** I search the codebase for callers
+**Then** they are called exclusively from Dock panel click handlers in `dock.js` — no other call site remains
 
-As a coach,
-I want créer une Séance composée de Blocs nommés (échauffement, thème principal, retour au calme...), chaque Bloc contenant un ou plusieurs Ateliers choisis depuis la Bibliothèque,
-So that je structure ma séance d'entraînement de façon claire.
+---
 
-**Acceptance Criteria:**
+### Story 5.6: Dock panels never poll for freshness
 
-**Given** je crée une nouvelle Séance
-**When** j'ajoute un Bloc et lui donne un nom
-**Then** je peux y ajouter un ou plusieurs Ateliers choisis depuis la Bibliothèque
-**And** chaque Atelier snapshotte son texte (nom, description, matériel, durée) au moment de l'ajout — pas de lien live vers l'Exercice source (AD-8)
-**And** je peux réordonner les Blocs et les Ateliers avant export
-
-### Story 3.2: Ajuster les durées avec total automatique
-
-As a coach,
-I want ajuster la durée de chaque Atelier dans une Séance,
-So that je contrôle le minutage de mon entraînement.
+As a developer extending this codebase,
+I want a hard rule against timer-based state polling in Dock panels,
+So that no future panel silently reintroduces the always-watching behavior this architecture explicitly avoids.
 
 **Acceptance Criteria:**
 
-**Given** je modifie la durée d'un Atelier dans une Séance
-**When** je change la valeur
-**Then** le total de la Séance se recalcule automatiquement
-**And** cette durée totale n'est jamais persistée — toujours recalculée à l'affichage (AD-9)
+**Given** each Dock panel's `render<Tool>Panel()` function
+**When** I trace what triggers a re-render
+**Then** it is only ever a discrete DOM event — panel open/re-open, a click inside that panel, or the existing `itemPlaced` CustomEvent
 
-### Story 3.3: Sauvegarder et rouvrir une Séance
+**Given** the Joueurs, Assets, and Trajectoires panels built in prior stories
+**When** I inspect their code
+**Then** none of them use `setInterval` or a `requestAnimationFrame` loop to check `state` for changes
 
-As a coach,
-I want sauvegarder une Séance en cours de construction et la rouvrir plus tard,
-So that je peux la finaliser en plusieurs fois avant export ou planification.
-
-**Acceptance Criteria:**
-
-**Given** je construis une Séance
-**When** je la sauvegarde avant qu'elle soit terminée
-**Then** je peux la rouvrir plus tard pour la modifier
-**And** une Séance non sauvegardée n'apparaît pas dans le Calendrier
-
-### Story 3.4: Export imprimable de la Séance
-
-As a coach,
-I want générer un export imprimable (PDF via impression navigateur) de ma Séance,
-So that je peux l'emporter sur le terrain.
-
-**Acceptance Criteria:**
-
-**Given** une Séance sauvegardée avec ses Blocs/Ateliers
-**When** je lance l'export
-**Then** `window.print()` s'ouvre sur une grille compacte multi-ateliers (3 à 5 schémas par page selon la complexité), sans lib PDF ajoutée (AD-2)
-**And** chaque Atelier affiche schéma, description courte, matériel et durée
-**And** la grille utilise un template de cellule fixe avec saut de page CSS automatique (`break-inside`/`break-after`), sans réorganisation manuelle (AD-3)
-**And** si l'Exercice source d'un Atelier a été supprimé, l'Atelier garde son texte snapshotté et affiche un placeholder à la place du schéma (AD-8)
-
-## Epic 4: Calendrier — Planification & Historique
-
-Le coach peut visualiser mois/semaine, planifier Séances et Matchs sur le Calendrier, et consulter l'historique de la saison.
-**FRs covered:** FR10, FR11, FR12
-
-### Story 4.1: Vue mensuelle/hebdomadaire
-
-As a coach,
-I want basculer entre vue mensuelle et hebdomadaire du Calendrier,
-So that je choisis la granularité adaptée à mon besoin.
-
-**Acceptance Criteria:**
-
-**Given** je suis sur le Calendrier
-**When** je bascule mois/semaine
-**Then** les deux vues montrent les mêmes événements pour la période concernée
-
-### Story 4.2: Planifier Séance et Match
-
-As a coach,
-I want associer une Séance à une date et créer un événement Match,
-So that je planifie mon calendrier d'entraînement et de compétition.
-
-**Acceptance Criteria:**
-
-**Given** une Séance sauvegardée
-**When** je l'associe à une date
-**Then** elle apparaît au Calendrier, référencée par id, jamais dupliquée (AD-5)
-**And** je peux créer un événement Match (date + adversaire minimum)
-**And** un clic sur une Séance planifiée l'ouvre pour consultation/réédition
-**And** si la Séance référencée est supprimée, la grille affiche inline "séance introuvable" au rendu, pas seulement au clic (AD-5)
-
-### Story 4.3: Historique du Calendrier
-
-As a coach,
-I want naviguer vers des dates passées du Calendrier,
-So that je revois les Séances et Matchs de la saison en cours.
-
-**Acceptance Criteria:**
-
-**Given** la saison en cours
-**When** je navigue vers des dates passées
-**Then** je vois les Séances et Matchs placés, sans limite de profondeur dans la saison
+**Given** Story 5.5 has removed the second mutator (Sidebar)
+**When** a Dock panel is open and the coach interacts only through that panel
+**Then** render-on-open alone keeps the panel accurate — no event bus or pub/sub layer is introduced to achieve this

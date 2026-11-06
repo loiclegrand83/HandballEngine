@@ -1,0 +1,75 @@
+- id: "1-1"
+  title: Écran de démarrage — Nouvelle Séance ou Éditer un exercice
+  description: >-
+    Startup screen with two options ("Nouvelle Séance" and "Éditer un exercice")
+    that route into Exercise Builder mode. Covers PRD FR1.1.
+- id: "1-2"
+  title: Mode Exercise Builder — Layout Dock/Sidebar/Canvas
+  description: >-
+    Exercise Builder screen shell: header, always-visible Dock (bottom) and
+    Sidebar (left), centered canvas, Save button. Covers PRD FR1.2, Spine AD-3/AD-4/AD-10.
+- id: "1-3"
+  title: Sélection de la vue terrain (Demi-terrain / Terrain Complet)
+  description: >-
+    Terrain view toggle (half-court / full-court) in the sidebar, terrain stays
+    centered and unobscured. Covers PRD FR5.1, FR5.2.
+- id: "2-1"
+  title: Sélection Équipe + Poste
+  description: >-
+    Dock "Joueurs" context lets the coach pick Équipe A/B and a Poste, with no
+    forced formation and a 6+1 per-team cap. Covers PRD FR2.1.
+- id: "2-2"
+  title: Placement d'un joueur sur le terrain
+  description: >-
+    Clicking the terrain places the selected équipe+poste as an overlay div at
+    that position, <100ms feedback. Covers PRD FR2.2, Spine AD-2/AD-8.
+- id: "2-3"
+  title: Déplacer ou supprimer un joueur placé
+  description: >-
+    Clicking an existing player overlay allows move (drag) or delete
+    (double-click/Delete key). Covers PRD FR2.2 (move/delete), Spine AD-9.
+- id: "2-4"
+  title: Feedback visuel des joueurs (label, couleur, numéro)
+  description: >-
+    Each player overlay shows poste label, équipe color, and a position number
+    when postes repeat. Covers PRD FR2.3.
+- id: "3-1"
+  title: Sélection d'un type d'asset
+  description: >-
+    Dock "Assets" context lets the coach pick an asset type (Plots, Cônes,
+    Haies, etc.) from the predefined list. Covers PRD FR3.1.
+- id: "3-2"
+  title: Placement d'un asset sur le terrain
+  description: >-
+    Clicking the terrain places the selected asset as an overlay div,
+    repeatable placements. Covers PRD FR3.1 (placement), Spine AD-2/AD-8.
+- id: "3-3"
+  title: Feedback visuel des assets (icône, label au survol)
+  description: >-
+    Each asset overlay shows a distinct icon per type and a hover label.
+    Covers PRD FR3.2.
+- id: "4-1"
+  title: Sélection type de trajectoire + joueur lié
+  description: >-
+    Dock "Trajectoires" context lets the coach pick a trajectory type and a
+    placed player to link it to; unavailable with no players placed. Covers PRD FR4.1 (selection).
+- id: "4-2"
+  title: Dessiner une trajectoire sur le terrain
+  description: >-
+    Click+drag draws a polyline trajectory from the linked player at 60fps,
+    finalized on release. Covers PRD FR4.1 (drawing), Spine AD-9.
+- id: "4-3"
+  title: Visualisation codée par couleur/type des trajectoires
+  description: >-
+    Trajectories render color-coded by type with a clear start (player) and
+    path/end. Covers PRD FR4.2.
+- id: "5-1"
+  title: Sauvegarder un exercice
+  description: >-
+    "Save Exercise" prompts for a name and persists the exercise to
+    localStorage without data loss on refresh. Covers PRD FR6.1, Spine AD-7.
+- id: "5-2"
+  title: Modèle de données complet de l'exercice
+  description: >-
+    Reloading a saved exercise restores players, assets, trajectories, and
+    terrain view identically. Covers PRD FR6.2, Spine AD-6.

@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dock UI Demo v2 — Handball Engine</title>
+  <style>
+    :root {
+      --color-surface: #0d1015;
+      --color-surface-variant: #181c22;
+      --color-surface-dim: #080b0f;
+      --color-on-surface: #f0ece0;
+      --color-on-surface-variant: #c8c3b7;
+      --color-primary: #f5c400;
+      --color-primary-container: rgba(245, 196, 0, 0.1);
+      --color-primary-container-hover: rgba(245, 196, 0, 0.15);
+      --color-outline: rgba(240, 236, 224, 0.2);
+      --color-outline-variant: rgba(240, 236, 224, 0.1);
+      --shadow-elevation-1: 0 1px 4px rgba(0, 0, 0, 0.2);
+      --shadow-elevation-2: 0 2px 8px rgba(0, 0, 0, 0.3);
+      --shadow-elevation-4: 0 8px 24px rgba(0, 0, 0, 0.4);
+      --easing-standard: cubic-bezier(0.4, 0, 0.2, 1);
+      --duration-standard: 150ms;
+      --duration-medium: 200ms;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--color-surface-dim);
+      color: var(--color-on-surface);
+      min-height: 100vh;
+      overflow: hidden;
+    }
+
+    .app-container {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      grid-template-rows: 1fr 64px;
+      height: 100vh;
+    }
+
+    @media (max-width: 1023px) {
+      .app-container {
+        grid-template-columns: 120px 1fr;
+      }
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       SIDEBAR
+    ═══════════════════════════════════════════════════════════════ */
+    .sidebar {
+      grid-column: 1;
+      grid-row: 1 / 3;
+      background-color: var(--color-surface);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-right: 1px solid var(--color-outline);
+      box-shadow: -2px 2px 8px rgba(0, 0, 0, 0.3);
+      border-radius: 16px 0 0 16px;
+      padding: 16px;
+      overflow-y: auto;
+      z-index: 999;
+    }
+
+    @media (max-width: 1023px) {
+      .sidebar {
+        padding: 12px;
+      }
+    }
+
+    .sidebar-section {
+      margin-bottom: 14px;
+      border-bottom: 1px solid var(--color-outline-variant);
+    }
+
+    .sidebar-section:last-child {
+      border-bottom: none;
+    }
+
+    .sidebar-section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--color-on-surface);
+      background-color: rgba(24, 28, 34, 0.3);
+      border-radius: 8px;
+      cursor: pointer;
+      user-select: none;
+      transition: all var(--duration-standard) var(--easing-standard));
+    }
+
+    .sidebar-section-header:hover {
+      background-color: rgba(24, 28, 34, 0.6);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    }
+
+    .sidebar-section-header::after {
+      content: '▼';
+      font-size: 10px;
+      margin-left: 8px;
+      transition: transform var(--duration-medium) var(--easing-standard);
+    }
+
+    .sidebar-section-header[aria-expanded="true"]::after {
+      transform: rotate(180deg);
+    }
+
+    .sidebar-section-content {
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition: max-height var(--duration-medium) var(--easing-standard), opacity var(--duration-medium) var(--easing-standard);
+    }
+
+    .sidebar-section-header[aria-expanded="true"] + .sidebar-section-content {
+      max-height: 400px;
+      opacity: 1;
+    }
+
+    .sidebar-menu-item {
+      padding: 8px 12px;
+      margin-bottom: 4px;
+      font-size: 12px;
+      color: var(--color-on-surface);
+      background-color: transparent;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all var(--duration-standard) var(--easing-standard);
+      user-select: none;
+    }
+
+    .sidebar-menu-item:hover {
+      background-color: rgba(24, 28, 34, 0.4);
+    }
+
+    .sidebar-menu-item.active {
+      background-color: var(--color-primary-container);
+      border-color: rgba(245, 196, 0, 0.3);
+      color: var(--color-primary);
+      font-weight: 500;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       CANVAS
+    ═══════════════════════════════════════════════════════════════ */
+    .canvas-container {
+      grid-column: 2;
+      grid-row: 1;
+      background: linear-gradient(135deg, #0a3d1a 0%, #0d1015 50%, #1a0a2e 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      color: var(--color-on-surface);
+      opacity: 0.5;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .canvas-container::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(245,196,0,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(245,196,0,0.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+    }
+
+    .canvas-label {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       DOCK (Centered, Glassmorphism)
+    ═══════════════════════════════════════════════════════════════ */
+    .dock {
+      grid-column: 1 / 3;
+      grid-row: 2;
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 0 20px;
+      background-color: var(--color-surface);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 1px solid var(--color-outline);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      border-radius: 16px;
+      z-index: 1000;
+      transition: all var(--duration-medium) var(--easing-standard);
+      user-select: none;
+      width: auto;
+      max-width: 90vw;
+    }
+
+    .dock:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    .dock.assets-mode {
+      width: 85vw;
+      max-width: 850px;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       DOCK ICON
+    ═══════════════════════════════════════════════════════════════ */
+    .dock-icon {
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: transparent;
+      border: 2px solid transparent;
+      border-radius: 12px;
+      cursor: pointer;
+      color: var(--color-on-surface);
+      font-size: 24px;
+      line-height: 1;
+      transition: all var(--duration-standard) var(--easing-standard);
+      user-select: none;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .dock-icon:hover:not(.active) {
+      background-color: var(--color-surface-variant);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      box-shadow: var(--shadow-elevation-1);
+    }
+
+    .dock-icon.active {
+      background-color: var(--color-primary-container);
+      border-color: rgba(245, 196, 0, 0.4);
+      color: var(--color-primary);
+      box-shadow: var(--shadow-elevation-1);
+    }
+
+    .dock-icon.active:hover {
+      background-color: var(--color-primary-container-hover);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+    }
+
+    .dock-icon:focus-visible {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 2px;
+    }
+
+    .dock-icon::after {
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+      background: var(--color-primary);
+      opacity: 0;
+      transform: scale(0);
+      transform-origin: center;
+      pointer-events: none;
+    }
+
+    .dock-icon:active::after {
+      animation: ripple 600ms cubic-bezier(0.4, 0, 0.6, 1);
+    }
+
+    @keyframes ripple {
+      0% {
+        width: 0;
+        height: 0;
+        opacity: 0.3;
+      }
+      100% {
+        width: 100px;
+        height: 100px;
+        opacity: 0;
+      }
+    }
+
+    .dock-tooltip {
+      position: absolute;
+      bottom: 65px;
+      background-color: rgba(0, 0, 0, 0.9);
+      color: var(--color-on-surface);
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--duration-standard) var(--easing-standard));
+      z-index: 1002;
+    }
+
+    .dock-icon:hover .dock-tooltip {
+      opacity: 1;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       ASSET ITEMS (Hidden until Assets Mode)
+    ═══════════════════════════════════════════════════════════════ */
+    .dock-asset-grid {
+      display: none;
+      width: 100%;
+      gap: 8px;
+    }
+
+    .dock.assets-mode .dock-asset-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .dock.assets-mode .dock-icon:not([data-tool="assets"]) {
+      display: none;
+    }
+
+    .dock-asset-item {
+      width: 56px;
+      height: 56px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      background-color: transparent;
+      border: 2px solid transparent;
+      border-radius: 12px;
+      cursor: pointer;
+      color: var(--color-on-surface);
+      font-size: 20px;
+      line-height: 1;
+      transition: all var(--duration-standard) var(--easing-standard));
+      user-select: none;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .dock-asset-item:hover {
+      background-color: var(--color-surface-variant);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      box-shadow: var(--shadow-elevation-1);
+    }
+
+    .dock-asset-item.active {
+      background-color: var(--color-primary-container);
+      border-color: rgba(245, 196, 0, 0.4);
+      color: var(--color-primary);
+    }
+
+    .dock-asset-label {
+      font-size: 9px;
+      font-weight: 500;
+      text-align: center;
+      color: var(--color-on-surface-variant);
+      max-width: 56px;
+      line-height: 1.1;
+    }
+
+    .dock-asset-item.active .dock-asset-label {
+      color: var(--color-primary);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       BACK BUTTON
+    ═══════════════════════════════════════════════════════════════ */
+    .dock-back-button {
+      display: none;
+      width: 48px;
+      height: 48px;
+      align-items: center;
+      justify-content: center;
+      background-color: transparent;
+      border: 2px solid transparent;
+      border-radius: 12px;
+      cursor: pointer;
+      color: var(--color-on-surface);
+      font-size: 20px;
+      transition: all var(--duration-standard) var(--easing-standard));
+    }
+
+    .dock.assets-mode .dock-back-button {
+      display: flex;
+    }
+
+    .dock-back-button:hover {
+      background-color: var(--color-surface-variant);
+      box-shadow: var(--shadow-elevation-1);
+    }
+
+    /* ═══════════════════════════════════════════════════════════════
+       PANEL
+    ═══════════════════════════════════════════════════════════════ */
+    .panel {
+      position: fixed;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: rgba(13, 16, 21, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--color-outline);
+      box-shadow: var(--shadow-elevation-4);
+      border-radius: 16px;
+      padding: 20px;
+      width: 90vw;
+      max-width: 360px;
+      z-index: 1001;
+      animation: slideUp var(--duration-medium) var(--easing-standard));
+      display: none;
+    }
+
+    .panel.active {
+      display: block;
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(16px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+    }
+
+    .panel-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--color-primary);
+    }
+
+    .panel-content {
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--color-on-surface);
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <button class="sidebar-section-header" aria-expanded="false">Vue</button>
+        <div class="sidebar-section-content">
+          <div class="sidebar-menu-item active">Terrain complet</div>
+          <div class="sidebar-menu-item">Demi-terrain</div>
+          <div class="sidebar-menu-item">Perspective</div>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <button class="sidebar-section-header" aria-expanded="false">Exercice</button>
+        <div class="sidebar-section-content">
+          <div class="sidebar-menu-item">Nom</div>
+          <div class="sidebar-menu-item">Thématique</div>
+          <div class="sidebar-menu-item">Durée</div>
+          <div class="sidebar-menu-item">Joueurs</div>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <button class="sidebar-section-header" aria-expanded="false">Options</button>
+        <div class="sidebar-section-content">
+          <div class="sidebar-menu-item">Paramètres</div>
+          <div class="sidebar-menu-item">Export</div>
+          <div class="sidebar-menu-item">Aide</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- CANVAS -->
+    <div class="canvas-container">
+      <div class="canvas-label">🏐<br>Terrain Complet</div>
+    </div>
+
+    <!-- DOCK -->
+    <nav class="dock" id="dock">
+      <!-- Main Toolbar -->
+      <button class="dock-icon active" data-tool="players" aria-label="Players">
+        👥
+        <div class="dock-tooltip">Players</div>
+      </button>
+      <button class="dock-icon" data-tool="assets" aria-label="Assets">
+        📦
+        <div class="dock-tooltip">Assets</div>
+      </button>
+      <button class="dock-icon" data-tool="trajectories" aria-label="Trajectories">
+        📍
+        <div class="dock-tooltip">Trajectories</div>
+      </button>
+      <button class="dock-icon" data-tool="animation" aria-label="Animation">
+        ▶️
+        <div class="dock-tooltip">Animation</div>
+      </button>
+      <button class="dock-icon" data-tool="bibliotheque" aria-label="Bibliothèque">
+        📚
+        <div class="dock-tooltip">Bibliothèque</div>
+      </button>
+      <button class="dock-icon" data-tool="seance" aria-label="Séance">
+        📋
+        <div class="dock-tooltip">Séance</div>
+      </button>
+      <button class="dock-icon" data-tool="planning" aria-label="Planning">
+        📅
+        <div class="dock-tooltip">Planning</div>
+      </button>
+      <button class="dock-icon" data-tool="postes" aria-label="Postes">
+        🏠
+        <div class="dock-tooltip">Postes</div>
+      </button>
+      <button class="dock-icon" data-tool="vue" aria-label="Vue">
+        👁️
+        <div class="dock-tooltip">Vue</div>
+      </button>
+      <button class="dock-icon" data-tool="undo" aria-label="Undo">
+        ↩️
+        <div class="dock-tooltip">Undo</div>
+      </button>
+
+      <!-- Assets Grid -->
+      <div class="dock-asset-grid">
+        <button class="dock-asset-item" data-asset="ballon"><span>⚪</span><span class="dock-asset-label">Ballon</span></button>
+        <button class="dock-asset-item" data-asset="haie"><span>▯</span><span class="dock-asset-label">Haie</span></button>
+        <button class="dock-asset-item" data-asset="haltere"><span>⊕</span><span class="dock-asset-label">Haltère</span></button>
+        <button class="dock-asset-item" data-asset="cible"><span>◉</span><span class="dock-asset-label">Cible</span></button>
+        <button class="dock-asset-item" data-asset="swiss"><span>◎</span><span class="dock-asset-label">Swiss</span></button>
+        <button class="dock-asset-item" data-asset="coupelle"><span>◻</span><span class="dock-asset-label">Coupelle</span></button>
+        <button class="dock-asset-item" data-asset="cerceau"><span>⭕</span><span class="dock-asset-label">Cerceau</span></button>
+        <button class="dock-asset-item" data-asset="echelle"><span>≡</span><span class="dock-asset-label">Échelle</span></button>
+        <button class="dock-asset-item" data-asset="mannequin"><span>👤</span><span class="dock-asset-label">Mannequin</span></button>
+        <button class="dock-asset-item" data-asset="mur"><span>▮</span><span class="dock-asset-label">Mur</span></button>
+        <button class="dock-asset-item" data-asset="plot"><span>🔺</span><span class="dock-asset-label">Plot</span></button>
+        <button class="dock-asset-item" data-asset="zone"><span>🎯</span><span class="dock-asset-label">Zone</span></button>
+      </div>
+
+      <!-- Back Button -->
+      <button class="dock-back-button" id="backButton">← Retour</button>
+    </nav>
+
+    <!-- PANEL -->
+    <div class="panel" id="panel">
+      <div class="panel-title" id="panelTitle">👥 Players</div>
+      <div class="panel-content" id="panelContent">Sélectionnez Équipe A ou B, puis un poste (AG, ARG, DC, PIV, ARD, AD). Cliquez sur le terrain pour placer.</div>
+    </div>
+  </div>
+
+  <script>
+    const dock = document.getElementById('dock');
+    const dockIcons = document.querySelectorAll('.dock-icon');
+    const dockAssetItems = document.querySelectorAll('.dock-asset-item');
+    const backButton = document.getElementById('backButton');
+    const panel = document.getElementById('panel');
+    const panelTitle = document.getElementById('panelTitle');
+    const panelContent = document.getElementById('panelContent');
+    const sidebarHeaders = document.querySelectorAll('.sidebar-section-header');
+
+    let assetsMode = false;
+
+    const toolsInfo = {
+      players: { title: '👥 Players', content: 'Sélectionnez Équipe A ou B, puis un poste (AG, ARG, DC, PIV, ARD, AD). Cliquez sur le terrain.' },
+      assets: { title: '📦 Assets Mode', content: 'Cliquez sur un équipement ci-dessus pour le sélectionner, puis cliquez sur le terrain pour le placer.' },
+      trajectories: { title: '📍 Trajectories', content: 'Choisissez un mode (Course, Tir, Passe, Croisé, Fixation). Cliquez les waypoints, double-clic pour terminer.' },
+      animation: { title: '▶️ Animation', content: 'Play pour animer. Stop pour arrêter. Reset pour remettre à zéro.' },
+      bibliotheque: { title: '📚 Bibliothèque', content: 'Chargez un exercice. Recherchez par nom, filtrez par thématique.' },
+      seance: { title: '📋 Séance', content: 'Construisez une feuille de route. Assemblez blocs d\'exercices.' },
+      planning: { title: '📅 Planning', content: 'Gérez le calendrier. Planifiez entraînements et matchs.' },
+      postes: { title: '🏠 Postes', content: 'Sélectionnez une position (AG, ARG, DC, PIV, ARD, AD).' },
+      vue: { title: '👁️ Vue', content: 'Basculez entre terrain complet, demi-terrain, perspective 3D.' },
+      undo: { title: '↩️ Undo/Redo', content: 'Annulez ou refaites une action. Ctrl+Z / Ctrl+Shift+Z.' }
+    };
+
+    const assetsInfo = {
+      ballon: 'Ballon de handball',
+      haie: 'Haie — obstacle',
+      haltere: 'Haltère — renforcement',
+      cible: 'Cible — précision',
+      swiss: 'Swiss Ball — stabilité',
+      coupelle: 'Coupelle — délimitation',
+      cerceau: 'Cerceau — agilité',
+      echelle: 'Échelle de rythme',
+      mannequin: 'Mannequin défensif',
+      mur: 'Mur — obstacle',
+      plot: 'Plot — cône',
+      zone: 'Zone fixation'
+    };
+
+    // Sidebar toggle
+    sidebarHeaders.forEach(header => {
+      header.addEventListener('click', () => {
+        const isExpanded = header.getAttribute('aria-expanded') === 'true';
+        header.setAttribute('aria-expanded', String(!isExpanded));
+      });
+    });
+
+    // Main toolbar icons
+    dockIcons.forEach(icon => {
+      icon.addEventListener('click', () => {
+        const tool = icon.dataset.tool;
+
+        if (tool === 'assets') {
+          assetsMode = true;
+          dock.classList.add('assets-mode');
+          dockIcons.forEach(i => i.classList.remove('active'));
+          icon.classList.add('active');
+          panelTitle.textContent = '📦 Assets — Sélectionnez un équipement';
+          panelContent.textContent = 'Cliquez ci-dessus sur un équipement, puis cliquez sur le terrain pour le placer.';
+          panel.classList.add('active');
+        } else {
+          if (assetsMode) {
+            dock.classList.remove('assets-mode');
+            dockAssetItems.forEach(i => i.classList.remove('active'));
+            assetsMode = false;
+          }
+          dockIcons.forEach(i => i.classList.remove('active'));
+          icon.classList.add('active');
+          const info = toolsInfo[tool];
+          panelTitle.textContent = info.title;
+          panelContent.textContent = info.content;
+          panel.classList.add('active');
+        }
+      });
+    });
+
+    // Asset items
+    dockAssetItems.forEach(item => {
+      item.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dockAssetItems.forEach(i => i.classList.remove('active'));
+        item.classList.add('active');
+        const assetName = item.dataset.asset;
+        panelTitle.textContent = `📦 ${item.textContent.split('\n')[1].trim()}`;
+        panelContent.textContent = assetsInfo[assetName] + ' — Cliquez sur le terrain pour le placer.';
+      });
+    });
+
+    // Back button
+    backButton.addEventListener('click', () => {
+      dock.classList.remove('assets-mode');
+      dockAssetItems.forEach(i => i.classList.remove('active'));
+      dockIcons.forEach(i => i.classList.remove('active'));
+      dockIcons[0].classList.add('active');
+      assetsMode = false;
+      panelTitle.textContent = '👥 Players';
+      panelContent.textContent = 'Sélectionnez Équipe A ou B, puis un poste (AG, ARG, DC, PIV, ARD, AD). Cliquez sur le terrain.';
+      panel.classList.add('active');
+    });
+
+    // Close panel
+    document.querySelector('.canvas-container').addEventListener('click', () => {
+      if (!assetsMode) panel.classList.remove('active');
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (assetsMode) backButton.click();
+        else panel.classList.remove('active');
+      }
+    });
+  </script>
+</body>
+</html>

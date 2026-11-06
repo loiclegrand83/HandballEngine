@@ -131,8 +131,8 @@ function renderCalendar() {
         chip.textContent = ev.titre || 'Entraînement';
         if (ev.seanceId && seancesLoaded && !allSeances.some(s => s.id === ev.seanceId)) {
           chip.classList.add('event-chip--orphan');
-          chip.textContent += ' ⚠ séance introuvable';
-          chip.title = 'La séance liée à cet événement a été supprimée de la bibliothèque.';
+          chip.textContent += ' ⚠ trame introuvable';
+          chip.title = 'La trame liée à cet événement a été supprimée.';
         }
       }
       chip.addEventListener('click', evt => { evt.stopPropagation(); openModal(ev); });
@@ -149,9 +149,7 @@ function renderCalendar() {
    TOOLBAR
 ══════════════════════════════════════════════════════════════ */
 function bindToolbar() {
-  document.getElementById('btnHome').addEventListener('click', () => {
-    window.location.href = '../index.html';
-  });
+  // Retour à l'accueil : par la navigation commune (#appNav)
   document.getElementById('btnPrevMonth').addEventListener('click', () => {
     if (viewMode === 'week') {
       const d = new Date(viewDate);
@@ -220,7 +218,7 @@ function setSeanceLinkValue(seanceId) {
     opt.value = seanceId;
     // Tant que allSeances n'a pas fini de charger, on ne sait pas encore si la
     // séance existe vraiment : éviter de l'accuser d'être supprimée à tort.
-    opt.textContent = seancesLoaded ? 'Séance introuvable (supprimée)' : 'Séance (chargement…)';
+    opt.textContent = seancesLoaded ? 'Trame introuvable (supprimée)' : 'Trame (chargement…)';
     opt.dataset.orphanPlaceholder = 'true';
     sel.appendChild(opt);
   }

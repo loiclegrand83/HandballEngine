@@ -3,60 +3,72 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Handball Tactical Board</title>
-  <link rel="manifest" href="../manifest.json" />
-  <meta name="theme-color" content="#080b0f" />
+  <title>Board — Handball Engine</title>
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="Handball Board" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="/src/css/components.css" />
   <link rel="stylesheet" href="../src/css/styles.css" />
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#080b0f" />
+  <link rel="apple-touch-icon" href="/assets/icons/pwa-192.png" />
+  <script src="/src/js/pwa.js"></script>
 </head>
 <body>
   <div class="app-shell">
+    <!-- ─── SIDEBAR ─────────────────────────────────────────────────────────── -->
     <aside class="sidebar">
+      <nav id="appNav"></nav>
       <h1>Board</h1>
+
+      <!-- Quick Actions -->
       <div class="button-group small" style="margin-bottom: 6px;">
         <button id="newExercise" title="Nouvel exercice">Nouveau</button>
-        <button id="saveLocal" title="Enregistrer l'exercice">Enregistrer</button>
+        <button id="saveLocal" title="Enregistrer l’exercice">Enregistrer</button>
         <button id="openLibrary" title="Ouvrir la bibliothèque">Bibliothèque</button>
         <button id="exportJson" title="Exporter JSON">Export JSON</button>
       </div>
-      <button id="openExplanation" title="Ouvrir la page explication" style="width:100%;margin-bottom:5px;padding:9px 12px;background:rgba(245,196,0,0.08);border:1px solid rgba(245,196,0,0.3);border-radius:4px;color:#f5c400;font:700 0.82rem 'Barlow Condensed',system-ui;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;text-align:left;">📋 Explication &amp; Points d'attention</button>
+      <button id="openExplanation" title="Ouvrir la page explication" style="width:100%;margin-bottom:5px;padding:9px 12px;background:rgba(245,196,0,0.08);border:1px solid rgba(245,196,0,0.3);border-radius:4px;color:#f5c400;font:700 0.82rem ‘Barlow Condensed’,system-ui;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;transition:all .15s;text-align:left;">📋 Explication &amp; Points d’attention</button>
       <input id="importJson" type="file" accept="application/json" title="Importer JSON" />
+
       <hr />
-      <section>
-        <h2>Vue</h2>
+
+      <!-- Vue Section (Collapsible) -->
+      <details class="sidebar-section" data-section="vue">
+        <summary>
+          <h2>Vue</h2>
+          <span class="summary-icon">▼</span>
+        </summary>
         <div class="button-group" id="viewModeButtons">
           <button type="button" data-mode="full">Terrain complet</button>
           <button type="button" data-mode="half">Demi-terrain</button>
-          <button type="button" data-mode="perspective">Perspective</button>
         </div>
-      </section>
-      <section>
-        <h2>Mode</h2>
-        <div class="button-group" id="drawModeButtons">
-          <button type="button" data-mode="asset">Asset</button>
-          <button type="button" data-mode="select">Sélect</button>
-          <button type="button" data-mode="course">Course</button>
-          <button type="button" data-mode="shot">Tir</button>
-          <button type="button" data-mode="pass">Passe</button>
-          <button type="button" data-mode="croise">Croisé</button>
-          <button type="button" data-mode="fixation" style="grid-column: span 2;">Fixation</button>
-        </div>
-        
+      </details>
+
+      <!-- Mode Section (Collapsible) -->
+      <details class="sidebar-section" data-section="mode">
+        <summary>
+          <h2>Mode</h2>
+          <span class="summary-icon">▼</span>
+        </summary>
         <label class="toggle-btn" style="margin-bottom: 6px;">
           <input type="checkbox" id="syncCheckbox" />
           <span class="toggle-label">Lié à la trajectoire précédente</span>
         </label>
-        
+
         <div class="button-group small">
           <button id="playAnimation">▶ Animation</button>
         </div>
-      </section>
-      <section>
-        <h2>Exercice</h2>
+      </details>
+
+      <!-- Exercice Section (Collapsible) -->
+      <details class="sidebar-section" data-section="exercice">
+        <summary>
+          <h2>Exercice</h2>
+          <span class="summary-icon">▼</span>
+        </summary>
         <label>
           Nom
           <input id="exerciseName" type="text" value="Exercice 1" />
@@ -90,60 +102,99 @@
           <input id="exerciseNbJoueurs" type="number" min="0" step="1" />
         </label>
         <label>
-          Niveau / catégorie d'âge
+          Niveau / catégorie d’âge
           <input id="exerciseNiveau" type="text" placeholder="ex: -15 ans, Confirmés" />
         </label>
         <label>
           Notes
           <textarea id="exerciseNotes" rows="2"></textarea>
         </label>
-      </section>
-      <section>
-        <h2>Postes</h2>
-        <div class="button-group small" id="postButtons">
-          <button type="button" data-post="AG">AG</button>
-          <button type="button" data-post="ARG">ARG</button>
-          <button type="button" data-post="DC">DC</button>
-          <button type="button" data-post="PIV">PIV</button>
-          <button type="button" data-post="ARD">ARD</button>
-          <button type="button" data-post="AD">AD</button>
-        </div>
-        <p style="font-size:0.72rem;opacity:0.55;margin-top:4px;">Sélectionner un poste avant de placer un joueur</p>
-      </section>
-      <section>
-        <h2>Aide</h2>
+      </details>
+
+      <!-- Aide Section (Collapsible) -->
+      <details class="sidebar-section" data-section="aide">
+        <summary>
+          <h2>Aide</h2>
+          <span class="summary-icon">▼</span>
+        </summary>
         <p>Cliquer sur un asset, puis sur le terrain pour l’ajouter.</p>
         <p>Drag pour déplacer.</p>
-      </section>
+      </details>
     </aside>
 
+    <!-- ─── MAIN CONTENT (CANVAS) ────────────────────────────────────────────── -->
     <main class="main-panel">
+      <div id="quickBar" class="quick-bar" role="toolbar" aria-label="Actions rapides">
+        <button type="button" class="quick-btn" data-quick="player" aria-pressed="false" title="Poser un joueur (J)"><span class="quick-ico" aria-hidden="true">●</span>Joueur<kbd>J</kbd></button>
+        <button type="button" class="quick-btn" data-quick="pass" aria-pressed="false" title="Passe (P)"><span class="quick-ico" aria-hidden="true">⤳</span>Passe<kbd>P</kbd></button>
+        <button type="button" class="quick-btn" data-quick="course" aria-pressed="false" title="Course (C)"><span class="quick-ico" aria-hidden="true">➝</span>Course<kbd>C</kbd></button>
+        <button type="button" class="quick-btn" data-quick="shot" aria-pressed="false" title="Tir (T)"><span class="quick-ico" aria-hidden="true">➹</span>Tir<kbd>T</kbd></button>
+        <button type="button" class="quick-btn" data-quick="undo" title="Annuler (Ctrl+Z)"><span class="quick-ico" aria-hidden="true">↶</span>Annuler<kbd>Ctrl+Z</kbd></button>
+        <label class="quick-field">Nom <input id="quickName" type="text" maxlength="100" autocomplete="off" /></label>
+        <label class="quick-field quick-field--duree">Durée <input id="quickDuree" type="number" min="1" max="180" step="1" inputmode="numeric" /> min</label>
+        <button type="button" class="quick-btn quick-btn--save" id="quickSave" data-quick="save" title="Enregistrer (Ctrl+S)">Enregistrer<kbd>Ctrl+S</kbd></button>
+      </div>
       <div class="canvas-container">
         <canvas id="boardCanvas" width="1000" height="600"></canvas>
-      </div>
-      <div class="bottom-controls">
-        <section class="control-block">
-          <h2>Équipe</h2>
-          <div class="button-group small" id="teamButtons">
-            <button type="button" data-team="A">Équipe A</button>
-            <button type="button" data-team="B">Équipe B</button>
-          </div>
-        </section>
-        <section class="control-block">
-          <h2>Haies</h2>
-          <div id="assetPalette" class="palette"></div>
-        </section>
       </div>
       <div class="footer">
         <span id="status">Prêt</span>
       </div>
     </main>
+
+    <!-- ─── DOCK (Bottom Toolbar with Icons) ─────────────────────────────────── -->
+    <nav class="dock" id="dock" role="toolbar" aria-label="Outils principaux">
+    <!-- Players -->
+    <button class="dock-icon" data-tool="players" aria-label="Joueurs" title="Joueurs"></button>
+
+    <!-- Assets/Grid -->
+    <button class="dock-icon" data-tool="assets" aria-label="Assets" title="Assets"></button>
+
+    <!-- Trajectories -->
+    <button class="dock-icon" data-tool="trajectories" aria-label="Trajectoires" title="Trajectoires"></button>
+
+    <!-- Animation -->
+    <button class="dock-icon" data-tool="animation" aria-label="Animation" title="Animation"></button>
+
+    <!-- Bibliothèque -->
+    <button class="dock-icon" data-tool="bibliothèque" aria-label="Bibliothèque" title="Bibliothèque"></button>
+
+    <!-- Trame -->
+    <button class="dock-icon" data-tool="séance" aria-label="Trame" title="Trame"></button>
+
+    <!-- Planning -->
+    <button class="dock-icon" data-tool="planning" aria-label="Planning" title="Planning"></button>
+
+    <!-- Postes -->
+    <button class="dock-icon" data-tool="postes" aria-label="Postes" title="Postes"></button>
+
+    <!-- Vue -->
+    <button class="dock-icon" data-tool="vue" aria-label="Vue" title="Vue"></button>
+
+    <!-- Undo -->
+    <button class="dock-icon" data-tool="undo" aria-label="Annuler" title="Annuler"></button>
+    </nav>
+
+    <!-- ─── PANEL (Hidden by Default, Opens on Icon Click) ───────────────────── -->
+    <div id="panel" class="panel hidden">
+      <div class="panel-header">
+        <div class="panel-title">
+          <span class="panel-icon"></span>
+          <h2 id="panelTitle">Titre du panel</h2>
+        </div>
+        <button class="panel-close" aria-label="Fermer le panel">&times;</button>
+      </div>
+      <div class="panel-content" id="panelContent">
+        <!-- Panel content injected here -->
+      </div>
+    </div>
   </div>
 
+  <!-- ─── LIBRARY MODAL ────────────────────────────────────────────────────────── -->
   <div class="modal-overlay" id="libraryModal" style="display: none;">
     <div class="modal-content library-modal">
       <div class="modal-header">
-        <h2>Bibliothèque d'exercices</h2>
+        <h2>Bibliothèque d’exercices</h2>
         <button class="close-btn" id="closeLibrary">&times;</button>
       </div>
       <div class="modal-body">
@@ -166,6 +217,12 @@
     </div>
   </div>
 
+  <!-- ─── SCRIPTS ──────────────────────────────────────────────────────────────── -->
   <script src="../src/js/app.js"></script>
+  <script src="../src/js/canvas-reflow.js"></script>
+  <script src="../src/js/dock.js"></script>
+  <script src="../src/js/keyboard-nav.js"></script>
+  <script src="/src/js/ui.js"></script>
+  <script src="/src/js/board-quickbar.js"></script>
 </body>
 </html>

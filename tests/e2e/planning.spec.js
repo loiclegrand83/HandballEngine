@@ -17,11 +17,13 @@ test.describe('Planning — vue semaine, liaison Séance, détection orpheline',
     const seanceId = `test_planning_e2e_${Date.now()}`;
     const eventId = `test_planning_e2e_ev_${Date.now()}`;
 
+    // Date du jour : le calendrier s'ouvre sur le mois courant
+    const today = new Date().toISOString().slice(0, 10);
     await request.post('/api/seances', {
-      data: { id: seanceId, titre: 'E2E Orphan Séance', date: '2026-09-15', blocs: [] },
+      data: { id: seanceId, titre: 'E2E Orphan Séance', date: today, blocs: [] },
     });
     await request.post('/api/planning', {
-      data: { id: eventId, type: 'entrainement', date: '2026-09-15', titre: uniqueTitre, seanceId, heure: '', notes: '' },
+      data: { id: eventId, type: 'entrainement', date: today, titre: uniqueTitre, seanceId, heure: '', notes: '' },
     });
     await request.delete(`/api/seances/${seanceId}`);
 
@@ -31,7 +33,7 @@ test.describe('Planning — vue semaine, liaison Séance, détection orpheline',
       // présente sur le calendrier ne doit jamais faire échouer cette assertion en
       // mode strict (locator().filter() garde exactement une puce, pas ".orphan" nu).
       const chip = page.locator('.event-chip--orphan').filter({ hasText: uniqueTitre });
-      await expect(chip).toContainText(/séance introuvable/i);
+      await expect(chip).toContainText(/trame introuvable/i);
     } finally {
       await request.delete(`/api/planning/${eventId}`);
     }

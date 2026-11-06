@@ -18,14 +18,11 @@ if (!CanvasRenderingContext2D.prototype.roundRect) {
     this.closePath();
   };
 }
-const assetPalette = document.getElementById('assetPalette');
 const exerciseName = document.getElementById('exerciseName');
 const exerciseNotes = document.getElementById('exerciseNotes');
 const status = document.getElementById('status');
 const importJson = document.getElementById('importJson');
 const viewModeButtons = document.getElementById('viewModeButtons');
-const drawModeButtons = document.getElementById('drawModeButtons');
-const teamButtons = document.getElementById('teamButtons');
 const playAnimationButton = document.getElementById('playAnimation');
 const exerciseCategory = document.getElementById('exerciseCategory');
 const exerciseThematique = document.getElementById('exerciseThematique');
@@ -62,7 +59,6 @@ const assets = [
   { id: 'player', label: 'Joueur', color: '#4682b4', radius: 18, shape: 'circle', hidden: true },
   { id: 'ball', label: 'Ballon', color: '#ffffff', radius: 13, shape: 'ball' },
   { id: 'H', label: 'Haie', color: '#fdd835', radius: 22, shape: 'hurdle' },
-  { id: 'G', label: 'Gardien', color: '#fdd835', radius: 18, shape: 'circle' },
   { id: 'C', label: 'Cible', color: '#66bb6a', radius: 12, shape: 'ring' },
   { id: 'dumbbell', label: 'Haltère', color: '#ffca28', radius: 24, shape: 'dumbbell' },
   { id: 'swiss', label: 'Swiss ball', color: '#26c6da', radius: 18, shape: 'circle' },
@@ -75,8 +71,6 @@ const assets = [
   { id: 'zone-fix', label: 'Zone fix.', color: '#ce93d8', radius: 32, shape: 'zone-fix' },
 ];
 
-const PERSP_TOP_SCALE = 0.60; // top width = 60% of full width in perspective mode
-
 const state = {
   selectedAssetIndex: 1,
   selectedTeam: 'A',
@@ -88,9 +82,11 @@ const state = {
   currentPath: null,
   animation: { active: false, currentStep: 0, progress: 0, speed: 0.007 },
   selectedPathIndex: null,
+  selectedItemIndex: null,
   dragPathPointIndex: null,
   currentExerciseId: null,
   userSaved: false,
+  renderOnly: false, // ?render=<versionId> : rendu du schéma seulement, aucune sauvegarde
   selectedPost: null, // poste handball sélectionné (AG, ARG, DC, PIV, ARD, AD)
   explanation: { material: '', steps: [] },
 };
@@ -114,13 +110,11 @@ function getScale() {
 }
 
 function fieldToCanvas(point) {
-  if (board.viewMode === 'perspective') return fieldToCanvasPerspective(point);
   const sc = getScale();
   return { x: sc.left + point.x * sc.s, y: sc.top + point.y * sc.s };
 }
 
 function canvasToField(point) {
-  if (board.viewMode === 'perspective') return canvasToFieldPerspective(point);
   const sc = getScale();
   return {
     x: Math.max(0, Math.min(sc.fw,      (point.x - sc.left) / sc.s)),
@@ -128,44 +122,13 @@ function canvasToField(point) {
   };
 }
 
-// ─── Vue Perspective ──────────────────────────────────────────────────────────
-// field.x (0..40) → vertical axis on screen (0=top/far goal, 40=bottom/near goal)
-// field.y (0..20) → horizontal axis on screen
-
-function fieldToCanvasPerspective(point) {
-  const sc = getScale();
-  const tx = point.x / board.fieldWidth;   // 0=top, 1=bottom
-  const ty = point.y / board.fieldHeight;  // 0=left, 1=right
-  const wf = PERSP_TOP_SCALE + (1 - PERSP_TOP_SCALE) * tx;
-  const width = sc.drawW * wf;
-  const leftEdge = sc.left + (sc.drawW - width) / 2;
-  return {
-    x: leftEdge + ty * width,
-    y: sc.top + tx * sc.drawH,
-  };
-}
-
-function canvasToFieldPerspective(point) {
-  const sc = getScale();
-  const tx = (point.y - sc.top) / sc.drawH;
-  const wf = PERSP_TOP_SCALE + (1 - PERSP_TOP_SCALE) * tx;
-  const width = sc.drawW * wf;
-  const leftEdge = sc.left + (sc.drawW - width) / 2;
-  const ty = (point.x - leftEdge) / width;
-  return {
-    x: Math.max(0, Math.min(board.fieldWidth,  tx * board.fieldWidth)),
-    y: Math.max(0, Math.min(board.fieldHeight, ty * board.fieldHeight)),
-  };
-}
-
-/** Sample an arc in field coordinates and return canvas-projected points */
-function sampleArcPerspective(cx_f, cy_f, R, startAngle, endAngle, samples = 40) {
-  const pts = [];
-  for (let i = 0; i <= samples; i++) {
-    const a = startAngle + (endAngle - startAngle) * (i / samples);
-    pts.push(fieldToCanvas({ x: cx_f + R * Math.cos(a), y: cy_f + R * Math.sin(a) }));
-  }
-  return pts;
+// Un joueur qui court se retrouve à l'extrémité de sa course : ses trajectoires
+// suivantes (passe, nouvelle course) doivent partir de là où il est dessiné.
+function syncLinkedPlayer(path) {
+  if (!path || !MOVING_KINDS.includes(path.kind) || !path.linkedItemId) return;
+  const item = state.items.find(i => i.id === path.linkedItemId);
+  const last = path.points[path.points.length - 1];
+  if (item && last) { item.x = last.x; item.y = last.y; }
 }
 
 function updateModeButtons(container, selectedMode) {
@@ -176,7 +139,7 @@ function updateModeButtons(container, selectedMode) {
 }
 
 function selectViewMode(mode) {
-  if (mode !== 'full' && mode !== 'half' && mode !== 'perspective') mode = 'full';
+  if (mode !== 'full' && mode !== 'half') mode = 'full';
   board.viewMode = mode;
   updateModeButtons(viewModeButtons, mode);
   setStatus(`Vue : ${board.viewMode}`);
@@ -187,7 +150,6 @@ function selectDrawMode(mode) {
   state.drawMode = mode;
   state.currentPath = null;
   lastPointerDown = null; // évite qu'un clic dans l'ancien mode soit lu comme un double-clic dans le nouveau
-  updateModeButtons(drawModeButtons, mode);
   setStatus(`Mode : ${state.drawMode}`);
 }
 
@@ -196,8 +158,6 @@ function selectDrawMode(mode) {
 function setStatus(text) { status.textContent = text; }
 
 function drawCourt() {
-  if (board.viewMode === 'perspective') { drawCourtPerspective(); return; }
-
   ctx.clearRect(0, 0, board.width, board.height);
   ctx.fillStyle = '#07111f';
   ctx.fillRect(0, 0, board.width, board.height);
@@ -424,190 +384,6 @@ function drawSubZone(sc, halfOnly) {
   ctx.beginPath(); ctx.moveTo(p1.x, p1.y + tick - 1); ctx.lineTo(p2.x, p2.y + tick - 1); ctx.stroke();
 }
 
-// ─── Vue Perspective — dessin terrain ────────────────────────────────────────
-
-function drawCourtPerspective() {
-  ctx.clearRect(0, 0, board.width, board.height);
-  ctx.fillStyle = '#07111f';
-  ctx.fillRect(0, 0, board.width, board.height);
-
-  // Trapézoid corners (field bounding box projected)
-  const c00 = fieldToCanvas({ x: 0,                   y: 0 });
-  const c01 = fieldToCanvas({ x: 0,                   y: board.fieldHeight });
-  const c10 = fieldToCanvas({ x: board.fieldWidth,     y: board.fieldHeight });
-  const c11 = fieldToCanvas({ x: board.fieldWidth,     y: 0 });
-
-  // Field fill
-  ctx.fillStyle = '#0e2f60';
-  ctx.beginPath();
-  ctx.moveTo(c00.x, c00.y); ctx.lineTo(c01.x, c01.y);
-  ctx.lineTo(c10.x, c10.y); ctx.lineTo(c11.x, c11.y);
-  ctx.closePath(); ctx.fill();
-
-  // Goal zone fills
-  drawGoalZonePerspective(0,                 true,  false);
-  drawGoalZonePerspective(board.fieldWidth,  true,  false);
-
-  // Field outline
-  ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 3; ctx.setLineDash([]);
-  ctx.beginPath();
-  ctx.moveTo(c00.x, c00.y); ctx.lineTo(c01.x, c01.y);
-  ctx.lineTo(c10.x, c10.y); ctx.lineTo(c11.x, c11.y);
-  ctx.closePath(); ctx.stroke();
-
-  // Goal zone contours + free throw lines
-  drawGoalZonePerspective(0,                false, false);
-  drawGoalZonePerspective(board.fieldWidth, false, false);
-  drawGoalZonePerspective(0,                false, true);
-  drawGoalZonePerspective(board.fieldWidth, false, true);
-
-  // Center line
-  const midA = fieldToCanvas({ x: board.fieldWidth / 2, y: 0 });
-  const midB = fieldToCanvas({ x: board.fieldWidth / 2, y: board.fieldHeight });
-  ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.setLineDash([]);
-  ctx.beginPath(); ctx.moveTo(midA.x, midA.y); ctx.lineTo(midB.x, midB.y); ctx.stroke();
-
-  // Center circle (sampled)
-  const ccx = board.fieldWidth / 2, ccy = board.fieldHeight / 2, ccR = 3;
-  const circPts = sampleArcPerspective(ccx, ccy, ccR, 0, Math.PI * 2, 60);
-  ctx.beginPath(); ctx.moveTo(circPts[0].x, circPts[0].y);
-  circPts.forEach(p => ctx.lineTo(p.x, p.y)); ctx.closePath(); ctx.stroke();
-  // Center dot
-  const cDot = fieldToCanvas({ x: ccx, y: ccy });
-  ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(cDot.x, cDot.y, 4, 0, Math.PI*2); ctx.fill();
-
-  // Penalty marks
-  drawPenaltyMarkPerspective(0);
-  drawPenaltyMarkPerspective(board.fieldWidth);
-
-  // Goals
-  drawGoalRectPerspective(0);
-  drawGoalRectPerspective(board.fieldWidth);
-
-  // Substitution zone ticks
-  const subCx = board.fieldWidth / 2;
-  const sub1  = fieldToCanvas({ x: subCx - 4.5, y: board.fieldHeight });
-  const sub2  = fieldToCanvas({ x: subCx + 4.5, y: board.fieldHeight });
-  ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 1.5; ctx.setLineDash([]);
-  [sub1, sub2].forEach(p => {
-    // tick goes slightly outside the field (to the right in perspective)
-    const outside = fieldToCanvas({ x: p.x > sub1.x ? subCx - 4.5 : subCx + 4.5, y: board.fieldHeight + 0.8 });
-    // simpler: just draw 10px tick perpendicular to right edge
-    ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x + 10, p.y); ctx.stroke();
-  });
-  ctx.beginPath(); ctx.moveTo(sub1.x + 10, sub1.y); ctx.lineTo(sub2.x + 10, sub2.y); ctx.stroke();
-}
-
-function drawGoalZonePerspective(goalX, fillMode, freeThrow) {
-  const R      = freeThrow ? board.freeThrowDistance : board.goalAreaDistance;
-  const cy_f   = board.fieldHeight / 2;
-  const ht     = cy_f - board.goalWidth / 2;  // 8.5
-  const hb     = cy_f + board.goalWidth / 2;  // 11.5
-  const isLeft = goalX === 0;
-
-  const N = 45;
-  const topY = Math.max(0, ht - R);
-  const botY = Math.min(board.fieldHeight, hb + R);
-  const pts = [];
-  // Starting point: top of D on the goal line (clamped to field boundary)
-  pts.push(fieldToCanvas({ x: goalX, y: topY }));
-  // Top arc
-  if (isLeft) {
-    pts.push(...sampleArcPerspective(goalX, ht, R, -Math.PI / 2, 0, N));
-    pts.push(...sampleArcPerspective(goalX, hb, R, 0, Math.PI / 2, N));
-  } else {
-    pts.push(...sampleArcPerspective(goalX, ht, R, -Math.PI / 2, -Math.PI, N));
-    pts.push(...sampleArcPerspective(goalX, hb, R, Math.PI, Math.PI / 2, N));
-  }
-  // Back to goal line (clamped to field boundary)
-  pts.push(fieldToCanvas({ x: goalX, y: botY }));
-  pts.push(fieldToCanvas({ x: goalX, y: topY }));
-
-  // Clip to court trapezoid so arcs never exceed field boundaries
-  const c00 = fieldToCanvas({ x: 0,               y: 0 });
-  const c01 = fieldToCanvas({ x: 0,               y: board.fieldHeight });
-  const c10 = fieldToCanvas({ x: board.fieldWidth, y: board.fieldHeight });
-  const c11 = fieldToCanvas({ x: board.fieldWidth, y: 0 });
-  ctx.save();
-  ctx.beginPath();
-  ctx.moveTo(c00.x, c00.y); ctx.lineTo(c01.x, c01.y);
-  ctx.lineTo(c10.x, c10.y); ctx.lineTo(c11.x, c11.y);
-  ctx.closePath(); ctx.clip();
-
-  ctx.beginPath();
-  ctx.moveTo(pts[0].x, pts[0].y);
-  pts.slice(1).forEach(p => ctx.lineTo(p.x, p.y));
-  ctx.closePath();
-
-  if (fillMode) {
-    ctx.fillStyle = '#0a2550'; ctx.fill();
-  } else {
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth   = freeThrow ? 1.5 : 2;
-    ctx.setLineDash(freeThrow ? [10, 7] : []);
-    ctx.stroke(); ctx.setLineDash([]);
-  }
-  ctx.restore();
-}
-
-function drawPenaltyMarkPerspective(goalX) {
-  const dir = goalX === 0 ? 1 : -1;
-  const px  = goalX + dir * board.penaltyDistance;
-  const cy  = board.fieldHeight / 2;
-  const p1  = fieldToCanvas({ x: px, y: cy - 0.15 });
-  const p2  = fieldToCanvas({ x: px, y: cy + 0.15 });
-  ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 3; ctx.setLineDash([]);
-  ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
-}
-
-function drawGoalRectPerspective(goalX) {
-  const cy  = board.fieldHeight / 2;
-  const ht  = cy - board.goalWidth / 2;
-  const hb  = cy + board.goalWidth / 2;
-  const dir = goalX === 0 ? 1 : -1;
-  const back = goalX - dir * 1;
-
-  const tl = fieldToCanvas({ x: back,  y: ht });
-  const tr = fieldToCanvas({ x: goalX, y: ht });
-  const br = fieldToCanvas({ x: goalX, y: hb });
-  const bl = fieldToCanvas({ x: back,  y: hb });
-
-  ctx.fillStyle = '#05101e';
-  ctx.beginPath();
-  ctx.moveTo(tl.x, tl.y); ctx.lineTo(tr.x, tr.y);
-  ctx.lineTo(br.x, br.y); ctx.lineTo(bl.x, bl.y);
-  ctx.closePath(); ctx.fill();
-
-  // Net hatch lines
-  ctx.save();
-  ctx.beginPath();
-  ctx.moveTo(tl.x, tl.y); ctx.lineTo(tr.x, tr.y);
-  ctx.lineTo(br.x, br.y); ctx.lineTo(bl.x, bl.y);
-  ctx.closePath(); ctx.clip();
-  ctx.strokeStyle = 'rgba(255,255,255,0.22)'; ctx.lineWidth = 0.8;
-  const rows = 4;
-  for (let i = 0; i <= rows; i++) {
-    const t = i / rows;
-    const ax = tl.x + (bl.x - tl.x) * t, ay = tl.y + (bl.y - tl.y) * t;
-    const bx = tr.x + (br.x - tr.x) * t, by = tr.y + (br.y - tr.y) * t;
-    ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke();
-  }
-  const cols = 3;
-  for (let i = 0; i <= cols; i++) {
-    const t = i / cols;
-    const ax = tl.x + (tr.x - tl.x) * t, ay = tl.y + (tr.y - tl.y) * t;
-    const bx = bl.x + (br.x - bl.x) * t, by = bl.y + (br.y - bl.y) * t;
-    ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke();
-  }
-  ctx.restore();
-
-  ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 3; ctx.setLineDash([]);
-  ctx.beginPath();
-  ctx.moveTo(tl.x, tl.y); ctx.lineTo(tr.x, tr.y);
-  ctx.lineTo(br.x, br.y); ctx.lineTo(bl.x, bl.y);
-  ctx.closePath(); ctx.stroke();
-}
-
 // ─── Items / assets ───────────────────────────────────────────────────────────
 
 function drawItems() {
@@ -668,6 +444,7 @@ function drawItems() {
 
 function drawPaths() {
   state.paths.forEach((path, index) => {
+    ctx.globalAlpha = state.flashPath && state.flashPath.id === path.id ? state.flashPath.alpha : 1;
     ctx.strokeStyle = path.color;
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
@@ -766,6 +543,7 @@ function drawPaths() {
       });
     }
   });
+  ctx.globalAlpha = 1;
 }
 
 function drawArrowAtEnd(path, canvasPoints) {
@@ -784,11 +562,6 @@ function drawArrowAtEnd(path, canvasPoints) {
 
 function getItemScale(item) {
   const sc = getScale();
-  if (board.viewMode === 'perspective') {
-    const tx = item.y / board.fieldHeight;
-    const wf = PERSP_TOP_SCALE + (1 - PERSP_TOP_SCALE) * tx;
-    return (sc.drawW * wf) / board.fieldWidth;
-  }
   return sc.s;
 }
 
@@ -1236,6 +1009,68 @@ function drawAnimationFrame() {
 
 function render() { drawCourt(); drawItems(); }
 
+// Resizing the canvas (canvas-reflow.js) clears its bitmap and the layout
+// dimensions cached in `board`. Sync both, then redraw, or the pitch vanishes.
+window.addEventListener('canvasReflowed', event => {
+  board.width = event.detail.width;
+  board.height = event.detail.height;
+  render();
+});
+
+// ─── Annuler (dock "undo") ────────────────────────────────────────────────────
+// Snapshot of items + paths. Taken before each canvas pointerdown, so the state
+// before the previous edit is kept. Undo restores the last snapshot.
+const UNDO_LIMIT = 100;
+const undoStack = [];
+// Ce qui est annulable : joueurs, trajectoires et textes des étapes (sans les images, trop lourdes).
+function undoableJson() {
+  const steps = (state.explanation?.steps || []).map(st => ({ description: st?.description || '', attention: st?.attention || '' }));
+  return JSON.stringify({ items: state.items, paths: state.paths, steps });
+}
+let lastSnapshot = undoableJson();
+function resetUndoHistory() {
+  undoStack.length = 0;
+  lastSnapshot = undoableJson();
+}
+
+
+
+function rememberState() {
+  const current = undoableJson();
+  if (current === lastSnapshot) return;
+  undoStack.push(lastSnapshot);
+  if (undoStack.length > UNDO_LIMIT) undoStack.shift();
+  lastSnapshot = current;
+}
+
+function undoLast() {
+  rememberState();
+  const previous = undoStack.pop();
+  if (!previous) { setStatus('Rien à annuler'); return; }
+  const data = JSON.parse(previous);
+  state.items = data.items;
+  state.paths = data.paths;
+  if (Array.isArray(data.steps) && state.explanation) {
+    const current = state.explanation.steps || [];
+    state.explanation.steps = data.steps.map((st, i) => ({ ...(current[i] || {}), ...st }));
+  }
+  lastSnapshot = previous;
+  state.currentPath = null;
+  state.selectedPathIndex = null;
+  state.selectedItemIndex = null;
+  state.dragIndex = null;
+  state.dragPathPointIndex = null;
+  saveLocal();
+  render();
+  setStatus('Action annulée');
+}
+
+// Capture phase: the snapshot runs before the pointerdown handler mutates state.
+canvas.addEventListener('pointerdown', rememberState, true);
+window.addEventListener('toolTriggered', event => {
+  if (event.detail?.tool === 'undo') undoLast();
+});
+
 // Renumérotation des étapes après suppression d'une trajectoire :
 // compacte les valeurs step sans laisser de trous (0,1,2,3... sans saut)
 function renumberSteps() {
@@ -1249,35 +1084,38 @@ function renumberSteps() {
 
 // ─── Palette ──────────────────────────────────────────────────────────────────
 
-function createAssetButtons() {
-  assets.forEach((asset, index) => {
-    if (asset.hidden) return;
-    const button = document.createElement('button');
-    button.className = 'asset-button';
-    button.dataset.assetIndex = index;
-    button.dataset.shape = asset.shape;
-    button.style.setProperty('--asset-color', asset.color);
-    button.innerHTML = `
-      <span class="asset-icon ${asset.shape}" aria-hidden="true"></span>
-      <span class="asset-label">${asset.label}</span>
-    `;
-    button.addEventListener('click', () => selectAsset(index));
-    assetPalette.appendChild(button);
-  });
-  selectAsset(assets.findIndex(asset => !asset.hidden));
-}
-
-function clearAssetSelection() {
-  Array.from(assetPalette.children).forEach(b => b.classList.remove('selected'));
-}
-
 function selectAsset(index) {
   state.selectedAssetIndex = index;
-  Array.from(assetPalette.children).forEach(b => {
-    b.classList.toggle('selected', Number(b.dataset.assetIndex) === index);
-  });
   setStatus(`Asset sélectionné: ${assets[index].label}`);
 }
+
+// ─── Dock "Assets" grid bridge (Story 3-1) ─────────────────────────────────────
+// The Dock's asset grid (dock.js ASSET_ITEMS) uses its own id scheme that does
+// not correspond 1:1 with this file's `assets` catalog (e.g. `swiss-ball` vs
+// `swiss`, `cerceau` vs `hoop`). Match by normalized label instead.
+function normalizeAssetLabel(label) {
+  return (label || '')
+    .normalize('NFD')
+    .replace(/[̀-ͯ]/g, '') // strip accents
+    .trim()
+    .toLowerCase();
+}
+
+const assetLabelIndex = new Map();
+assets.forEach((asset, index) => {
+  assetLabelIndex.set(normalizeAssetLabel(asset.label), index);
+});
+
+window.addEventListener('assetSelected', event => {
+  const rawLabel = event.detail?.assetLabel;
+  const normalized = normalizeAssetLabel(rawLabel);
+  const index = assetLabelIndex.get(normalized);
+  if (index === undefined) {
+    console.warn(`[app.js] Dock asset "${rawLabel}" has no matching entry in the assets array (normalized: "${normalized}")`);
+    return;
+  }
+  selectAsset(index);
+});
 
 const teamColors = {
   A: '#1e88e5',
@@ -1289,7 +1127,7 @@ const teamColors = {
 const VALID_SHAPES = ['circle', 'ring', 'rect', 'wall', 'bar', 'hurdle', 'dumbbell', 'ladder', 'cup', 'cone', 'arrow', 'ball', 'zone-fix'];
 const VALID_TEAMS  = ['A', 'B', null];
 const VALID_PATH_KINDS = ['course', 'shot', 'pass', 'croise', 'fixation'];
-const HANDBALL_POSTS = ['AG', 'ARG', 'DC', 'PIV', 'ARD', 'AD'];
+const HANDBALL_POSTS = ['AG', 'ARG', 'DC', 'PIV', 'ARD', 'AD', 'G'];
 const MOVING_KINDS   = ['course', 'croise', 'fixation'];
 
 function sanitizeItem(raw) {
@@ -1306,6 +1144,7 @@ function sanitizeItem(raw) {
     y:            Number(raw.y) || 0,
     team:         VALID_TEAMS.includes(raw.team) ? raw.team : null,
     post:         HANDBALL_POSTS.includes(raw.post) ? raw.post : null,
+    isGoalkeeper: Boolean(raw.isGoalkeeper) || raw.post === 'G',
     hidden:       Boolean(raw.hidden),
   };
 }
@@ -1317,8 +1156,9 @@ function sanitizePath(raw) {
     kind:   VALID_PATH_KINDS.includes(raw.kind) ? raw.kind : 'course',
     color:  /^#[0-9a-fA-F]{3,8}$/.test(raw.color) ? raw.color : '#90caf9',
     step:   Number(raw.step) || 0,
+  linkedItemId: typeof raw.linkedItemId === 'string' ? raw.linkedItemId.slice(0, 64) : null,
     points: Array.isArray(raw.points)
-      ? raw.points.map(p => ({ x: Number(p.x) || 0, y: Number(p.y) || 0 }))
+      ? raw.points.filter(p => p && typeof p === 'object').map(p => ({ x: Number(p.x) || 0, y: Number(p.y) || 0 }))
       : [],
   };
 }
@@ -1337,6 +1177,13 @@ function getNextPlayerNumber(team) {
   return next;
 }
 
+function getPosteLabel(team, post) {
+  const count = state.items
+    .filter(item => item.team === team && item.post === post)
+    .length;
+  return `${post} ${count + 1}`;
+}
+
 function addItem(x, y) {
   const selected = assets[state.selectedAssetIndex];
   const field = canvasToField({ x, y });
@@ -1344,8 +1191,10 @@ function addItem(x, y) {
   const color = isPlayer ? teamColors[state.selectedTeam] : selected.color;
   const post = isPlayer && state.selectedPost ? state.selectedPost : null;
   const displayLabel = isPlayer
-    ? (post || String(getNextPlayerNumber(state.selectedTeam)))
-    : (selected.shape === 'circle' ? selected.label.charAt(0) : '');
+    ? (post
+        ? (post === 'G' ? post : getPosteLabel(state.selectedTeam, post))
+        : String(getNextPlayerNumber(state.selectedTeam)))
+    : '';
   state.items.push({
     ...selected,
     x: field.x,
@@ -1355,9 +1204,54 @@ function addItem(x, y) {
     color,
     displayLabel,
     post,
+    isGoalkeeper: isPlayer && post === 'G',
     rotation: 0,
   });
   saveLocal(); render();
+  flashPlacement(state.items[state.items.length - 1]);
+  window.dispatchEvent(new CustomEvent('itemPlaced'));
+}
+
+// ─── Retour visuel (CA26) : animations courtes, sans changer les données ─────────
+const REDUCED_MOTION = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+function animateFrames(duration, frame, done) {
+  if (REDUCED_MOTION) { if (done) done(); return; }
+  const start = performance.now();
+  const step = now => {
+    const t = Math.min(1, (now - start) / duration);
+    frame(t);
+    if (t < 1) requestAnimationFrame(step);
+    else { if (done) done(); render(); }
+  };
+  requestAnimationFrame(step);
+}
+
+// Anneau qui s'agrandit pendant 180 ms autour de l'élément posé.
+function flashPlacement(item) {
+  if (!item) return;
+  animateFrames(180, t => {
+    render();
+    const pos = fieldToCanvas(item);
+    ctx.save();
+    ctx.globalAlpha = 1 - t;
+    ctx.strokeStyle = '#f5c400';
+    ctx.lineWidth = 3;
+    ctx.setLineDash([]);
+    ctx.beginPath();
+    ctx.arc(pos.x, pos.y, item.radius * (0.8 + 1.2 * t), 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+  });
+}
+
+// La trajectoire terminée clignote une fois (opacité 1 → 0,5 → 1 en 200 ms).
+function flashPath(path) {
+  if (!path) return;
+  animateFrames(200, t => {
+    state.flashPath = { id: path.id, alpha: 1 - 0.5 * (1 - Math.abs(2 * t - 1)) };
+    render();
+  }, () => { state.flashPath = null; });
 }
 
 function getItemIndexAt(cx, cy) {
@@ -1458,7 +1352,12 @@ canvas.addEventListener('pointerdown', event => {
     }
 
     if (ai >= 0) {
+      if (isDoubleTap) {
+        deleteItemAt(ai);
+        return;
+      }
       state.selectedPathIndex = null;
+      state.selectedItemIndex = ai;
       state.dragIndex = ai;
       const pos = fieldToCanvas(state.items[ai]);
       state.pointerOffset.x = point.x - pos.x;
@@ -1484,6 +1383,11 @@ canvas.addEventListener('pointerdown', event => {
   if (mode === 'course' || mode === 'shot' || mode === 'pass' || mode === 'croise' || mode === 'fixation') {
     const newPoint = canvasToField(point);
     if (!state.currentPath || state.currentPath.kind !== mode) {
+      const playerHitIndex = getItemIndexAt(point.x, point.y);
+      if (playerHitIndex < 0 || !state.items[playerHitIndex].team) {
+        setStatus('Cliquez sur un joueur pour démarrer une trajectoire');
+        return;
+      }
       const pathColors = { shot: '#ff5252', course: '#90caf9', pass: '#ffd740', croise: '#ff9800', fixation: '#ce93d8' };
       let step = 0;
       const syncCheckbox = document.getElementById('syncCheckbox');
@@ -1491,11 +1395,12 @@ canvas.addEventListener('pointerdown', event => {
         const lastStep = Math.max(...state.paths.map(p => p.step || 0));
         step = (syncCheckbox && syncCheckbox.checked) ? lastStep : lastStep + 1;
       }
-      state.currentPath = { id: `path-${Date.now()}`, kind: mode, color: pathColors[mode], step: step, points: [newPoint] };
+      state.currentPath = { id: `path-${Date.now()}`, kind: mode, color: pathColors[mode], step: step, points: [newPoint], linkedItemId: state.items[playerHitIndex].id };
       state.paths.push(state.currentPath);
       setStatus(`Début trajectoire ${mode}`);
     } else {
       state.currentPath.points.push(newPoint);
+      syncLinkedPlayer(state.currentPath);
       setStatus(`Point ajouté`);
     }
 
@@ -1515,6 +1420,7 @@ canvas.addEventListener('pointerdown', event => {
         setStatus('Trajectoire annulée (un seul point)');
       } else {
         setStatus('Trajectoire terminée');
+        flashPath(state.currentPath);
       }
       state.currentPath = null;
       lastPointerDown = null;
@@ -1530,6 +1436,7 @@ canvas.addEventListener('pointermove', event => {
     const point = canvasPoint(event);
     const field = canvasToField(point);
     state.paths[state.selectedPathIndex].points[state.dragPathPointIndex] = field;
+    syncLinkedPlayer(state.paths[state.selectedPathIndex]);
     render();
     return;
   }
@@ -1568,15 +1475,42 @@ canvas.addEventListener('pointerleave', () => {
   if (state.dragPathPointIndex !== null) { state.dragPathPointIndex = null; saveLocal(); render(); }
 });
 
+function deleteItemAt(index) {
+  const deleted = state.items[index];
+  state.items.splice(index, 1);
+  if (state.selectedItemIndex !== null) {
+    if (state.selectedItemIndex === index) state.selectedItemIndex = null;
+    else if (state.selectedItemIndex > index) state.selectedItemIndex -= 1;
+  }
+  if (state.dragIndex !== null) {
+    if (state.dragIndex === index) state.dragIndex = null;
+    else if (state.dragIndex > index) state.dragIndex -= 1;
+  }
+  if (deleted && deleted.post && deleted.post !== 'G') {
+    state.items
+      .filter(item => item.team === deleted.team && item.post === deleted.post)
+      .forEach((item, i) => { item.displayLabel = `${deleted.post} ${i + 1}`; });
+  }
+  saveLocal();
+  render();
+  setStatus('Asset supprimé');
+}
+
+document.addEventListener('keydown', event => {
+  if (event.key !== 'Delete' && event.key !== 'Backspace') return;
+  const focusedTag = document.activeElement && document.activeElement.tagName;
+  if (focusedTag === 'INPUT' || focusedTag === 'TEXTAREA' || focusedTag === 'SELECT') return;
+  if (state.selectedItemIndex === null) return;
+  deleteItemAt(state.selectedItemIndex);
+  state.selectedItemIndex = null;
+});
+
 canvas.addEventListener('contextmenu', event => {
   event.preventDefault();
   const point = canvasPoint(event);
   const ai = getItemIndexAt(point.x, point.y);
   if (ai >= 0) {
-    state.items.splice(ai, 1);
-    saveLocal();
-    render();
-    setStatus('Asset supprimé');
+    deleteItemAt(ai);
     return;
   }
 
@@ -1617,24 +1551,77 @@ canvas.addEventListener('dblclick', event => {
 
 // ─── Bibliothèque & Persistance (Backend) ───────────────────────────────────────
 
-async function saveLocal() {
+// Sauvegarde auto = brouillon non versionné (Q8) ; seule « Enregistrer » crée une version.
+let draftTimer = null;
+function saveLocal() {
   // N'autosauvegarde que si l'utilisateur a déjà fait un "Enregistrer" explicite
-  if (!state.userSaved) return;
-  await _persistExercise();
+  if (!state.userSaved || state.renderOnly || !state.currentExerciseId) return;
+  clearTimeout(draftTimer);
+  draftTimer = setTimeout(async () => {
+    try {
+      await fetch('/api/exercises/' + encodeURIComponent(state.currentExerciseId) + '/draft', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(buildExerciseData(false)),
+      });
+    } catch (e) {
+      console.error('Erreur lors de la sauvegarde du brouillon', e);
+    }
+  }, 1500);
 }
 
+const FIELD_INPUTS = { name: 'exerciseName', thematique: 'exerciseThematique', duree: 'exerciseDuree' };
+
 async function saveToBibli() {
+  if (state.renderOnly) return;
   // Sauvegarde explicite : génère un ID si besoin, active l'autosave pour la suite
   if (!state.currentExerciseId) {
     state.currentExerciseId = 'ex_' + Date.now();
   }
-  state.userSaved = true;
-  await _persistExercise();
-  setStatus('Exercice enregistré dans la bibliothèque');
+  clearTimeout(draftTimer);
+  const result = await _persistExercise();
+  if (!result) return null;
+  if (result.ok) {
+    state.userSaved = true;
+    const message = result.created
+      ? `Version n°${result.versionNo} enregistrée`
+      : `Aucun changement depuis la version n°${result.versionNo}`;
+    setStatus(message);
+    if (window.HawebUI) {
+      window.HawebUI.toast(message, 'ok');
+      window.HawebUI.pulse(document.getElementById('quickSave'));
+    }
+  } else {
+    setStatus(result.message || 'Erreur lors de l\'enregistrement');
+    if (window.HawebUI) window.HawebUI.toast(result.message || 'Erreur lors de l\'enregistrement', 'err');
+    const input = document.getElementById(FIELD_INPUTS[result.field]);
+    if (input) {
+      input.classList.add('field-error');
+      setTimeout(() => input.classList.remove('field-error'), 3000);
+    }
+  }
+  return result;
 }
 
-async function _persistExercise() {
-  const exerciseData = {
+// Schéma de l'exercice pour la séance et les PDF : vue complète, sans atténuation,
+// à résolution suffisante pour l'impression (la séance l'affiche en grand).
+function captureSchema() {
+  // Le schéma montre toujours le terrain complet, quelle que soit la vue affichée.
+  const savedView = board.viewMode;
+  board.viewMode = 'full';
+  render();
+  const off = document.createElement('canvas');
+  off.width  = Math.round(canvas.width  * 0.8);
+  off.height = Math.round(canvas.height * 0.8);
+  off.getContext('2d').drawImage(canvas, 0, 0, off.width, off.height);
+  const dataUrl = off.toDataURL('image/jpeg', 0.9);
+  board.viewMode = savedView;
+  render();
+  return dataUrl;
+}
+
+function buildExerciseData(withSnapshot) {
+  const data = {
     id: state.currentExerciseId,
     name: exerciseName.value || 'Sans nom',
     category: exerciseCategory.value,
@@ -1649,14 +1636,25 @@ async function _persistExercise() {
     explanation: state.explanation,
     updatedAt: new Date().toISOString(),
   };
+  if (withSnapshot) data.snapshot = captureSchema();
+  return data;
+}
+
+// Renvoie {ok, created, versionNo} ou {ok:false, message, field} ; null si le serveur est injoignable.
+async function _persistExercise() {
   try {
-    await fetch('/api/exercises', {
+    const res = await fetch('/api/exercises', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(exerciseData)
+      body: JSON.stringify(buildExerciseData(true))
     });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) return { ok: false, message: body.error, field: body.field };
+    return { ok: true, created: body.created, versionId: body.versionId, versionNo: body.versionNo };
   } catch (e) {
     console.error("Erreur lors de la sauvegarde backend", e);
+    setStatus("Le serveur local est arrêté : la modification n'est pas enregistrée. Relancez Handball Engine.");
+    return null;
   }
 }
 
@@ -1691,7 +1689,7 @@ async function loadLocal() {
   }
 }
 
-function loadExerciseFromData(d) {
+function loadExerciseFromData(d, opts = {}) {
   state.currentExerciseId = d.id || ('ex_' + Date.now());
   state.userSaved = true; // Déjà dans la bibliothèque, l'autosave peut fonctionner
   exerciseName.value = String(d.name || '').slice(0, 100);
@@ -1707,9 +1705,30 @@ function loadExerciseFromData(d) {
   state.explanation = (d.explanation && typeof d.explanation === 'object')
     ? d.explanation
     : { material: '', steps: [] };
+  resetUndoHistory(); // après l'explication : l'historique part de l'exercice chargé
   selectViewMode(board.viewMode);
   render();
   setStatus('Exercice chargé');
+  window.dispatchEvent(new CustomEvent('exerciseLoaded'));
+  if (!opts.skipDraft && !state.renderOnly) restoreDraftIfNewer(d);
+}
+
+// Un brouillon (sauvegarde auto) plus récent que la version chargée est restauré.
+async function restoreDraftIfNewer(d) {
+  const id = state.currentExerciseId;
+  try {
+    const res = await fetch('/api/exercises/' + encodeURIComponent(id) + '/draft');
+    if (!res.ok) return;
+    const draft = await res.json();
+    const loadedAt = new Date(d.updatedAt || d.exportedAt || 0).getTime();
+    if (state.currentExerciseId !== id || !draft || !draft.data) return;
+    if (new Date(draft.savedAt).getTime() > loadedAt) {
+      loadExerciseFromData({ ...draft.data, id }, { skipDraft: true });
+      setStatus('Brouillon non enregistré restauré — cliquez Enregistrer pour créer une version');
+    }
+  } catch (e) {
+    // hors ligne : on garde la version chargée
+  }
 }
 
 function exportJson() {
@@ -1894,7 +1913,9 @@ document.getElementById('newExercise').addEventListener('click', () => {
   exerciseNiveau.value = '';
   exerciseNotes.value = '';
   state.items = []; state.paths = [];
+  resetUndoHistory();
   render(); setStatus('Nouvel exercice (non sauvegardé)');
+  window.dispatchEvent(new CustomEvent('exerciseLoaded'));
 });
 
 document.getElementById('saveLocal').addEventListener('click', async () => {
@@ -1936,41 +1957,29 @@ viewModeButtons.addEventListener('click', e => {
   if (!button) return;
   selectViewMode(button.dataset.mode);
 });
-drawModeButtons.addEventListener('click', e => {
-  const button = e.target.closest('button[data-mode]');
-  if (!button) return;
-  selectDrawMode(button.dataset.mode);
-});
-teamButtons.addEventListener('click', e => {
-  const button = e.target.closest('button[data-team]');
-  if (!button) return;
-  state.selectedTeam = button.dataset.team;
+function selectTeam(team) {
+  state.selectedTeam = team;
   state.selectedAssetIndex = assets.findIndex(asset => asset.id === 'player');
-  clearAssetSelection();
   selectDrawMode('asset');
-  updateModeButtons(teamButtons, state.selectedTeam);
   setStatus(`Équipe : ${state.selectedTeam} (prêt à poser un joueur)`);
-});
+}
 
-const postButtonsEl = document.getElementById('postButtons');
-postButtonsEl.addEventListener('click', e => {
-  const button = e.target.closest('button[data-post]');
-  if (!button) return;
-  const post = button.dataset.post;
-  if (state.selectedPost === post) {
-    // Désélectionner si on reclique sur le même
-    state.selectedPost = null;
-    updateModeButtons(postButtonsEl, null);
-    setStatus('Poste désélectionné — numérotation automatique');
-  } else {
-    state.selectedPost = post;
-    state.selectedAssetIndex = assets.findIndex(asset => asset.id === 'player');
-    clearAssetSelection();
-    selectDrawMode('asset');
-    updateModeButtons(postButtonsEl, post);
-    setStatus(`Poste : ${post} — cliquer sur le terrain pour placer`);
-  }
-});
+function selectPost(post) {
+  state.selectedPost = post;
+  state.selectedAssetIndex = assets.findIndex(asset => asset.id === 'player');
+  selectDrawMode('asset');
+  setStatus(`Poste : ${post} — cliquer sur le terrain pour placer`);
+}
+
+// selectTeam/selectPost/selectDrawMode/hasAnyPlayerPlaced (above) and `state`
+// (top-level const) are consumed by dock.js as implicit globals -- both files
+// are classic <script> tags sharing one global scope, loaded in document
+// order (app.js before dock.js). Do not wrap this file in a module or IIFE
+// without updating dock.js's call sites to match.
+function hasAnyPlayerPlaced() {
+  return state.items.some(i => i.team);
+}
+
 playAnimationButton.addEventListener('click', () => {
   if (!state.paths.length) { setStatus('Aucune trajectoire'); return; }
   if (state.animation.active) {
@@ -2042,6 +2051,9 @@ function prepareAnimationStep() {
     const path = item.path;
     let actorIndex = null;
     if (MOVING_KINDS.includes(path.kind) && path.points.length > 0) {
+      // Acteur = joueur lié à la trajectoire ; repli sur le joueur le plus proche du départ si le lien est absent.
+      const linked = state.items.findIndex(it => it.id === path.linkedItemId && it.team);
+      if (linked >= 0) { anim.actors.push(linked); return; }
       const start = path.points[0];
       let minDist = Infinity;
       state.items.forEach((it, i) => {
@@ -2142,6 +2154,7 @@ const POST_LABELS = {
   ARD: 'Arrière D',
   DC:  'Demi-centre',
   PIV: 'Pivot',
+  G:   'Gardien',
 };
 
 function detectPoste(item) {
@@ -2581,13 +2594,81 @@ function openExplanationPage() {
   window.open('../pages/explanation.html', '_blank');
 }
 
+// ─── Actions publiques pour la barre rapide (board-quickbar.js) ─────────────────
+function selectPlayerTool() {
+  selectAsset(0);
+  selectDrawMode('asset');
+}
+window.HawebBoard = { selectPlayerTool, selectDrawMode, save: saveToBibli, undo: undoLast };
+
 // ─── Init ─────────────────────────────────────────────────────────────────────
 
+// Mode rendu (?render=<versionId>) : dessine une version, envoie son schéma, prévient la page parente.
+async function renderSnapshotMode(versionId) {
+  state.renderOnly = true;
+  let ok = false;
+  try {
+    const res = await fetch('/api/exercises/versions/' + encodeURIComponent(versionId));
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const v = await res.json();
+    loadExerciseFromData(v.data, { skipDraft: true });
+    if (!playerImage.complete) {
+      await new Promise(resolve => {
+        playerImage.addEventListener('load', resolve, { once: true });
+        playerImage.addEventListener('error', resolve, { once: true });
+        setTimeout(resolve, 2000);
+      });
+    }
+    await new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    render();
+    const image = captureSchema();
+    const put = await fetch('/api/versions/' + encodeURIComponent(versionId) + '/snapshot', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image }),
+    });
+    ok = put.ok || put.status === 409; // 409 : une image existe déjà pour cette version
+  } catch (e) {
+    console.error('Rendu du schéma impossible', e);
+  }
+  if (window.parent && window.parent !== window) {
+    window.parent.postMessage({ type: 'haweb-snapshot', versionId: Number(versionId), ok }, location.origin);
+  }
+}
+
+async function loadFromQueryParamOrDefault() {
+  const params = new URLSearchParams(window.location.search);
+  const renderVersion = params.get('render');
+  if (renderVersion) return renderSnapshotMode(renderVersion);
+  const exerciseId = params.get('exercise');
+  if (exerciseId) {
+    try {
+      const res = await fetch('/api/exercises');
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const lib = await res.json();
+      const found = Array.isArray(lib) ? lib.find(ex => ex.id === exerciseId) : null;
+      if (found) {
+        loadExerciseFromData(found);
+        return;
+      }
+      console.error('Exercice introuvable pour id=' + exerciseId);
+    } catch (e) {
+      console.error('Erreur lors du chargement de l\'exercice depuis le paramètre d\'URL', e);
+    }
+    return;
+  }
+  if (params.get('new') === '1') {
+    // Signal explicite "Nouvelle Séance" : canvas vierge, on ne charge rien du backend.
+    return;
+  }
+  // Pas de paramètre : comportement historique (accès direct/bookmark à board.html).
+  await loadLocal();
+}
+
 window.addEventListener('load', () => {
-  createAssetButtons(); loadLocal();
+  loadFromQueryParamOrDefault();
   selectViewMode(board.viewMode);
   selectDrawMode(state.drawMode);
-  updateModeButtons(teamButtons, state.selectedTeam);
   render();
 
   document.getElementById('openExplanation')?.addEventListener('click', openExplanationPage);
