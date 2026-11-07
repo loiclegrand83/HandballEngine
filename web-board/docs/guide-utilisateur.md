@@ -151,8 +151,8 @@ Les objets posés sur le terrain ne remplissent pas tout seuls la liste de maté
 ### 4.5 Déplacer, tourner, supprimer
 
 - **Déplacer** : cliquez sur un joueur ou un objet et faites-le glisser.
-- **Supprimer** : clic droit sur l'objet. Ou bien sélectionnez-le, puis appuyez sur la touche **Suppr**. Un double-clic sur un objet le supprime aussi.
-- **Tourner** : choisissez d'abord une trajectoire (par exemple « Course », voir 4.6), puis double-cliquez sur un objet. Il tourne d'un quart de tour. Ne double-cliquez pas sans trajectoire choisie : l'objet serait supprimé.
+- **Supprimer** : clic droit sur l'objet, ou sélectionnez-le puis appuyez sur la touche **Suppr**.
+- **Tourner** : double-cliquez sur un objet (joueur, ballon, plot…). Il tourne d'un quart de tour. Hors tracé, le double-clic ne supprime rien.
 - **Annuler** : cliquez sur « Annuler » (ou **Ctrl+Z**).
 
 ### 4.6 Dessiner une passe, une course ou un tir
@@ -502,8 +502,8 @@ Sur Mac, remplacez **Ctrl** par **Cmd**.
 | Geste | Action |
 |---|---|
 | Glisser | Déplacer un joueur ou un objet |
-| Double-clic sur un objet | Le supprimer (« Annuler » le rétablit) |
-| Double-clic sur un objet, une trajectoire étant choisie | Le tourner d'un quart de tour |
+| Double-clic sur un objet | Le tourner d'un quart de tour |
+| Clic droit sur un objet, ou Suppr | Le supprimer (« Annuler » le rétablit) |
 | Double-clic pendant un tracé | Terminer la trajectoire |
 | Clic droit | Supprimer l'objet ou la trajectoire |
 
