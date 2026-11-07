@@ -1352,10 +1352,7 @@ canvas.addEventListener('pointerdown', event => {
     }
 
     if (ai >= 0) {
-      if (isDoubleTap) {
-        deleteItemAt(ai);
-        return;
-      }
+      // Double-clic : géré par l'événement dblclick (rotation). La suppression passe par clic droit ou Suppr.
       state.selectedPathIndex = null;
       state.selectedItemIndex = ai;
       state.dragIndex = ai;
@@ -1539,6 +1536,8 @@ canvas.addEventListener('contextmenu', event => {
 });
 
 canvas.addEventListener('dblclick', event => {
+  // En mode trajectoire, le double-clic termine le tracé : il ne doit pas tourner un joueur.
+  if (['course', 'shot', 'pass', 'croise', 'fixation'].includes(state.drawMode)) return;
   const point = canvasPoint(event);
   const ai = getItemIndexAt(point.x, point.y);
   if (ai >= 0) {
@@ -1757,7 +1756,7 @@ function importJsonFile(file) {
       d.id = 'ex_' + Date.now();
       loadExerciseFromData(d);
       // Pas de sauvegarde automatique — utiliser le bouton Sauvegarder
-      setStatus('Importé (non sauvegardé — cliquez Sauvegarder pour conserver)');
+      setStatus('Importé (non enregistré — cliquez Enregistrer pour conserver)');
     } catch (e) { setStatus('Erreur import JSON'); }
   };
   reader.readAsText(file);
